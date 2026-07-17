@@ -8,6 +8,7 @@ libpkgstate = library(
     'owned_entry.cpp',
     'installed_package.cpp',
     'snapshot.cpp',
+    'legacy_text_store.cpp',
   ],
   cpp_args: ['-D_FILE_OFFSET_BITS=64'],
   include_directories: public_inc,
@@ -33,6 +34,9 @@ install_headers(
   '../include/libpkgstate/owned_entry.h',
   '../include/libpkgstate/installed_package.h',
   '../include/libpkgstate/snapshot.h',
+  '../include/libpkgstate/write_transaction.h',
+  '../include/libpkgstate/store.h',
+  '../include/libpkgstate/legacy_text_store.h',
   subdir: 'libpkgstate',
 )
 

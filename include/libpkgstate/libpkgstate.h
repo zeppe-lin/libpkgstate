@@ -13,6 +13,9 @@
 
 #include <libpkgstate/error.h>
 #include <libpkgstate/installed_package.h>
+#include <libpkgstate/legacy_text_store.h>
 #include <libpkgstate/owned_entry.h>
 #include <libpkgstate/package_identity.h>
 #include <libpkgstate/snapshot.h>
+#include <libpkgstate/store.h>
+#include <libpkgstate/write_transaction.h>
