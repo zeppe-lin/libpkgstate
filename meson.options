@@ -1,0 +1,14 @@
+option(
+  'link_mode',
+  type: 'combo',
+  choices: ['shared', 'static'],
+  value: 'shared',
+  description: 'How libpkgstate links against external dependencies',
+)
+
+option(
+  'tests',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Build and run unit tests',
+)
