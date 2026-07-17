@@ -31,5 +31,10 @@ libpkgimage_dep = dependency(
 
 pkgconf = import('pkgconfig')
 
+if get_option('install_tools') and get_option('tools').disabled()
+  error('install_tools requires tools to be enabled')
+endif
+
 subdir('src')
+subdir('tools')
 subdir('tests')

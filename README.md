@@ -74,6 +74,14 @@ Tests may be disabled with:
 meson setup build -Dtests=disabled
 ```
 
+Reference tools are built by default but are not installed.  They may be
+disabled, or explicitly installed, with:
+
+```sh
+meson setup build -Dtools=disabled
+meson setup build-tools -Dinstall_tools=true
+```
+
 State and storage contracts
 ---------------------------
 
@@ -97,6 +105,29 @@ can safely coexist with the utilities being replaced during migration.  A
 commit writes and synchronizes a same-directory temporary file, links the old
 database to `db.backup`, atomically renames the new state into place, and
 synchronizes the directory.
+
+Reference tools
+---------------
+
+`tools/pkginfo.cpp` provides a deliberately small reference inspector for the
+public `libpkgstate` API.  It is useful for integration tests, format diagnosis,
+and exercising ownership queries independently of `pkgman`.
+
+```sh
+build/tools/pkginfo -i
+build/tools/pkginfo -l pkgname
+build/tools/pkginfo -o /usr/bin/tool
+build/tools/pkginfo -r /alternate/root -i
+```
+
+The tool reports durable installed state only.  It does not inspect package
+archives or provide archive footprints; those are `libpkgimage` concerns.  It
+is not intended to become a second package-management frontend.  `pkgman` is
+the integration unit and user interface.
+
+By default the executable remains in the build tree so it can coexist with the
+historical `pkginfo` while migration is in progress.  Set
+`-Dinstall_tools=true` only when installing the reference tools is desired.
 
 API documentation
 -----------------
@@ -137,7 +168,8 @@ Layout
 
 * `include/libpkgstate/` — public API;
 * `src/` — library implementation;
-* `tests/` — model, format, locking, and transaction tests; and
+* `tools/` — thin reference command-line clients;
+* `tests/` — model, format, locking, transaction, and CLI tests; and
 * `.github/workflows/` — shared/static CI builds.
 
 License
