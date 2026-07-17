@@ -1,0 +1,62 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: shared
+            default_library: shared
+            link_mode: shared
+          - name: static
+            default_library: static
+            link_mode: static
+
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Checkout libpkgimage
+        uses: actions/checkout@v6
+        with:
+          repository: zeppe-lin/libpkgimage
+          path: _deps/libpkgimage
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ libarchive-dev meson ninja-build pkg-config
+
+      - name: Build and install libpkgimage
+        run: |
+          meson setup _deps/libpkgimage/build \
+            _deps/libpkgimage \
+            -Ddefault_library=${{ matrix.default_library }} \
+            -Dlink_mode=${{ matrix.link_mode }} \
+            -Dtests=disabled \
+            -Dwerror=true
+          meson compile -C _deps/libpkgimage/build
+          sudo meson install -C _deps/libpkgimage/build
+
+      - name: Configure
+        run: |
+          meson setup build \
+            -Ddefault_library=${{ matrix.default_library }} \
+            -Dlink_mode=${{ matrix.link_mode }} \
+            -Dwerror=true
+
+      - name: Build
+        run: meson compile -C build
+
+      - name: Test
+        run: meson test -C build --print-errorlogs
