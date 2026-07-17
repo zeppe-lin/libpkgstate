@@ -46,5 +46,5 @@ pkgconf.generate(
   filebase: 'libpkgstate',
   description: 'Installed package state and ownership library',
   subdirs: '.',
-  requires: ['libpkgimage >= 0.2.0'],
+  requires: ['libpkgimage >= 0.2.1'],
 )

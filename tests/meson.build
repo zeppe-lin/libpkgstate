@@ -33,4 +33,16 @@ if get_option('tests').allowed()
     dependencies: libpkgstate_dep,
   )
   test('compile umbrella header', umbrella_header_test)
+
+  if get_option('tools').allowed()
+    sh = find_program('sh')
+    test(
+      'exercise pkginfo reference tool',
+      sh,
+      args: [
+        join_paths(meson.current_source_dir(), 'pkginfo_cli_test.sh'),
+        pkginfo_tool,
+      ],
+    )
+  endif
 endif

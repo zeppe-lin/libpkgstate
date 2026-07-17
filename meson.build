@@ -1,7 +1,7 @@
 project(
   'libpkgstate',
   'cpp',
-  version: '0.1.0',
+  version: '0.2.0',
   license: 'GPL-3.0-or-later',
   meson_version: '>=1.2.0',
   default_options: [
@@ -24,7 +24,7 @@ endif
 
 libpkgimage_dep = dependency(
   'libpkgimage',
-  version: '>=0.2.0',
+  version: '>=0.2.1',
   required: true,
   static: want_static,
 )

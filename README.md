@@ -33,7 +33,7 @@ Build-time requirements:
 * Meson 1.2.0 or later;
 * Ninja;
 * pkg-config; and
-* `libpkgimage` 0.2.0 or later.
+* `libpkgimage` 0.2.1 or later.
 
 Doxygen is optional and is only needed to build the generated API reference.
 
@@ -128,6 +128,11 @@ the integration unit and user interface.
 By default the executable remains in the build tree so it can coexist with the
 historical `pkginfo` while migration is in progress.  Set
 `-Dinstall_tools=true` only when installing the reference tools is desired.
+
+The output contract is line-oriented: `-i` and `-o` print `name version`, while
+`-l` prints canonical owned paths and retains the trailing slash on directory
+entries.  An absent owner or package returns status 1; command-line misuse
+returns status 2.
 
 API documentation
 -----------------

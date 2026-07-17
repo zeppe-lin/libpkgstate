@@ -61,7 +61,7 @@ Exactly one query mode is required:
   -o, --owner=path          List packages that own an exact path
 
 Other options:
-  -r, --root=root-dir       Read root-dir/var/lib/pkg/db instead of /
+  -r, --root=root-dir       Read root-dir/var/lib/pkg/db
   -V, --version             Print version and exit
   -h, --help                Print this help and exit
 
@@ -99,7 +99,7 @@ select_action(options& parsed, action selected, std::string argument = {})
 
 /*!
  * \brief Parse command-line options.
- * \return Parsed options, or an empty optional result encoded by process exit.
+ * \return Parsed query options.  Help and version requests exit directly.
  */
 options
 parse_options(int argc, char** argv)
@@ -156,6 +156,9 @@ parse_options(int argc, char** argv)
 
   if (parsed.selected == action::none)
     throw std::invalid_argument("query mode is required");
+
+  if (parsed.root.empty())
+    throw std::invalid_argument("root directory must not be empty");
 
   return parsed;
 }
