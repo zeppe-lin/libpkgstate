@@ -65,18 +65,18 @@ conventionally stored at _/var/lib/pkg/db_. See
 
 # ERRORS
 
-All public failures derive from `pkgstate::error`.
+All public failures derive from *pkgstate::error*.
 
-`identity_error`
+*identity_error*
 	Invalid identity representation.
 
-`state_error`
+*state_error*
 	Invalid installed package or snapshot state.
 
-`store_error`
+*store_error*
 	Storage parsing, locking, input/output, or publication failure.
 
-`transaction_error`
+*transaction_error*
 	Invalid write-transaction lifecycle use.
 
 Applications should select behavior from the typed exception class rather than

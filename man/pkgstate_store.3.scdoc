@@ -13,26 +13,26 @@ pkgstate_store - durable package-state stores and write transactions
 
 # STORE INTERFACE
 
-`pkgstate::store` is the backend-neutral durable storage interface.
+*pkgstate::store* is the backend-neutral durable storage interface.
 
 ```
 snapshot read() const;
 std::unique_ptr<write_transaction> begin_write() const;
 ```
 
-`read()`
+*read()*
 	Read and validate one immutable snapshot.
 
-`begin_write()`
+*begin_write()*
 	Begin an isolated exclusive state write initialized from current
 	durable state.
 
 Storage, parsing, locking, and input/output failures raise
-`pkgstate::store_error`.
+*pkgstate::store_error*.
 
 # WRITE TRANSACTION
 
-A `pkgstate::write_transaction` owns one private mutable package set until
+A *pkgstate::write_transaction* owns one private mutable package set until
 publication.
 
 ```
@@ -43,27 +43,27 @@ void commit();
 bool committed() const noexcept;
 ```
 
-`current()`
+*current()*
 	Return the complete uncommitted snapshot.
 
-`put()`
+*put()*
 	Add a package or replace the package with the same name.
 
-`erase()`
+*erase()*
 	Remove a package by name. Return false when no package existed.
-	Invalid identity representation raises `pkgstate::identity_error`.
+	Invalid identity representation raises *pkgstate::identity_error*.
 
-`commit()`
+*commit()*
 	Publish the complete current snapshot. Publication failure raises
-	`pkgstate::store_error`.
+	*pkgstate::store_error*.
 
-`committed()`
+*committed()*
 	Return whether publication completed successfully.
 
 Destroying an uncommitted transaction discards its uncommitted state.
 
 After successful commit, another mutation or commit attempt is invalid and
-raises `pkgstate::transaction_error`.
+raises *pkgstate::transaction_error*.
 
 # TRANSACTION BOUNDARY
 

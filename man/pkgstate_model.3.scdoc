@@ -15,7 +15,7 @@ pkgstate_model - identities, installed ownership, and snapshots
 
 # PACKAGE IDENTITY
 
-`pkgstate::package_identity` stores a package name and version.
+*pkgstate::package_identity* stores a package name and version.
 
 Construct an identity with:
 
@@ -30,21 +30,21 @@ newline bytes.
 The library validates representation, not distribution naming policy. It does
 not impose repository, epoch, release, or collection syntax.
 
-Invalid input raises `pkgstate::identity_error`.
+Invalid input raises *pkgstate::identity_error*.
 
 # OWNED ENTRIES
 
-`pkgstate::owned_entry` contains:
+*pkgstate::owned_entry* contains:
 
-- one canonical `pkgimage::package_path`; and
-- one `pkgstate::owned_entry_type`.
+- one canonical *pkgimage::package_path*; and
+- one *pkgstate::owned_entry_type*.
 
 The durable object classes are:
 
-`owned_entry_type::directory`
+*owned_entry_type::directory*
 	An explicitly owned directory.
 
-`owned_entry_type::non_directory`
+*owned_entry_type::non_directory*
 	Any owned object that is not a directory.
 
 The compatibility state format cannot distinguish regular files, symbolic
@@ -56,11 +56,11 @@ belongs to the entry type, not a trailing slash in the in-memory path.
 
 # INSTALLED PACKAGES
 
-`pkgstate::installed_package` combines one identity with one ownership
+*pkgstate::installed_package* combines one identity with one ownership
 manifest.
 
 Construction accepts manifest entries in arbitrary order, sorts them by
-canonical path, and rejects duplicate paths with `pkgstate::state_error`.
+canonical path, and rejects duplicate paths with *pkgstate::state_error*.
 
 An empty manifest is valid.
 
@@ -80,10 +80,10 @@ owns(path)
 
 # SNAPSHOTS
 
-`pkgstate::snapshot` is an immutable indexed package set.
+*pkgstate::snapshot* is an immutable indexed package set.
 
 Construction accepts packages in arbitrary order, sorts them by package name,
-and rejects duplicate package names with `pkgstate::state_error`.
+and rejects duplicate package names with *pkgstate::state_error*.
 
 Queries provide:
 
@@ -95,7 +95,7 @@ owners(path)
 is_owned(path)
 ```
 
-`owners(path)` performs exact canonical-path lookup and returns every owner in
+*owners(path)* performs exact canonical-path lookup and returns every owner in
 package-name order.
 
 Shared ownership is valid state. The library neither collapses multiple owners

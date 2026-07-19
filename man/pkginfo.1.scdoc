@@ -44,7 +44,7 @@ state, or orchestrate package operations.
 
 # OUTPUT
 
-`--installed` and `--owner` print:
+*--installed* and *--owner* print:
 
 ```
 name version
@@ -52,13 +52,13 @@ name version
 
 one result per line.
 
-`--list` prints canonical root-relative paths, one per line. Directory
+*--list* prints canonical root-relative paths, one per line. Directory
 ownership retains a trailing slash.
 
 Package and owner results are ordered by package name. Manifest results are
 ordered by canonical path.
 
-`--owner` performs exact ownership lookup. Shared ownership prints every owner.
+*--owner* performs exact ownership lookup. Shared ownership prints every owner.
 
 # EXIT STATUS
 

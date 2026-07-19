@@ -14,19 +14,19 @@ pkgstate::legacy_text_store store("/var/lib/pkg/db");
 
 # DESCRIPTION
 
-`pkgstate::legacy_text_store` is an original implementation of the historical
+*pkgstate::legacy_text_store* is an original implementation of the historical
 line-oriented package database format.
 
 The constructor accepts the complete database pathname. It does not prepend an
 installation root.
 
-`database_path()`
+*database_path()*
 	Return the configured pathname.
 
-`read()`
+*read()*
 	Read and validate one immutable state snapshot.
 
-`begin_write()`
+*begin_write()*
 	Begin an isolated exclusive write transaction.
 
 The format is documented in *pkgstate-db*(5).
@@ -44,7 +44,7 @@ begin_write()   exclusive lock
 The write lock remains held until commit, transaction destruction, or
 construction failure.
 
-Lock contention raises `pkgstate::store_error`; operations do not wait.
+Lock contention raises *pkgstate::store_error*; operations do not wait.
 
 The locking contract is advisory. Programs that edit the database without
 taking the same directory lock can race with readers and writers.
@@ -59,7 +59,7 @@ A read:
 4. constructs canonical installed packages; and
 5. returns one indexed snapshot.
 
-Malformed input raises `pkgstate::store_error`. Diagnostics include the
+Malformed input raises *pkgstate::store_error*. Diagnostics include the
 database pathname and, where available, the input line number.
 
 # PUBLICATION
@@ -67,13 +67,13 @@ database pathname and, where available, the input line number.
 Commit replaces the complete database state:
 
 1. create a same-directory temporary file;
-2. set mode `0444`;
+2. set mode 0444;
 3. serialize the complete transaction snapshot;
 4. write all bytes;
 5. synchronize the temporary file with *fsync*(2);
 6. close the temporary file;
-7. remove the previous `db.backup`;
-8. hard-link the current database to `db.backup` when it exists;
+7. remove the previous _db.backup_;
+8. hard-link the current database to _db.backup_ when it exists;
 9. rename the temporary file over the database; and
 10. synchronize the database directory.
 
@@ -98,7 +98,7 @@ choosing recovery. It must not assume the old database remained active.
 
 # PERMISSIONS
 
-The published database mode is `0444`.
+The published database mode is 0444.
 
 The backend does not change database ownership. Caller credentials, directory
 permissions, mount behavior, and system policy determine ownership and whether
@@ -108,14 +108,14 @@ publication is permitted.
 
 Root interpretation belongs to the caller.
 
-For an alternate root `/mnt/root`, construct:
+For an alternate root _/mnt/root_, construct:
 
 ```
 pkgstate::legacy_text_store(
     "/mnt/root/var/lib/pkg/db");
 ```
 
-The *pkginfo*(1) `-r` option performs this pathname construction.
+The *pkginfo*(1) *-r* option performs this pathname construction.
 
 # SEE ALSO
 

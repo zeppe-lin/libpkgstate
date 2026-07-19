@@ -69,7 +69,7 @@ usr/bin/example
 The format does not distinguish regular files, symbolic links, FIFOs, sockets,
 or devices from one another.
 
-Paths may not be absolute and may not escape the root through `..`.
+Paths may not be absolute and may not escape the root through *..*.
 
 A package record may not contain the same canonical path more than once.
 
@@ -77,20 +77,20 @@ A package record may not contain the same canonical path more than once.
 
 A database may not contain the same package name more than once.
 
-When written by `pkgstate::legacy_text_store`:
+When written by *pkgstate::legacy_text_store*:
 
 - packages are serialized in package-name order;
 - owned paths are serialized in canonical path order;
 - directory ownership receives a trailing slash;
 - records are separated by one blank line; and
-- the database mode is `0444`.
+- the database mode is 0444.
 
 Shared ownership is represented by listing the same path in more than one
 package record.
 
 # LOCKING
 
-Readers and writers using `pkgstate::legacy_text_store` take non-blocking
+Readers and writers using *pkgstate::legacy_text_store* take non-blocking
 advisory locks on the database directory.
 
 Manual editors and other tools must participate in the same locking contract
@@ -127,7 +127,7 @@ empty
 
 ```
 
-`alpha` and `beta` share ownership of `usr/share/alpha/`. `empty` owns no
+_alpha_ and _beta_ share ownership of _usr/share/alpha/_. _empty_ owns no
 paths.
 
 # SEE ALSO
