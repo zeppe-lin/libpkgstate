@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (C) 2026 Alexandr Savca
+# SPDX-FileCopyrightText: 2026 Alexandr Savca
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 set -eu

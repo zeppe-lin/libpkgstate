@@ -1,11 +1,8 @@
-/*
- * Copyright (C) 2026 Alexandr Savca
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
-#include <libpkgstate/package_identity.h>
+// SPDX-FileCopyrightText: 2026 Alexandr Savca
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <libpkgstate/error.h>
+#include <libpkgstate/package_identity.h>
 
 namespace pkgstate {
 namespace {

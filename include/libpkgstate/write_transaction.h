@@ -1,12 +1,9 @@
-/*
- * Copyright (C) 2026 Alexandr Savca
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+// SPDX-FileCopyrightText: 2026 Alexandr Savca
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 /*!
  * \file write_transaction.h
  * \brief Backend-neutral installed-state write transactions.
- * \copyright See COPYING for license terms and COPYRIGHT for notices.
  */
 
 #pragma once

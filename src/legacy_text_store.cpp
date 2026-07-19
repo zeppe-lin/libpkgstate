@@ -1,9 +1,10 @@
-/*
- * Copyright (C) 2026 Alexandr Savca
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+// SPDX-FileCopyrightText: 2026 Alexandr Savca
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <libpkgstate/legacy_text_store.h>
+
+#include <libpkgimage/error.h>
+#include <libpkgstate/error.h>
 
 #include <cerrno>
 #include <cstdlib>
@@ -22,9 +23,6 @@
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include <libpkgimage/error.h>
-#include <libpkgstate/error.h>
 
 namespace pkgstate {
 namespace {

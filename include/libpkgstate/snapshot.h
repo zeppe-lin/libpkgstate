@@ -1,12 +1,9 @@
-/*
- * Copyright (C) 2026 Alexandr Savca
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+// SPDX-FileCopyrightText: 2026 Alexandr Savca
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 /*!
  * \file snapshot.h
  * \brief Immutable installed-state snapshots and ownership queries.
- * \copyright See COPYING for license terms and COPYRIGHT for notices.
  */
 
 #pragma once

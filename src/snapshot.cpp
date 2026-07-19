@@ -1,14 +1,11 @@
-/*
- * Copyright (C) 2026 Alexandr Savca
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+// SPDX-FileCopyrightText: 2026 Alexandr Savca
+// SPDX-License-Identifier: GPL-3.0-or-later
 
+#include <libpkgstate/error.h>
 #include <libpkgstate/snapshot.h>
 
 #include <algorithm>
 #include <utility>
-
-#include <libpkgstate/error.h>
 
 namespace pkgstate {
 
