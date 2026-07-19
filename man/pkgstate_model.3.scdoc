@@ -1,0 +1,119 @@
+PKGSTATE_MODEL(3)
+
+# NAME
+
+pkgstate_model - identities, installed ownership, and snapshots
+
+# SYNOPSIS
+
+```
+#include <libpkgstate/package_identity.h>
+#include <libpkgstate/owned_entry.h>
+#include <libpkgstate/installed_package.h>
+#include <libpkgstate/snapshot.h>
+```
+
+# PACKAGE IDENTITY
+
+`pkgstate::package_identity` stores a package name and version.
+
+Construct an identity with:
+
+```
+auto identity =
+    pkgstate::package_identity::make(name, version);
+```
+
+Both fields must be non-empty and must not contain NUL, carriage-return, or
+newline bytes.
+
+The library validates representation, not distribution naming policy. It does
+not impose repository, epoch, release, or collection syntax.
+
+Invalid input raises `pkgstate::identity_error`.
+
+# OWNED ENTRIES
+
+`pkgstate::owned_entry` contains:
+
+- one canonical `pkgimage::package_path`; and
+- one `pkgstate::owned_entry_type`.
+
+The durable object classes are:
+
+`owned_entry_type::directory`
+	An explicitly owned directory.
+
+`owned_entry_type::non_directory`
+	Any owned object that is not a directory.
+
+The compatibility state format cannot distinguish regular files, symbolic
+links, FIFOs, sockets, and device nodes. The model preserves the durable
+distinction and does not invent a finer type.
+
+Paths are canonical and relative to the installation root. Directory identity
+belongs to the entry type, not a trailing slash in the in-memory path.
+
+# INSTALLED PACKAGES
+
+`pkgstate::installed_package` combines one identity with one ownership
+manifest.
+
+Construction accepts manifest entries in arbitrary order, sorts them by
+canonical path, and rejects duplicate paths with `pkgstate::state_error`.
+
+An empty manifest is valid.
+
+The manifest describes durable ownership after installation policy has been
+resolved. It is not an archive footprint and does not contain payload bytes,
+hashes, modes, owners, timestamps, link targets, or device numbers.
+
+Queries provide:
+
+```
+identity()
+manifest()
+size()
+find(path)
+owns(path)
+```
+
+# SNAPSHOTS
+
+`pkgstate::snapshot` is an immutable indexed package set.
+
+Construction accepts packages in arbitrary order, sorts them by package name,
+and rejects duplicate package names with `pkgstate::state_error`.
+
+Queries provide:
+
+```
+packages()
+size()
+find_package(name)
+owners(path)
+is_owned(path)
+```
+
+`owners(path)` performs exact canonical-path lookup and returns every owner in
+package-name order.
+
+Shared ownership is valid state. The library neither collapses multiple owners
+to one package nor treats overlap as an automatic error.
+
+A snapshot does not refresh itself after another process changes durable state.
+Read a new snapshot when current state is required.
+
+# ORDERING
+
+The following ordering is part of the contract:
+
+- package manifests are sorted by canonical path;
+- snapshots are sorted by package name; and
+- owner results are sorted by package name.
+
+Input order does not affect observable order.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_store*(3), *pkgstate-db*(5)

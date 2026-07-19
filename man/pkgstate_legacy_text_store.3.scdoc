@@ -1,0 +1,123 @@
+PKGSTATE_LEGACY_TEXT_STORE(3)
+
+# NAME
+
+pkgstate_legacy_text_store - compatibility backend for /var/lib/pkg/db
+
+# SYNOPSIS
+
+```
+#include <libpkgstate/legacy_text_store.h>
+
+pkgstate::legacy_text_store store("/var/lib/pkg/db");
+```
+
+# DESCRIPTION
+
+`pkgstate::legacy_text_store` is an original implementation of the historical
+line-oriented package database format.
+
+The constructor accepts the complete database pathname. It does not prepend an
+installation root.
+
+`database_path()`
+	Return the configured pathname.
+
+`read()`
+	Read and validate one immutable state snapshot.
+
+`begin_write()`
+	Begin an isolated exclusive write transaction.
+
+The format is documented in *pkgstate-db*(5).
+
+# LOCKING
+
+The backend opens the database parent directory and applies non-blocking
+advisory *flock*(2) locks.
+
+```
+read()          shared lock
+begin_write()   exclusive lock
+```
+
+The write lock remains held until commit, transaction destruction, or
+construction failure.
+
+Lock contention raises `pkgstate::store_error`; operations do not wait.
+
+The locking contract is advisory. Programs that edit the database without
+taking the same directory lock can race with readers and writers.
+
+# READING
+
+A read:
+
+1. acquires the shared directory lock;
+2. opens the database as binary input;
+3. parses and validates every record;
+4. constructs canonical installed packages; and
+5. returns one indexed snapshot.
+
+Malformed input raises `pkgstate::store_error`. Diagnostics include the
+database pathname and, where available, the input line number.
+
+# PUBLICATION
+
+Commit replaces the complete database state:
+
+1. create a same-directory temporary file;
+2. set mode `0444`;
+3. serialize the complete transaction snapshot;
+4. write all bytes;
+5. synchronize the temporary file with *fsync*(2);
+6. close the temporary file;
+7. remove the previous `db.backup`;
+8. hard-link the current database to `db.backup` when it exists;
+9. rename the temporary file over the database; and
+10. synchronize the database directory.
+
+The backup is the previous database inode. It is not independently serialized.
+
+If the database did not exist, backup creation is skipped.
+
+# FAILURE SEMANTICS
+
+Failure before rename leaves the previous database pathname authoritative. The
+temporary file is removed when possible.
+
+Failure after rename may mean the new database is visible even though directory
+synchronization failed. This condition is reported as:
+
+```
+state published but directory sync failed
+```
+
+A caller receiving that error must inspect or reread durable state before
+choosing recovery. It must not assume the old database remained active.
+
+# PERMISSIONS
+
+The published database mode is `0444`.
+
+The backend does not change database ownership. Caller credentials, directory
+permissions, mount behavior, and system policy determine ownership and whether
+publication is permitted.
+
+# ALTERNATE ROOTS
+
+Root interpretation belongs to the caller.
+
+For an alternate root `/mnt/root`, construct:
+
+```
+pkgstate::legacy_text_store(
+    "/mnt/root/var/lib/pkg/db");
+```
+
+The *pkginfo*(1) `-r` option performs this pathname construction.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_store*(3), *pkgstate-db*(5),
+*flock*(2), *fsync*(2), *rename*(2)

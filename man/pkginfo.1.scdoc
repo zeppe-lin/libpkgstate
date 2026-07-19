@@ -1,0 +1,119 @@
+PKGINFO(1)
+
+# NAME
+
+pkginfo - inspect durable installed package state
+
+# SYNOPSIS
+
+*pkginfo* [*-Vh*] [*-r* _root-dir_] *-i*
+
+*pkginfo* [*-Vh*] [*-r* _root-dir_] *-l* _package_
+
+*pkginfo* [*-Vh*] [*-r* _root-dir_] *-o* _path_
+
+# DESCRIPTION
+
+*pkginfo* is the reference command-line inspector for *libpkgstate*.
+
+It reads durable installed package state and performs one query. Exactly one
+query mode is required.
+
+The tool does not inspect package archives, print archive footprints, mutate
+state, or orchestrate package operations.
+
+# OPTIONS
+
+*-i*, *--installed*
+	List installed packages and versions.
+
+*-l* _package_, *--list*=_package_
+	List canonical paths owned by one installed package.
+
+*-o* _path_, *--owner*=_path_
+	List every package that owns the exact canonical path.
+
+*-r* _root-dir_, *--root*=_root-dir_
+	Read _root-dir_/var/lib/pkg/db instead of /var/lib/pkg/db.
+
+*-V*, *--version*
+	Print version information and exit.
+
+*-h*, *--help*
+	Print usage information and exit.
+
+# OUTPUT
+
+`--installed` and `--owner` print:
+
+```
+name version
+```
+
+one result per line.
+
+`--list` prints canonical root-relative paths, one per line. Directory
+ownership retains a trailing slash.
+
+Package and owner results are ordered by package name. Manifest results are
+ordered by canonical path.
+
+`--owner` performs exact ownership lookup. Shared ownership prints every owner.
+
+# EXIT STATUS
+
+*0*
+	The query completed successfully.
+
+*1*
+	The requested package or owner was absent, or a runtime failure occurred.
+
+*2*
+	Command-line usage was invalid.
+
+Diagnostics are written to standard error.
+
+# EXAMPLES
+
+List installed packages:
+
+```
+pkginfo -i
+```
+
+List one package manifest:
+
+```
+pkginfo -l pkgutils
+```
+
+Find every exact owner:
+
+```
+pkginfo -o /usr/bin/pkgadd
+```
+
+Inspect an alternate root:
+
+```
+pkginfo -r /mnt/root -i
+```
+
+# FILES
+
+_/var/lib/pkg/db_
+	Default compatibility package database.
+
+_/var/lib/pkg/db.backup_
+	Previous database inode retained by the compatibility writer.
+
+# NOTES
+
+*pkginfo* is a state representation tool. *pkgman* remains the
+package-management integration interface.
+
+Archive contents and archive footprints belong to *libpkgimage*.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate-db*(5), *pkgman*(1)

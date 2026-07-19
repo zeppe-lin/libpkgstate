@@ -37,4 +37,5 @@ endif
 
 subdir('src')
 subdir('tools')
+subdir('man')
 subdir('tests')

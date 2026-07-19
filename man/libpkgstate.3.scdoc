@@ -1,0 +1,111 @@
+LIBPKGSTATE(3)
+
+# NAME
+
+libpkgstate - durable installed package state
+
+# SYNOPSIS
+
+```
+#include <libpkgstate/libpkgstate.h>
+```
+
+# DESCRIPTION
+
+*libpkgstate* represents and persists durable installed package state.
+
+The library records package identity and ownership after installation policy
+has been resolved. It does not describe raw archive contents.
+
+The central distinction is:
+
+```
+pkgimage::package_image       archive truth
+pkgstate::installed_package   installed-state truth
+```
+
+An archive entry may be preserved, rejected, omitted, or replaced by a higher
+installation layer. The installed manifest therefore cannot be treated as a
+copy of the package image.
+
+# MODEL
+
+The public model consists of:
+
+*package_identity*
+	Validated package name and version.
+
+*owned_entry*
+	One canonical root-relative path and its durable directory or
+	non-directory class.
+
+*installed_package*
+	One identity and one canonical ownership manifest.
+
+*snapshot*
+	An immutable package set with package and exact ownership indexes.
+
+Shared ownership is valid state and is returned explicitly.
+
+See *pkgstate_model*(3) for the complete model contract.
+
+# STORAGE
+
+The abstract *store* interface reads snapshots and begins isolated
+*write_transaction* objects.
+
+A state write transaction mutates package-state storage only. It does not make
+installed filesystem changes atomic and is not a complete package transaction.
+
+See *pkgstate_store*(3).
+
+The *legacy_text_store* backend implements the line-oriented database
+conventionally stored at _/var/lib/pkg/db_. See
+*pkgstate_legacy_text_store*(3) and *pkgstate-db*(5).
+
+# ERRORS
+
+All public failures derive from `pkgstate::error`.
+
+`identity_error`
+	Invalid identity representation.
+
+`state_error`
+	Invalid installed package or snapshot state.
+
+`store_error`
+	Storage parsing, locking, input/output, or publication failure.
+
+`transaction_error`
+	Invalid write-transaction lifecycle use.
+
+Applications should select behavior from the typed exception class rather than
+parse diagnostic text.
+
+# BOUNDARIES
+
+*libpkgstate* does not:
+
+- inspect package archives;
+- replay package payloads;
+- inspect or mutate the live filesystem;
+- evaluate installation policy;
+- create rejected objects;
+- run package scripts;
+- resolve dependencies; or
+- coordinate complete installation or removal transactions.
+
+Archive representation belongs to *libpkgimage*. Audit semantics belong to
+*libpkgaudit*. Package-management integration belongs to *pkgman*.
+
+# LINKING
+
+```
+pkg-config --cflags --libs libpkgstate
+pkg-config --static --libs libpkgstate
+```
+
+# SEE ALSO
+
+*pkgstate_model*(3), *pkgstate_store*(3),
+*pkgstate_legacy_text_store*(3), *pkgstate-db*(5), *pkginfo*(1)

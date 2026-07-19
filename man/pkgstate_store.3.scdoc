@@ -1,0 +1,102 @@
+PKGSTATE_STORE(3)
+
+# NAME
+
+pkgstate_store - durable package-state stores and write transactions
+
+# SYNOPSIS
+
+```
+#include <libpkgstate/store.h>
+#include <libpkgstate/write_transaction.h>
+```
+
+# STORE INTERFACE
+
+`pkgstate::store` is the backend-neutral durable storage interface.
+
+```
+snapshot read() const;
+std::unique_ptr<write_transaction> begin_write() const;
+```
+
+`read()`
+	Read and validate one immutable snapshot.
+
+`begin_write()`
+	Begin an isolated exclusive state write initialized from current
+	durable state.
+
+Storage, parsing, locking, and input/output failures raise
+`pkgstate::store_error`.
+
+# WRITE TRANSACTION
+
+A `pkgstate::write_transaction` owns one private mutable package set until
+publication.
+
+```
+snapshot current() const;
+void put(installed_package package);
+bool erase(std::string_view package_name);
+void commit();
+bool committed() const noexcept;
+```
+
+`current()`
+	Return the complete uncommitted snapshot.
+
+`put()`
+	Add a package or replace the package with the same name.
+
+`erase()`
+	Remove a package by name. Return false when no package existed.
+	Invalid identity representation raises `pkgstate::identity_error`.
+
+`commit()`
+	Publish the complete current snapshot. Publication failure raises
+	`pkgstate::store_error`.
+
+`committed()`
+	Return whether publication completed successfully.
+
+Destroying an uncommitted transaction discards its uncommitted state.
+
+After successful commit, another mutation or commit attempt is invalid and
+raises `pkgstate::transaction_error`.
+
+# TRANSACTION BOUNDARY
+
+A package-state transaction is not a filesystem transaction.
+
+It does not coordinate:
+
+- payload staging;
+- installation or removal;
+- rejected-object creation;
+- filesystem rollback;
+- post-install maintenance; or
+- package script execution.
+
+A higher transaction layer must order those operations and package-state
+publication.
+
+# BACKEND CONTRACT
+
+A storage backend must preserve:
+
+- validated identities;
+- canonical ownership paths;
+- directory versus non-directory identity;
+- empty manifests;
+- duplicate rejection;
+- shared ownership;
+- deterministic snapshots; and
+- isolated complete-state publication.
+
+The backend may choose its own encoding, locking, and durability mechanism.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3),
+*pkgstate_legacy_text_store*(3), *pkgstate-db*(5)

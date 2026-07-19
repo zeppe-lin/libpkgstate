@@ -1,0 +1,136 @@
+PKGSTATE-DB(5)
+
+# NAME
+
+pkgstate-db - line-oriented installed package database format
+
+# DESCRIPTION
+
+The compatibility package database is conventionally stored at:
+
+```
+/var/lib/pkg/db
+```
+
+It contains zero or more package records.
+
+# RECORD FORMAT
+
+One record contains:
+
+```
+package-name
+package-version
+owned-path
+owned-directory/
+...
+
+```
+
+The package name is the first non-empty line.
+
+The next line is the package version and is required.
+
+Zero or more ownership lines follow. A blank line or end-of-file terminates
+the record.
+
+An empty manifest is represented by a blank line immediately after the version
+line.
+
+Blank lines between records are ignored.
+
+# IDENTITY FIELDS
+
+Package names and versions must be:
+
+- non-empty;
+- free of NUL bytes;
+- free of carriage returns; and
+- free of newlines.
+
+The format does not impose higher-level package naming syntax.
+
+# OWNED PATHS
+
+Owned paths are canonical and relative to the installation root.
+
+A trailing slash identifies a directory:
+
+```
+usr/share/example/
+```
+
+A path without a trailing slash identifies an owned non-directory object:
+
+```
+usr/bin/example
+```
+
+The format does not distinguish regular files, symbolic links, FIFOs, sockets,
+or devices from one another.
+
+Paths may not be absolute and may not escape the root through `..`.
+
+A package record may not contain the same canonical path more than once.
+
+# PACKAGE SET
+
+A database may not contain the same package name more than once.
+
+When written by `pkgstate::legacy_text_store`:
+
+- packages are serialized in package-name order;
+- owned paths are serialized in canonical path order;
+- directory ownership receives a trailing slash;
+- records are separated by one blank line; and
+- the database mode is `0444`.
+
+Shared ownership is represented by listing the same path in more than one
+package record.
+
+# LOCKING
+
+Readers and writers using `pkgstate::legacy_text_store` take non-blocking
+advisory locks on the database directory.
+
+Manual editors and other tools must participate in the same locking contract
+to avoid racing with package-state publication.
+
+# BACKUP
+
+Before replacing an existing database, the compatibility backend creates:
+
+```
+/var/lib/pkg/db.backup
+```
+
+The backup is a hard link to the previous database inode.
+
+It is replaced on each successful publication attempt before the new database
+is renamed into place.
+
+# EXAMPLE
+
+```
+alpha
+1.0
+etc/alpha.conf
+usr/share/alpha/
+
+beta
+2.0
+usr/bin/beta
+usr/share/alpha/
+
+empty
+3.0
+
+```
+
+`alpha` and `beta` share ownership of `usr/share/alpha/`. `empty` owns no
+paths.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3),
+*pkgstate_legacy_text_store*(3), *pkginfo*(1)
