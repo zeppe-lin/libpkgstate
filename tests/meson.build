@@ -1,4 +1,6 @@
 if get_option('tests').allowed()
+  sh = find_program('sh')
+
   model_test = executable(
     'model-test',
     'model_test.cpp',
@@ -34,13 +36,58 @@ if get_option('tests').allowed()
   )
   test('compile umbrella header', umbrella_header_test)
 
+  public_headers = [
+    ['libpkgstate', 'libpkgstate/libpkgstate.h'],
+    ['error', 'libpkgstate/error.h'],
+    ['package-identity', 'libpkgstate/package_identity.h'],
+    ['owned-entry', 'libpkgstate/owned_entry.h'],
+    ['installed-package', 'libpkgstate/installed_package.h'],
+    ['snapshot', 'libpkgstate/snapshot.h'],
+    ['write-transaction', 'libpkgstate/write_transaction.h'],
+    ['store', 'libpkgstate/store.h'],
+    ['legacy-text-store', 'libpkgstate/legacy_text_store.h'],
+  ]
+
+  foreach header : public_headers
+    public_header_test = executable(
+      header[0] + '-public-header-test',
+      'public_header_test.cpp',
+      cpp_args: [
+        '-DLIBPKGSTATE_TEST_HEADER="' + header[1] + '"',
+      ],
+      dependencies: libpkgstate_dep,
+    )
+    test('compile public header ' + header[1], public_header_test)
+  endforeach
+
+  test(
+    'verify documentation source contracts',
+    sh,
+    args: [
+      join_paths(
+        meson.current_source_dir(),
+        'documentation_source_test.sh',
+      ),
+      meson.project_source_root(),
+    ],
+  )
+
   if get_option('tools').allowed()
-    sh = find_program('sh')
     test(
       'exercise pkginfo reference tool',
       sh,
       args: [
         join_paths(meson.current_source_dir(), 'pkginfo_cli_test.sh'),
+        pkginfo_tool,
+      ],
+    )
+
+    test(
+      'verify pkginfo manual contract',
+      sh,
+      args: [
+        join_paths(meson.current_source_dir(), 'pkginfo_manual_test.sh'),
+        meson.project_source_root(),
         pkginfo_tool,
       ],
     )
