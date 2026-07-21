@@ -12,11 +12,15 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <utility>
 
 #include <getopt.h>
 
 #include <libpkgimage/error.h>
+#include <libpkgimage/libarchive_backend.h>
+#include <libpkgimage/package_entry.h>
+#include <libpkgimage/package_image.h>
 #include <libpkgimage/package_path.h>
 #include <libpkgstate/error.h>
 #include <libpkgstate/legacy_text_store.h>
@@ -49,12 +53,13 @@ struct options final {
 void
 print_help(std::ostream& out)
 {
-  out << R"(Usage: pkginfo [-Vh] [-r root-dir] {-i | -l package | -o path}
-Inspect durable installed package state.
+  out << R"(Usage: pkginfo [-Vh] [-r root-dir]
+               {-i | -l package-or-archive | -o path}
+Inspect installed package state and package archive contents.
 
 Exactly one query mode is required:
   -i, --installed           List installed packages and versions
-  -l, --list=package        List paths owned by an installed package
+  -l, --list=argument       List an installed package or package archive
   -o, --owner=path          List packages that own an exact path
 
 Other options:
@@ -62,12 +67,14 @@ Other options:
   -V, --version             Print version and exit
   -h, --help                Print this help and exit
 
-Paths printed by --list are canonical and root-relative.  Directory ownership
-is shown with a trailing slash.  --owner accepts either root-relative spelling
-or one or more leading slashes.
+Installed package names take precedence over same-named archive paths.
+Installed manifests are printed in canonical path order; archive entries retain
+archive order.  Directories are shown with a trailing slash.  --owner accepts
+either root-relative spelling or one or more leading slashes.
 
-This is a libpkgstate reference tool.  It is not the package-management
-interface provided by pkgman.
+This is a reference composition tool for libpkgstate and libpkgimage.  It does
+not provide the inherited pkginfo -f footprint command.  pkgman remains the
+package-management interface.
 )";
 }
 
@@ -199,15 +206,15 @@ print_installed(const pkgstate::snapshot& state)
 }
 
 /*!
- * \brief Print the canonical ownership manifest of one package.
- * \throws std::runtime_error when the package is not installed.
+ * \brief Print the canonical ownership manifest of one installed package.
+ * \return True when the package exists.
  */
-void
-print_manifest(const pkgstate::snapshot& state, std::string_view name)
+bool
+print_installed_manifest(const pkgstate::snapshot& state, std::string_view name)
 {
   const pkgstate::installed_package* package = state.find_package(name);
   if (package == nullptr)
-    throw std::runtime_error("package is not installed: " + std::string(name));
+    return false;
 
   for (const pkgstate::owned_entry& entry : package->manifest())
   {
@@ -216,6 +223,71 @@ print_manifest(const pkgstate::snapshot& state, std::string_view name)
       std::cout << '/';
     std::cout << '\n';
   }
+
+  return true;
+}
+
+/*!
+ * \brief Test whether an archive operand names a regular file.
+ * \throws std::filesystem::filesystem_error on an unexpected status failure.
+ */
+bool
+regular_file_exists(const std::filesystem::path& path)
+{
+  std::error_code failure;
+  const bool regular = std::filesystem::is_regular_file(path, failure);
+
+  if (!failure)
+    return regular;
+
+  if (failure == std::errc::no_such_file_or_directory ||
+      failure == std::errc::not_a_directory)
+    return false;
+
+  throw std::filesystem::filesystem_error(
+      "cannot inspect package archive", path, failure);
+}
+
+/*!
+ * \brief Print normalized package archive entries in archive order.
+ */
+void
+print_archive_manifest(const std::filesystem::path& archive_path)
+{
+  const pkgimage::libarchive_backend backend;
+  const pkgimage::inspected_package_image inspected =
+      backend.inspect(archive_path);
+
+  for (const pkgimage::package_entry& entry : inspected.image().entries())
+  {
+    std::cout << entry.path.string();
+    if (entry.type == pkgimage::entry_type::directory)
+      std::cout << '/';
+    std::cout << '\n';
+  }
+}
+
+/*!
+ * \brief List an installed package or a package archive.
+ *
+ * Installed package identity is checked first so a same-named filesystem entry
+ * cannot redirect a package-state query into archive inspection.
+ */
+void
+print_list(const pkgstate::snapshot& state, std::string_view argument)
+{
+  if (print_installed_manifest(state, argument))
+    return;
+
+  const std::filesystem::path archive_path(argument);
+  if (!regular_file_exists(archive_path))
+  {
+    throw std::runtime_error(
+        "argument is neither an installed package nor a package archive: " +
+        std::string(argument));
+  }
+
+  print_archive_manifest(archive_path);
 }
 
 /*!
@@ -268,7 +340,7 @@ main(int argc, char** argv)
         print_installed(state);
         return EXIT_SUCCESS;
       case action::list:
-        print_manifest(state, parsed.argument);
+        print_list(state, parsed.argument);
         return EXIT_SUCCESS;
       case action::owner:
         if (print_owners(state, parsed.argument))

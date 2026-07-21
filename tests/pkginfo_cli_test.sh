@@ -78,10 +78,11 @@ grep -Fx 'pkginfo: no package owns: /not/owned' "$work/stderr" > /dev/null ||
 
 status=0
 "$pkginfo" -r "$root" -l absent > "$work/actual" 2> "$work/stderr" || status=$?
-test "$status" -eq 1 || fail "missing package returned status $status"
-test ! -s "$work/actual" || fail "missing package wrote to stdout"
-grep -Fx 'pkginfo: package is not installed: absent' "$work/stderr" > /dev/null ||
-  fail "missing package diagnostic differs"
+test "$status" -eq 1 || fail "missing list operand returned status $status"
+test ! -s "$work/actual" || fail "missing list operand wrote to stdout"
+grep -Fx \
+  'pkginfo: argument is neither an installed package nor a package archive: absent' \
+  "$work/stderr" > /dev/null || fail "missing list operand diagnostic differs"
 
 status=0
 "$pkginfo" -r "$root" -i -l alpha > "$work/actual" 2> "$work/stderr" || status=$?
