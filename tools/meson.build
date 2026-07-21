@@ -8,7 +8,7 @@ if get_option('tools').allowed()
     cpp_args: [
       '-DPKGSTATE_VERSION="' + meson.project_version() + '"',
     ],
-    dependencies: libpkgstate_dep,
+    dependencies: [libpkgstate_dep, libpkgimage_dep],
     install: get_option('install_tools'),
   )
 endif

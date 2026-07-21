@@ -75,6 +75,19 @@ if get_option('tests').allowed()
     ],
   )
 
+  test(
+    'verify pkg-config dependency metadata',
+    sh,
+    args: [
+      join_paths(meson.current_source_dir(), 'pkgconfig_metadata_test.sh'),
+      join_paths(
+        meson.project_build_root(),
+        'meson-private',
+        'libpkgstate.pc',
+      ),
+    ],
+  )
+
   if get_option('tools').allowed()
     test(
       'exercise pkginfo reference tool',
