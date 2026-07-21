@@ -89,8 +89,12 @@ Reference-tool tests
 Black-box `pkginfo(1)` tests cover:
 
 * installed package listing;
-* package manifest listing;
-* empty manifests;
+* installed package manifest listing;
+* package archive listing;
+* archive order and directory suffixes;
+* installed-package precedence over a same-named file;
+* malformed, missing, and non-regular archive operands;
+* empty installed manifests;
 * exact owner lookup;
 * shared ownership;
 * alternate roots;
@@ -120,7 +124,8 @@ The documentation contract test checks:
 
 * presence of every documented manual source;
 * page names and sections;
-* `pkginfo(1)` option and status coverage;
+* `pkginfo(1)` option, dispatch, ordering, and status coverage;
+* the explicit absence and migration boundary of `pkginfo -f`;
 * state-versus-filesystem transaction warnings;
 * compatibility database record grammar;
 * locking and backup documentation; and

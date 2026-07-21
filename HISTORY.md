@@ -49,3 +49,19 @@ The documentation reconstruction added:
 * independent public-header tests;
 * documentation consistency tests; and
 * CI gates for scdoc and Doxygen.
+
+0.3.0
+-----
+
+The third release adds archive listing to the reference frontend without
+changing the installed-state library boundary:
+
+* `pkginfo -l` accepts an installed package or a regular package archive;
+* installed package identity takes precedence over same-named files;
+* archive entries are inspected through `libpkgimage` 0.3.0 and retain archive
+  order;
+* directory suffixes remain explicit in both installed and archive output;
+* malformed and non-regular archive operands have defined failures;
+* migration documentation records `pkginfo -f` as the remaining build-layer
+  transition gate; and
+* the public libpkgstate ABI and soversion remain unchanged.

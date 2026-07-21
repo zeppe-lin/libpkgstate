@@ -54,3 +54,18 @@ grep -F 'trailing slash' "$manual" >/dev/null ||
 
 grep -F 'exact ownership lookup' "$manual" >/dev/null ||
   fail "manual omits exact ownership semantics"
+
+for contract in \
+  'installed package name takes precedence' \
+  'archive order' \
+  'pkginfo -f' \
+  'Historical CRUX *pkgmk*'
+do
+  grep -F "$contract" "$manual" >/dev/null ||
+    fail "manual omits $contract contract"
+done
+
+grep -F 'package archive' "$work/help" >/dev/null ||
+  fail "help omits archive list behavior"
+grep -F 'pkginfo -f footprint command' "$work/help" >/dev/null ||
+  fail "help omits footprint boundary"

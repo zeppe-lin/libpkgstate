@@ -183,18 +183,26 @@ from the typed exception class rather than parse diagnostic text.
 Reference tool
 --------------
 
-`pkginfo(1)` is a small composition client for `legacy_text_store`.
+`pkginfo(1)` is a small composition client for `legacy_text_store` and the
+`libpkgimage` libarchive backend.
 
 It owns:
 
 * command-line parsing;
+* installed-package-first `-l` dispatch;
 * alternate-root database selection;
+* archive pathname inspection;
 * line-oriented output;
 * diagnostics; and
 * exit-status policy.
 
-It does not add hidden state semantics to the library.  `pkgman` remains the
-supported package-management integration layer.
+The frontend may compose installed truth and archive truth because it does not
+merge them.  Installed manifests remain `libpkgstate` facts; archive entries
+remain `libpkgimage` facts.  The `libpkgstate` library still opens no archive.
+
+The inherited `pkginfo -f` footprint command is not part of this composition.
+Footprint generation and comparison belong to the build layer.  `pkgman`
+remains the supported package-management integration layer.
 
 Determinism
 -----------

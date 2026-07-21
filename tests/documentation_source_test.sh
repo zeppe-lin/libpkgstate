@@ -69,3 +69,15 @@ do
   grep -F "$page" "$source_root/README.md" >/dev/null ||
     fail "README omits $page"
 done
+
+grep -F 'The frontend may compose installed truth and archive truth' \
+  "$source_root/DESIGN.md" >/dev/null ||
+  fail "design omits frontend composition boundary"
+
+grep -F 'Historical CRUX `pkgmk` calls `pkginfo -f`' \
+  "$source_root/MIGRATION.md" >/dev/null ||
+  fail "migration omits footprint transition gate"
+
+grep -F '`libpkgimage` 0.3.0 or later' \
+  "$source_root/README.md" >/dev/null ||
+  fail "README omits libpkgimage dependency floor"

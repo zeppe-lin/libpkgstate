@@ -23,9 +23,11 @@ pkgstate::installed_package   what durable state says is installed
 An installed manifest is the ownership state that remains after installation
 policy has been resolved.  It is not a copy of an archive manifest.
 
-`libpkgstate` does not inspect package archives, apply installation policy,
-mutate the installed filesystem, stage rejected objects, run maintenance
-actions, or coordinate a complete package transaction.
+The `libpkgstate` library does not inspect package archives, apply installation
+policy, mutate the installed filesystem, stage rejected objects, run maintenance
+actions, or coordinate a complete package transaction.  The optional `pkginfo`
+reference frontend composes installed-state queries with `libpkgimage` archive
+inspection without moving either authority into the other library.
 
 The implementation is original Zeppe-Lin code.  It is not derived from CRUX
 `pkgutils` or from the former CRUX-derived `libpkgcore`.
@@ -97,7 +99,7 @@ Build-time requirements:
 * Meson 1.2.0 or later;
 * Ninja;
 * pkg-config; and
-* `libpkgimage` 0.2.1 or later.
+* `libpkgimage` 0.3.0 or later.
 
 Optional documentation dependencies:
 
@@ -150,27 +152,35 @@ meson install -C build
 Reference pkginfo
 -----------------
 
-The optional `tools/pkginfo.cpp` executable is a small inspector for durable
-installed state:
+The optional `tools/pkginfo.cpp` executable is a small composition client for
+installed state and package archive contents:
 
 ```sh
 build/tools/pkginfo -i
 build/tools/pkginfo -l pkgname
+build/tools/pkginfo -l package.pkg.tar.xz
 build/tools/pkginfo -o /usr/bin/tool
 build/tools/pkginfo -r /alternate/root -i
 ```
 
-It reports installed-state facts only.  It does not inspect package archives
-or print archive footprints.  `pkgman` remains the package-management
-integration unit.
+For `-l`, an installed package name takes precedence over a same-named archive
+path.  Installed manifests come from `libpkgstate`; archive images come from
+`libpkgimage`.  The library boundary remains intact.
 
 The output contract is line-oriented:
 
 * `-i` and `-o` print `name version`;
-* `-l` prints canonical root-relative owned paths;
-* directory ownership retains a trailing slash;
-* status 1 reports an absent package, absent owner, or runtime failure; and
+* installed `-l` results use canonical path order;
+* archive `-l` results preserve archive order;
+* directories retain a trailing slash;
+* status 1 reports an absent operand, absent owner, invalid archive, or runtime
+  failure; and
 * status 2 reports command-line misuse.
+
+The reference tool does not implement the inherited `pkginfo -f` footprint
+command.  Existing `pkgmk` deployments that call `pkginfo -f` must retain the
+old frontend until the build layer provides that command.  `pkgman` remains the
+package-management integration unit.
 
 Using the library
 -----------------
