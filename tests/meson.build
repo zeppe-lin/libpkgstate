@@ -87,6 +87,15 @@ if get_option('tests').allowed()
     ],
   )
 
+  test(
+    'verify release metadata',
+    sh,
+    args: [
+      join_paths(meson.current_source_dir(), 'release_metadata_test.sh'),
+      meson.project_source_root(),
+    ],
+  )
+
   if get_option('tools').allowed()
     tar_program = find_program('tar')
 

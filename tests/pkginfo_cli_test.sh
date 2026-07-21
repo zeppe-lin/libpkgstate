@@ -167,6 +167,6 @@ grep -F 'pkginfo: exactly one query mode is required' "$work/stderr" > /dev/null
   fail "conflicting mode diagnostic differs"
 
 cat > "$work/expected" <<'EOF_VERSION'
-pkginfo (libpkgstate) 0.2.0
+pkginfo (libpkgstate) 0.3.0
 EOF_VERSION
 expect_success version "$pkginfo" --version
