@@ -3,7 +3,6 @@
 
 if get_option('tests').allowed()
   sh = find_program('sh')
-
   model_test = executable(
     'model-test',
     'model_test.cpp',
@@ -89,12 +88,15 @@ if get_option('tests').allowed()
   )
 
   if get_option('tools').allowed()
+    tar_program = find_program('tar')
+
     test(
       'exercise pkginfo reference tool',
       sh,
       args: [
         join_paths(meson.current_source_dir(), 'pkginfo_cli_test.sh'),
         pkginfo_tool,
+        tar_program,
       ],
     )
 
