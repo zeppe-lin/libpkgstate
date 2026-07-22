@@ -54,6 +54,13 @@ if get_option('tests').allowed()
   )
   test('validate installed package state', model_test)
 
+  legacy_model_test = executable(
+    'legacy-model-test',
+    'legacy_model_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('preserve incomplete legacy state', legacy_model_test)
+
   legacy_text_store_test = executable(
     'legacy-text-store-test',
     'legacy_text_store_test.cpp',
@@ -95,6 +102,9 @@ if get_option('tests').allowed()
     ['owned-entry', 'libpkgstate/owned_entry.h'],
     ['installed-package', 'libpkgstate/installed_package.h'],
     ['snapshot', 'libpkgstate/snapshot.h'],
+    ['legacy-installed-package',
+     'libpkgstate/legacy_installed_package.h'],
+    ['legacy-snapshot', 'libpkgstate/legacy_snapshot.h'],
     ['write-transaction', 'libpkgstate/write_transaction.h'],
     ['store', 'libpkgstate/store.h'],
     ['legacy-text-store', 'libpkgstate/legacy_text_store.h'],

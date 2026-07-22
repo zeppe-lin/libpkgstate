@@ -27,7 +27,9 @@ check_page()
 check_page man/libpkgstate.3.scdoc LIBPKGSTATE\(3\)
 check_page man/pkgstate_model.3.scdoc PKGSTATE_MODEL\(3\)
 check_page man/pkgstate_store.3.scdoc PKGSTATE_STORE\(3\)
-check_page man/pkgstate_legacy_text_store.3.scdoc PKGSTATE_LEGACY_TEXT_STORE\(3\)
+check_page \
+  man/pkgstate_legacy_text_store.3.scdoc \
+  PKGSTATE_LEGACY_TEXT_STORE\(3\)
 check_page man/pkgstate-db.5.scdoc PKGSTATE-DB\(5\)
 check_page man/pkginfo.1.scdoc PKGINFO\(1\)
 
@@ -66,6 +68,18 @@ grep -F 'Known empty and historically unavailable are different states.' \
 grep -F 'A pathname is a locator, not a target identity.' \
   "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
   fail "model manual omits target-binding identity boundary"
+
+grep -F 'complete canonical installed truth for one' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual omits complete installed-package boundary"
+
+grep -F 'legacy_snapshot read() const;' \
+  "$source_root/man/pkgstate_store.3.scdoc" >/dev/null ||
+  fail "store manual does not expose compatibility snapshot type"
+
+grep -F 'constructs *legacy_installed_package* records' \
+  "$source_root/man/pkgstate_legacy_text_store.3.scdoc" >/dev/null ||
+  fail "legacy backend manual claims canonical installed records"
 
 for document in DESIGN.md STORAGE.md MIGRATION.md TESTING.md HISTORY.md
 do

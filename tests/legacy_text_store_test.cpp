@@ -55,13 +55,15 @@ main()
   pkgstate::legacy_text_store store(database);
   CHECK(store.database_path() == database);
 
-  const pkgstate::snapshot state = store.read();
+  const pkgstate::legacy_snapshot state = store.read();
   CHECK(state.size() == 3);
   CHECK(state.packages()[0].identity().name() == "base");
   CHECK(state.packages()[1].identity().name() == "empty");
   CHECK(state.packages()[2].identity().name() == "zlib");
-  CHECK(state.find_package("base")->manifest()[0].path.string() == "usr/bin/base");
-  CHECK(state.find_package("base")->manifest()[1].path.string() == "usr/share/doc");
+  CHECK(state.find_package("base")->manifest()[0].path.string() ==
+        "usr/bin/base");
+  CHECK(state.find_package("base")->manifest()[1].path.string() ==
+        "usr/share/doc");
   CHECK(state.find_package("base")->manifest()[1].type ==
         pkgstate::owned_entry_type::directory);
   CHECK(state.find_package("empty")->manifest().empty());

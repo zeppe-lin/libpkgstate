@@ -2,7 +2,7 @@ PKGSTATE_STORE(3)
 
 # NAME
 
-pkgstate_store - durable package-state stores and write transactions
+pkgstate_store - compatibility package-state stores and write transactions
 
 # SYNOPSIS
 
@@ -11,59 +11,64 @@ pkgstate_store - durable package-state stores and write transactions
 #include <libpkgstate/write_transaction.h>
 ```
 
-# STORE INTERFACE
+# COMPATIBILITY INTERFACE
 
-*pkgstate::store* is the backend-neutral durable storage interface.
+*pkgstate::store* is the storage interface retained for the historical package
+database model.
 
 ```
-snapshot read() const;
+legacy_snapshot read() const;
 std::unique_ptr<write_transaction> begin_write() const;
 ```
 
 *read()*
-	Read and validate one immutable snapshot.
+	Read and validate one immutable compatibility snapshot.
 
 *begin_write()*
-	Begin an isolated exclusive state write initialized from current
-	durable state.
+	Begin an isolated exclusive compatibility-state write initialized from
+	current durable compatibility state.
+
+The interface returns *legacy_snapshot*, not canonical *snapshot*. The
+historical storage model does not carry canonical releases, installed control,
+target binding, typed installed identities, or snapshot identity.
 
 Storage, parsing, locking, and input/output failures raise
 *pkgstate::store_error*.
 
 # WRITE TRANSACTION
 
-A *pkgstate::write_transaction* owns one private mutable package set until
-publication.
+A *pkgstate::write_transaction* owns one private mutable compatibility package
+set until publication.
 
 ```
-snapshot current() const;
-void put(installed_package package);
+legacy_snapshot current() const;
+void put(legacy_installed_package package);
 bool erase(std::string_view package_name);
 void commit();
 bool committed() const noexcept;
 ```
 
 *current()*
-	Return the complete uncommitted snapshot.
+	Return the complete uncommitted compatibility snapshot.
 
 *put()*
-	Add a package or replace the package with the same name.
+	Add or replace one *legacy_installed_package* by package name. Complete
+	canonical *installed_package* values are not accepted.
 
 *erase()*
-	Remove a package by name. Return false when no package existed.
-	Invalid identity representation raises *pkgstate::identity_error*.
+	Remove a compatibility package by name. Return false when no package
+	existed. Invalid identity representation raises *identity_error*.
 
 *commit()*
-	Publish the complete current snapshot. Publication failure raises
-	*pkgstate::store_error*.
+	Publish the complete current compatibility database. Publication failure
+	raises *store_error*.
 
 *committed()*
-	Return whether publication completed successfully.
+	Return whether the legacy commit operation completed successfully.
 
-Destroying an uncommitted transaction discards its uncommitted state.
-
-After successful commit, another mutation or commit attempt is invalid and
-raises *pkgstate::transaction_error*.
+Destroying an uncommitted transaction discards its uncommitted state. After
+successful commit, another mutation or commit attempt raises
+*transaction_error*.
 
 # TRANSACTION BOUNDARY
 
@@ -78,23 +83,24 @@ It does not coordinate:
 - post-install maintenance; or
 - package script execution.
 
-A higher transaction layer must order those operations and package-state
-publication.
+It also does not perform caller-supplied expected-snapshot comparison. The
+interface is not the canonical stale-safe publication API.
 
 # BACKEND CONTRACT
 
-A storage backend must preserve:
+A compatibility backend must preserve every fact its format actually carries:
 
-- validated identities;
+- historical package name and opaque version line;
 - canonical ownership paths;
 - directory versus non-directory identity;
 - empty manifests;
 - duplicate rejection;
 - shared ownership;
-- deterministic snapshots; and
-- isolated complete-state publication.
+- deterministic compatibility snapshots; and
+- isolated complete-database replacement.
 
-The backend may choose its own encoding, locking, and durability mechanism.
+It must not invent canonical release, control, target, evidence, or identity
+facts from mutable current inputs.
 
 # SEE ALSO
 

@@ -10,6 +10,7 @@ pkgstate_legacy_text_store - compatibility backend for /var/lib/pkg/db
 #include <libpkgstate/legacy_text_store.h>
 
 pkgstate::legacy_text_store store("/var/lib/pkg/db");
+pkgstate::legacy_snapshot state = store.read();
 ```
 
 # DESCRIPTION
@@ -24,12 +25,28 @@ installation root.
 	Return the configured pathname.
 
 *read()*
-	Read and validate one immutable state snapshot.
+	Read and validate one immutable *legacy_snapshot*.
 
 *begin_write()*
-	Begin an isolated exclusive write transaction.
+	Begin an isolated exclusive compatibility write transaction.
 
 The format is documented in *pkgstate-db*(5).
+
+# INCOMPLETE AUTHORITY
+
+A database record carries only:
+
+- package name;
+- one opaque version line; and
+- directory or non-directory ownership paths.
+
+A read therefore constructs *legacy_installed_package* records, not canonical
+*installed_package* records. It returns *legacy_snapshot*, not canonical
+*snapshot*.
+
+The backend does not split the opaque version line, reconstruct installed
+control, invent a target binding, consult current source or archive state, or
+assign canonical installed-package and snapshot identities.
 
 # LOCKING
 
@@ -56,19 +73,19 @@ A read:
 1. acquires the shared directory lock;
 2. opens the database as binary input;
 3. parses and validates every record;
-4. constructs canonical installed packages; and
-5. returns one indexed snapshot.
+4. constructs incomplete compatibility package records; and
+5. returns one indexed *legacy_snapshot*.
 
-Malformed input raises *pkgstate::store_error*. Diagnostics include the
-database pathname and, where available, the input line number.
+Malformed input raises *store_error*. Diagnostics include the database pathname
+and, where available, the input line number.
 
 # PUBLICATION
 
-Commit replaces the complete database state:
+Commit replaces the complete compatibility database state:
 
 1. create a same-directory temporary file;
 2. set mode 0444;
-3. serialize the complete transaction snapshot;
+3. serialize the complete compatibility transaction snapshot;
 4. write all bytes;
 5. synchronize the temporary file with *fsync*(2);
 6. close the temporary file;

@@ -6,33 +6,42 @@ durable installed package state.
 
 It provides:
 
-* validated package names and versions;
 * strongly typed algorithm-qualified state identities;
 * canonical package releases with computed identities;
 * immutable durable installed control with explicit completeness;
 * durable target-state bindings with computed identities;
-* state-owned canonical package paths;
-* canonical installed ownership manifests;
-* immutable snapshots with package and ownership indexes;
-* explicit shared ownership;
-* backend-neutral state write transactions; and
+* complete canonical installed package records with computed identities;
+* complete immutable snapshots with package and ownership indexes;
+* state-owned canonical package paths and explicit shared ownership;
+* explicitly incomplete compatibility records and snapshots;
+* compatibility write transactions for the historical database; and
 * an original compatibility backend for `/var/lib/pkg/db`.
 
 The central distinction is:
 
 ```text
 pkgimage::package_image       what an archive contains
-pkgstate::installed_package   what durable state says is installed
+pkgstate::installed_package   complete durable installed truth
 ```
 
-An installed manifest is the ownership state that remains after installation
-policy has been resolved.  It is not a copy of an archive manifest.
+An installed manifest is the ownership state that remains after completed
+application policy.  It is not a copy of an archive manifest.
+
+The historical database is deliberately represented by different public types:
+
+```text
+legacy_installed_package      name + opaque version line + ownership
+legacy_snapshot               one incomplete database observation
+```
+
+Those values do not pretend to contain canonical releases, installed control,
+target binding, typed installed identities, or snapshot identity.
 
 The `libpkgstate` library does not inspect package archives, apply installation
 policy, mutate the installed filesystem, stage rejected objects, run maintenance
 actions, or coordinate a complete package transaction.  The optional `pkginfo`
-reference frontend composes installed-state queries with `libpkgimage` archive
-inspection without moving either authority into the other library.
+reference frontend composes compatibility-state queries with `libpkgimage`
+archive inspection without moving either authority into the other library.
 
 The implementation is original Zeppe-Lin code.  It is not derived from CRUX
 `pkgutils` or from the former CRUX-derived `libpkgcore`.
@@ -40,41 +49,50 @@ The implementation is original Zeppe-Lin code.  It is not derived from CRUX
 Contracts
 ---------
 
-The canonical release fact and compatibility installed model currently coexist:
+The canonical model is:
 
 ```text
 package_release --------> installed_control
-    coordinates            runtime dependencies
-    computed identity      removal lifecycle material
-                           target/profile facts
-                           retained provenance
-                           computed identity
-
-managed target + store + root view + backend + publication domain
-                              |
-                              v
-                    state_target_binding
-                       computed identity
-
-package_identity      package_path
-       |                    |
-       +---------+----------+
-                 |
-                 v
-installed_package ----> ordered owned_entry manifest
-       |
-       v
-snapshot -------------> package lookup and shared ownership
-       |
-       v
-store / write_transaction
+       |                         |
+       +------------+------------+
+                    |
+state_target_binding+ completed ownership manifest
+                    |
+                    v
+           installed_package
+             computed identity
+                    |
+                    v
+               snapshot
+       one target binding, package lookup,
+       and derived shared ownership index
 ```
 
-Canonical state identities use distinct C++ types and the strict textual form
-`v1:sha256:<lowercase-hex>`.  `package_release` and `installed_control` use that
-substrate now; `state_target_binding` uses it for the durable storage and
-publication projection.  The compatibility-shaped installed package and
-snapshot acquire canonical identities in later model commits.
+`installed_package::make()` requires one canonical release, control for exactly
+that release, one target binding, and the completed ownership manifest.  The
+library normalizes the manifest and computes `installed_package_identity` from
+those facts.  Snapshot identity and ownership-inventory identity are added by
+the next model layer; the complete facts they cover are already present.
+
+`snapshot::make()` accepts only complete canonical installed packages.  Every
+package must carry the snapshot's exact target binding.  Packages are sorted by
+name, duplicate package names are rejected, and shared path ownership remains
+valid state.
+
+Compatibility storage uses a separate model:
+
+```text
+package_identity                 historical name + opaque version line
+legacy_installed_package         compatibility ownership record
+legacy_snapshot                  indexed compatibility observation
+store / write_transaction        compatibility mutation only
+legacy_text_store                /var/lib/pkg/db backend
+```
+
+A compatibility read does not parse an opaque version line into canonical
+version and release fields.  It does not reconstruct missing control or target
+facts from current sources, archives, filenames, configuration, or the live
+filesystem.
 
 Important invariants:
 
@@ -82,22 +100,25 @@ Important invariants:
 * installed control distinguishes known empty facts from historical absence;
 * unavailable control groups cannot contain invented values;
 * target bindings contain typed identities, not root pathnames;
-* target bindings exclude installed-snapshot identity;
-* legacy package identity fields are non-empty and line-safe;
+* installed packages bind release, control, target, and completed ownership;
+* installed-package identity excludes containing snapshot identity;
+* canonical snapshots contain packages from exactly one target binding;
 * package paths are canonical and root-relative;
-* an installed package contains at most one entry for each path;
-* packages and manifests are returned in deterministic order;
+* package manifests contain at most one entry for each path;
+* packages, manifests, and owner results have deterministic order;
 * multiple packages may own the same path;
-* snapshots are immutable after construction; and
-* state transactions mutate storage only.
+* canonical and compatibility snapshots are immutable after construction; and
+* compatibility transactions mutate compatibility storage only.
 
-A `write_transaction` is not a filesystem transaction.  Publishing package
-state does not make preceding installation or removal operations atomic.
+A `write_transaction` is not a canonical publication request and is not a
+filesystem transaction.  It accepts `legacy_installed_package` values only.
+Publishing compatibility state does not make preceding installation or removal
+operations atomic and does not provide expected-snapshot comparison.
 
 The compatibility backend reads and writes the documented line-oriented
-`/var/lib/pkg/db` format.  Reads hold a non-blocking shared lock on the
-database directory.  Writes hold a non-blocking exclusive lock from
-`begin_write()` until commit or destruction.
+`/var/lib/pkg/db` format.  Reads hold a non-blocking shared lock on the database
+directory.  Writes hold a non-blocking exclusive lock from `begin_write()` until
+commit or destruction.
 
 See:
 
@@ -228,7 +249,7 @@ Using the library
 #include <libpkgstate/legacy_text_store.h>
 
 pkgstate::legacy_text_store store("/var/lib/pkg/db");
-const pkgstate::snapshot state = store.read();
+const pkgstate::legacy_snapshot state = store.read();
 
 if (const auto* package = state.find_package("pkgutils"))
   std::cout << package->identity().version() << '\n';

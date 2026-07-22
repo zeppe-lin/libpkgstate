@@ -3,6 +3,9 @@
 
 #include <libpkgstate/legacy_text_store.h>
 
+#include <libpkgstate/legacy_installed_package.h>
+#include <libpkgstate/legacy_snapshot.h>
+
 #include <libpkgstate/error.h>
 #include <libpkgstate/package_path.h>
 
@@ -50,7 +53,8 @@ public:
   {
     fd_ = ::open(directory_.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (fd_ == -1)
-      throw store_error(system_message("could not open directory", directory_, errno));
+      throw store_error(system_message(
+          "could not open directory", directory_, errno));
 
     if (::flock(fd_, operation | LOCK_NB) == -1)
     {
@@ -59,9 +63,11 @@ public:
       fd_ = -1;
 
       if (saved == EWOULDBLOCK || saved == EAGAIN)
-        throw store_error("package state is currently locked by another process");
+        throw store_error(
+            "package state is currently locked by another process");
 
-      throw store_error(system_message("could not lock directory", directory_, saved));
+      throw store_error(system_message(
+          "could not lock directory", directory_, saved));
     }
   }
 
@@ -96,14 +102,14 @@ parse_failure(const std::filesystem::path& database,
                     ": " + message);
 }
 
-snapshot
+legacy_snapshot
 read_database(const std::filesystem::path& database)
 {
   std::ifstream input(database, std::ios::binary);
   if (!input)
     throw store_error(system_message("could not open", database, errno));
 
-  std::vector<installed_package> packages;
+  std::vector<legacy_installed_package> packages;
   std::string line;
   std::size_t line_number = 0;
 
@@ -157,7 +163,8 @@ read_database(const std::filesystem::path& database)
     catch (const state_error& failure)
     {
       parse_failure(database, name_line,
-                    std::string("invalid installed manifest: ") + failure.what());
+                    std::string("invalid legacy installed manifest: ") +
+                        failure.what());
     }
   }
 
@@ -166,7 +173,7 @@ read_database(const std::filesystem::path& database)
 
   try
   {
-    return snapshot(std::move(packages));
+    return legacy_snapshot(std::move(packages));
   }
   catch (const state_error& failure)
   {
@@ -176,10 +183,10 @@ read_database(const std::filesystem::path& database)
 }
 
 std::string
-serialize(const snapshot& state)
+serialize(const legacy_snapshot& state)
 {
   std::ostringstream output;
-  for (const installed_package& package : state.packages())
+  for (const legacy_installed_package& package : state.packages())
   {
     output << package.identity().name() << '\n';
     output << package.identity().version() << '\n';
@@ -226,8 +233,8 @@ public:
 
     fd_ = ::mkstemp(mutable_pattern.data());
     if (fd_ == -1)
-      throw store_error(system_message("could not create temporary state", database,
-                                       errno));
+      throw store_error(system_message(
+          "could not create temporary state", database, errno));
 
     path_ = mutable_pattern.data();
 
@@ -236,8 +243,8 @@ public:
     {
       const int saved = errno;
       cleanup();
-      throw store_error(system_message("could not secure temporary state", path_,
-                                       saved));
+      throw store_error(system_message(
+          "could not secure temporary state", path_, saved));
     }
   }
 
@@ -296,7 +303,7 @@ private:
 
 void
 publish_database(const std::filesystem::path& database,
-                 const snapshot& state,
+                 const legacy_snapshot& state,
                  int directory_fd)
 {
   temporary_file temporary(database);
@@ -329,8 +336,9 @@ publish_database(const std::filesystem::path& database,
   temporary.release_path();
 
   if (::fsync(directory_fd) == -1)
-    throw store_error(system_message("state published but directory sync failed",
-                                     parent_directory(database), errno));
+    throw store_error(system_message(
+        "state published but directory sync failed",
+        parent_directory(database), errno));
 }
 
 void
@@ -343,23 +351,23 @@ class legacy_write_transaction final : public write_transaction {
 public:
   legacy_write_transaction(std::filesystem::path database,
                            std::unique_ptr<directory_lock> lock,
-                           snapshot initial)
+                           legacy_snapshot initial)
       : database_(std::move(database)), lock_(std::move(lock))
   {
-    for (const installed_package& package : initial.packages())
+    for (const legacy_installed_package& package : initial.packages())
       packages_.emplace(package.identity().name(), package);
   }
 
-  [[nodiscard]] snapshot current() const override
+  [[nodiscard]] legacy_snapshot current() const override
   {
-    std::vector<installed_package> packages;
+    std::vector<legacy_installed_package> packages;
     packages.reserve(packages_.size());
     for (const auto& item : packages_)
       packages.push_back(item.second);
-    return snapshot(std::move(packages));
+    return legacy_snapshot(std::move(packages));
   }
 
-  void put(installed_package package) override
+  void put(legacy_installed_package package) override
   {
     ensure_open();
     packages_.insert_or_assign(package.identity().name(), std::move(package));
@@ -394,7 +402,7 @@ private:
 
   std::filesystem::path database_;
   std::unique_ptr<directory_lock> lock_;
-  std::map<std::string, installed_package> packages_;
+  std::map<std::string, legacy_installed_package> packages_;
   bool committed_ = false;
 };
 
@@ -413,7 +421,7 @@ legacy_text_store::database_path() const noexcept
   return database_;
 }
 
-snapshot
+legacy_snapshot
 legacy_text_store::read() const
 {
   directory_lock lock(parent_directory(database_), LOCK_SH);
@@ -425,7 +433,7 @@ legacy_text_store::begin_write() const
 {
   auto lock =
       std::make_unique<directory_lock>(parent_directory(database_), LOCK_EX);
-  snapshot initial = read_database(database_);
+  legacy_snapshot initial = read_database(database_);
   return std::make_unique<legacy_write_transaction>(
       database_, std::move(lock), std::move(initial));
 }

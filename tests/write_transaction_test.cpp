@@ -33,12 +33,12 @@ directory(const char* value)
   return {path(value), pkgstate::owned_entry_type::directory};
 }
 
-pkgstate::installed_package
+pkgstate::legacy_installed_package
 package(const char* name,
         const char* version,
         std::vector<pkgstate::owned_entry> manifest)
 {
-  return pkgstate::installed_package(
+  return pkgstate::legacy_installed_package(
       pkgstate::package_identity::make(name, version), std::move(manifest));
 }
 
@@ -75,7 +75,7 @@ main()
   CHECK(transaction->erase("old"));
   CHECK(!transaction->erase("missing"));
 
-  const pkgstate::snapshot pending = transaction->current();
+  const pkgstate::legacy_snapshot pending = transaction->current();
   CHECK(pending.size() == 2);
   CHECK(pending.find_package("base")->identity().version() == "2.0-1");
   CHECK(pending.find_package("new")->manifest().empty());
@@ -90,11 +90,13 @@ main()
   transaction->commit();
   CHECK(transaction->committed());
 
-  const pkgstate::snapshot durable = abstract_store.read();
+  const pkgstate::legacy_snapshot durable = abstract_store.read();
   CHECK(durable.size() == 2);
   CHECK(durable.find_package("old") == nullptr);
-  CHECK(durable.find_package("base")->manifest()[0].path.string() == "usr/bin/base");
-  CHECK(durable.find_package("base")->manifest()[1].path.string() == "usr/share/base");
+  CHECK(durable.find_package("base")->manifest()[0].path.string() ==
+        "usr/bin/base");
+  CHECK(durable.find_package("base")->manifest()[1].path.string() ==
+        "usr/share/base");
 
   const std::string expected =
       "base\n"

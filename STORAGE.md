@@ -1,50 +1,54 @@
 libpkgstate storage contract
 ============================
 
-Store abstraction
------------------
+Compatibility store abstraction
+-------------------------------
 
-`pkgstate::store` exposes two operations:
+`pkgstate::store` currently exposes the historical storage interface:
 
 ```cpp
-snapshot read() const;
+legacy_snapshot read() const;
 std::unique_ptr<write_transaction> begin_write() const;
 ```
 
-A store is responsible for durable package-state storage only.
+This interface is explicitly compatibility-scoped.  It reads and mutates
+`legacy_snapshot` values only.  It does not publish canonical `snapshot` values
+and does not implement stale-safe compare-and-publish.
 
-`read()` returns one immutable snapshot.  `begin_write()` returns an isolated
-transaction initialized from the current durable snapshot.
+`read()` returns one immutable observation of compatibility records.
+`begin_write()` returns an isolated transaction initialized from current
+durable compatibility state.
 
-Write transaction
------------------
+Compatibility write transaction
+-------------------------------
 
-A transaction owns a private mutable package set until `commit()` succeeds.
+A transaction owns a private mutable `legacy_installed_package` set until
+`commit()` succeeds.
 
 Operations:
 
 ```text
-current()    return the uncommitted snapshot
-put()        add or replace one package by name
-erase()      remove one package by name
-commit()     publish the complete current snapshot
-committed()  report successful publication
+current()    return the uncommitted legacy snapshot
+put()        add or replace one legacy package by name
+erase()      remove one legacy package by name
+commit()     replace the complete compatibility database
+committed()  report successful compatibility publication
 ```
 
-`put()` replaces an existing record with the same package name.
+`put()` cannot accept canonical `installed_package`.  The type boundary blocks
+silent rich-to-legacy down-conversion before serialization.
 
-`erase()` validates the supplied name using the package-identity
+`erase()` validates the supplied name using the historical package-identity
 representation rules.  It returns false when no record existed.
 
 After successful commit, further mutation or commit attempts are invalid and
-raise `transaction_error`.
+raise `transaction_error`.  Destroying an uncommitted transaction discards its
+uncommitted package set.
 
-Destroying an uncommitted transaction discards its uncommitted package set.
+No canonical or filesystem transaction
+--------------------------------------
 
-No filesystem transaction
--------------------------
-
-The state transaction does not make package deployment atomic.
+The compatibility transaction does not make package deployment atomic.
 
 A higher layer may perform:
 
@@ -55,9 +59,10 @@ publish package state
 run maintenance
 ```
 
-`libpkgstate` coordinates only the publication step.  Failure before or after
-that step remains the responsibility of the complete package transaction
-engine.
+The interface protects only the historical database replacement.  It performs
+no caller-supplied expected-snapshot comparison and is not the canonical
+publication protocol.  Failure before or after state publication remains the
+responsibility of the complete package transaction engine.
 
 Legacy text format
 ------------------
@@ -70,9 +75,19 @@ located at:
 ```
 
 The constructor accepts an explicit database pathname.  It does not prepend a
-root directory itself.
+root directory itself.  The exact format is documented in `pkgstate-db(5)`.
 
-The exact format is documented in `pkgstate-db(5)`.
+The backend can retain only:
+
+```text
+package name
+opaque version line
+directory or non-directory ownership paths
+```
+
+It therefore constructs `legacy_installed_package` and `legacy_snapshot`, not
+canonical installed packages and snapshots.  It does not derive canonical
+release, control, target, evidence, or identity facts from current inputs.
 
 Locking
 -------
@@ -104,21 +119,21 @@ A read:
 1. acquires the shared directory lock;
 2. opens the database as binary input;
 3. parses every package record;
-4. validates identities and paths;
-5. constructs canonical installed packages; and
-6. returns one indexed snapshot.
+4. validates historical identities and canonical paths;
+5. constructs incomplete compatibility package records; and
+6. returns one indexed `legacy_snapshot`.
 
-Malformed input raises `store_error` with the database pathname and line
-number where available.
+Malformed input raises `store_error` with the database pathname and line number
+where available.
 
 Publication contract
 --------------------
 
-Commit publication is a complete-state replacement:
+Commit publication is a complete compatibility-state replacement:
 
 1. create a same-directory temporary file;
 2. set its mode to `0444`;
-3. serialize the complete transaction snapshot;
+3. serialize the complete compatibility transaction snapshot;
 4. write all bytes;
 5. synchronize the temporary file with `fsync(2)`;
 6. close the temporary file;
@@ -131,9 +146,8 @@ A same-directory temporary file and rename preserve the single-filesystem
 rename contract.
 
 The backup is the previous database inode.  It is not a second independently
-serialized snapshot.
-
-If the database did not exist, backup creation is skipped.
+serialized snapshot.  If the database did not exist, backup creation is
+skipped.
 
 Failure interpretation
 ----------------------
@@ -149,7 +163,8 @@ state published but directory sync failed
 ```
 
 A caller receiving that failure must not assume the old state remained active.
-It should inspect or reread durable state before deciding recovery.
+It should inspect or reread durable compatibility state before deciding
+recovery.
 
 Permissions
 -----------
@@ -174,22 +189,13 @@ For example, `pkginfo -r /mnt/root` constructs the database pathname:
 The library itself receives that explicit pathname and does not interpret the
 alternate root further.
 
-Backend migration
------------------
+Canonical backend boundary
+--------------------------
 
-The compatibility format is one `store` implementation, not the installed
-state model itself.
+The compatibility store is not the canonical state backend.
 
-A future backend must preserve the public model invariants:
-
-* validated identities;
-* canonical ownership paths;
-* directory versus non-directory identity;
-* empty manifests;
-* duplicate rejection;
-* shared ownership;
-* deterministic snapshots; and
-* isolated complete-state publication.
-
-It need not preserve the text encoding, directory locking mechanism, or backup
-pathname unless interoperability requires them.
+A canonical backend must preserve complete `snapshot` values, installed
+control, target binding, typed identities, publication requests, and receipts
+without loss.  It requires a separate compare-and-publish interface and storage
+format.  The historical transaction API remains available only for the old
+database during migration.

@@ -14,10 +14,12 @@
 #include <libpkgstate/installed_control.h>
 #include <libpkgstate/state_target_binding.h>
 #include <libpkgstate/installed_package.h>
+#include <libpkgstate/legacy_installed_package.h>
 #include <libpkgstate/owned_entry.h>
 #include <libpkgstate/package_identity.h>
 #include <libpkgstate/package_path.h>
 #include <libpkgstate/snapshot.h>
+#include <libpkgstate/legacy_snapshot.h>
 
 #include <libpkgstate/write_transaction.h>
 #include <libpkgstate/store.h>

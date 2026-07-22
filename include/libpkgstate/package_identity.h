@@ -3,7 +3,7 @@
 
 /*!
  * \file package_identity.h
- * \brief Installed package names and versions.
+ * \brief Historical package names and opaque version lines.
  */
 
 #pragma once
@@ -16,10 +16,13 @@
 namespace pkgstate {
 
 /*!
- * \brief Validated identity of one installed package.
+ * \brief Validated identity retained by the compatibility database.
  *
- * Identity fields are line-oriented durable state.  They must therefore be
- * non-empty and may not contain NUL, carriage-return, or newline bytes.
+ * This is not a canonical installed-package identity. The second field is an
+ * opaque historical version line and is never split into canonical version and
+ * distribution release coordinates. Identity fields are line-oriented
+ * durable state. They must therefore be non-empty and may not contain NUL,
+ * carriage-return, or newline bytes.
  * Package naming policy beyond those representation invariants belongs to a
  * higher layer.
  */
@@ -28,7 +31,7 @@ public:
   /*!
    * \brief Validate and construct a package identity.
    * \param name Package name.
-   * \param version Package version string.
+   * \param version Opaque historical version line.
    * \throws identity_error when either field is empty or not line-safe.
    */
   [[nodiscard]] static package_identity
@@ -40,7 +43,7 @@ public:
   [[nodiscard]] const std::string& name() const noexcept;
 
   /*!
-   * \brief Return the package version.
+   * \brief Return the opaque historical version line.
    */
   [[nodiscard]] const std::string& version() const noexcept;
 

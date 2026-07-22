@@ -12,6 +12,8 @@ pkgstate_model - package releases, control, target binding, and ownership
 #include <libpkgstate/installed_control.h>
 #include <libpkgstate/state_target_binding.h>
 #include <libpkgstate/package_identity.h>
+#include <libpkgstate/legacy_installed_package.h>
+#include <libpkgstate/legacy_snapshot.h>
 #include <libpkgstate/package_path.h>
 #include <libpkgstate/owned_entry.h>
 #include <libpkgstate/installed_package.h>
@@ -154,27 +156,6 @@ the package manager. Observation backends, execution capabilities, package
 profiles, configuration scopes, and the installed snapshot remain outside this
 value.
 
-# COMPATIBILITY PACKAGE IDENTITY
-
-*pkgstate::package_identity* stores the historical package name and opaque
-version line used by the compatibility database.
-
-Construct an identity with:
-
-```
-auto identity =
-    pkgstate::package_identity::make(name, version);
-```
-
-Both fields must be non-empty and must not contain NUL, carriage-return, or
-newline bytes.
-
-The library validates representation, not distribution naming policy. It does
-not impose repository, epoch, release, or collection syntax. It also does not
-split the historical version line into canonical version and release fields.
-
-Invalid input raises *pkgstate::identity_error*.
-
 # PACKAGE PATHS
 
 *pkgstate::package_path* is the canonical logical path of an installed object
@@ -195,10 +176,8 @@ mounted. Invalid input raises *pkgstate::path_error*.
 
 # OWNED ENTRIES
 
-*pkgstate::owned_entry* contains:
-
-- one canonical *pkgstate::package_path*; and
-- one *pkgstate::owned_entry_type*.
+*pkgstate::owned_entry* contains one canonical *package_path* and one
+*owned_entry_type*.
 
 The durable object classes are:
 
@@ -208,47 +187,75 @@ The durable object classes are:
 *owned_entry_type::non_directory*
 	Any owned object that is not a directory.
 
-The compatibility state format cannot distinguish regular files, symbolic
-links, FIFOs, sockets, and device nodes. The model preserves the durable
-distinction and does not invent a finer type.
+The compatibility format cannot distinguish regular files, symbolic links,
+FIFOs, sockets, and device nodes. The model preserves the recorded distinction
+and does not invent a finer object type.
 
-Paths are canonical and relative to the installation root. Directory identity
-belongs to the entry type, not a trailing slash in the in-memory path.
+# CANONICAL INSTALLED PACKAGES
 
-# INSTALLED PACKAGES
+*pkgstate::installed_package* is complete canonical installed truth for one
+package release. Construct one with:
 
-*pkgstate::installed_package* combines one identity with one ownership
-manifest.
+```
+auto package = pkgstate::installed_package::make(
+    release, control, target_binding, manifest);
+```
 
-Construction accepts manifest entries in arbitrary order, sorts them by
-canonical path, and rejects duplicate paths with *pkgstate::state_error*.
+The control must name exactly the supplied release. Manifest entries may arrive
+in arbitrary order; construction sorts them by canonical path and rejects
+duplicate paths or invalid object classes with *pkgstate::state_error*.
 
-An empty manifest is valid.
+The library computes *installed_package_identity* from, in order:
 
-The manifest describes durable ownership after installation policy has been
-resolved. It is not an archive footprint and does not contain payload bytes,
-hashes, modes, owners, timestamps, link targets, or device numbers.
+1. package-release identity;
+2. installed-control identity;
+3. state-target-binding identity; and
+4. the normalized ownership manifest, including explicit object classes.
+
+Application and transaction evidence retained in installed control therefore
+participates through *installed_control_identity*. The installed-package record
+contains no snapshot identity. The containing snapshot can consequently include
+installed-package identities without creating an identity cycle.
+
+An empty ownership manifest is valid and means that the package owns no paths.
+It is not an unavailable ownership manifest.
 
 Queries provide:
 
 ```
 identity()
+release()
+control()
+target_binding()
 manifest()
 size()
 find(path)
 owns(path)
 ```
 
-# SNAPSHOTS
+# CANONICAL SNAPSHOTS
 
-*pkgstate::snapshot* is an immutable indexed package set.
+*pkgstate::snapshot* is complete immutable installed truth for one exact
+*state_target_binding*. Construct one with:
 
-Construction accepts packages in arbitrary order, sorts them by package name,
-and rejects duplicate package names with *pkgstate::state_error*.
+```
+auto state = pkgstate::snapshot::make(target_binding, packages);
+```
+
+Every package must carry the same target binding. Construction sorts packages
+by canonical package name, rejects duplicate names, and derives the exact
+path-to-package reverse index from the per-package ownership manifests.
+
+The schema version is *installed_state_schema_version* and is returned by
+*schema_version()*. Ownership-inventory and snapshot identities are added by a
+later model layer; this object already contains the complete facts those
+identities cover.
 
 Queries provide:
 
 ```
+schema_version()
+target_binding()
 packages()
 size()
 find_package(name)
@@ -257,13 +264,43 @@ is_owned(path)
 ```
 
 *owners(path)* performs exact canonical-path lookup and returns every owner in
-package-name order.
+package-name order. Shared ownership is valid state. The library neither
+collapses multiple owners to one package nor treats overlap as an automatic
+error.
 
-Shared ownership is valid state. The library neither collapses multiple owners
-to one package nor treats overlap as an automatic error.
+A snapshot is immutable. It does not refresh itself after another process
+publishes state.
 
-A snapshot does not refresh itself after another process changes durable state.
-Read a new snapshot when current state is required.
+# LEGACY COMPATIBILITY MODEL
+
+The historical `/var/lib/pkg/db` format cannot construct canonical
+*installed_package* or *snapshot* values. Its public model is separate:
+
+*package_identity*
+	Historical package name and opaque version line.
+
+*legacy_installed_package*
+	One compatibility identity and its retained ownership manifest.
+
+*legacy_snapshot*
+	One indexed, immutable observation of compatibility records.
+
+The version line remains opaque. libpkgstate does not split it into canonical
+version and distribution release fields.
+
+A *legacy_installed_package* has no canonical package release, installed
+control, state target binding, application evidence, transaction evidence, or
+installed-package identity. A *legacy_snapshot* has no target binding,
+ownership-inventory identity, or installed-state snapshot identity.
+
+Compatibility constructors still normalize ownership paths, sort manifests and
+packages, reject duplicate paths and names, preserve empty manifests, and expose
+shared ownership. Those representation guarantees do not make the missing
+canonical facts available.
+
+The *store* and *write_transaction* interfaces operate on *legacy_snapshot* and
+*legacy_installed_package* only. They are compatibility storage interfaces, not
+the canonical compare-and-publish API.
 
 # ORDERING
 

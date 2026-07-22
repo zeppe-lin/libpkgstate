@@ -18,11 +18,12 @@ namespace pkgstate {
 /*!
  * \brief Line-oriented compatibility store for `/var/lib/pkg/db`.
  *
- * Each record contains package name, package version, zero or more owned
- * paths, and a blank record terminator.  The backend is an original
- * implementation of that documented format.  It acquires non-blocking
- * advisory locks on the database directory so it can coexist safely with
- * the tools being replaced during migration.
+ * Each record contains a package name, one opaque version line, zero or more
+ * owned paths, and a blank record terminator. The backend returns explicitly
+ * incomplete `legacy_snapshot` values. It does not construct canonical
+ * installed packages or infer missing release, control, target, or evidence
+ * facts. It acquires non-blocking advisory locks on the database directory so
+ * it can coexist safely with the tools being replaced during migration.
  */
 class legacy_text_store final : public store {
 public:
@@ -38,7 +39,7 @@ public:
   [[nodiscard]] const std::filesystem::path&
   database_path() const noexcept;
 
-  [[nodiscard]] snapshot read() const override;
+  [[nodiscard]] legacy_snapshot read() const override;
 
   [[nodiscard]] std::unique_ptr<write_transaction>
   begin_write() const override;

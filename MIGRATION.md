@@ -39,7 +39,7 @@ List dispatch
 
 `pkginfo -l argument` applies the following order:
 
-1. query the selected installed-state snapshot for package name `argument`;
+1. query the selected `legacy_snapshot` for package name `argument`;
 2. when no installed package matches, require `argument` to name a regular
    file; and
 3. inspect that file as a package archive through `libpkgimage`.
@@ -130,11 +130,19 @@ Database compatibility
 `legacy_text_store` is an original implementation of the existing
 line-oriented `/var/lib/pkg/db` format.
 
-The transition therefore does not require a database conversion.  Existing
-valid package records are read into the new canonical model.
+The frontend transition therefore does not require a database conversion.
+Existing valid records are read into `legacy_installed_package` values inside a
+`legacy_snapshot`.
+
+That compatibility observation is not a canonical installed-state snapshot. It
+has no canonical release decomposition, installed control, target binding,
+installed-package identity, ownership-inventory identity, or snapshot identity.
+The frontend needs none of those facts for its preserved `-i`, `-l`, and `-o`
+queries.
 
 Invalid historical records are rejected rather than silently normalized beyond
-the documented path and ordering rules.
+the documented path and ordering rules. Missing canonical facts are not
+reconstructed from current sources, archives, filenames, or configuration.
 
 Operational check
 -----------------

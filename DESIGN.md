@@ -24,12 +24,16 @@ state-publication receipt
 ```
 
 The implementation currently exposes canonical package releases, immutable
-installed control, durable target-state bindings, and a smaller
-compatibility-shaped installed model:
-validated legacy name and version lines, state-owned canonical package paths,
-ownership manifests, immutable snapshots, and the historical `/var/lib/pkg/db`
-backend.  That implementation is a sound migration base.  It is not yet the
-complete canonical model defined here.
+installed control, durable target-state bindings, complete canonical installed
+packages, and complete immutable snapshots.  Canonical package records compute
+their own installed-package identities; ownership-inventory and snapshot
+identities are introduced by the next model layer.
+
+The historical `/var/lib/pkg/db` backend uses explicitly separate
+`legacy_installed_package` and `legacy_snapshot` values.  Those compatibility
+values preserve validated name and opaque version lines plus canonical ownership
+paths without pretending that the old format contains release, control, target,
+evidence, or typed installed identities.
 
 This document is normative for the direction of the public model and storage
 interfaces.  Existing behavior remains current until a later commit implements
@@ -168,10 +172,10 @@ Consequently:
 * migration-supplied decomposition must be marked as migration provenance; and
 * adapters that require complete release facts must refuse incomplete records.
 
-Current `package_identity` remains the 0.3.x compatibility value until the
-canonical package-release model replaces or quarantines it.  Its line-safety
-validation remains valid for the legacy format but is not the complete future
-identity contract.
+`package_identity` is now quarantined as the compatibility value used only by
+historical package records.  Its line-safety validation remains valid for the
+legacy format, but it is not a canonical installed-package identity and its
+second field remains an opaque version line.
 
 Canonical package paths
 -----------------------
@@ -256,6 +260,13 @@ The installed package identity is assigned by `libpkgstate` from the canonical
 installed record.  Callers may supply the facts and subordinate evidence, but
 they do not select an arbitrary installed package identity and ask state to
 bless it.
+
+The public `installed_package::make()` constructor implements that boundary. It
+requires one `package_release`, `installed_control` for exactly that release,
+one `state_target_binding`, and one completed ownership manifest. It normalizes
+and validates the manifest, then computes `installed_package_identity` from the
+release, control, target-binding, and normalized ownership facts. Application
+and transaction evidence participate through installed-control provenance.
 
 Installed control
 -----------------
@@ -493,9 +504,16 @@ Construction must validate:
 * consistency between installed package and control release bindings; and
 * explicit completeness for every compatibility limitation.
 
-A snapshot returned by a read remains immutable.  It does not refresh itself
-after another process publishes state.  A consumer requiring current truth must
-read a new snapshot.
+The public `snapshot::make()` constructor implements the complete fact
+container. It accepts one state target binding and complete canonical installed
+packages only, rejects packages from another binding and duplicate package
+names, and derives exact shared ownership from the per-package manifests. The
+schema version is explicit. Ownership-inventory and snapshot identities are
+added by the next model layer.
+
+A canonical snapshot remains immutable after construction. It does not refresh
+itself after another process publishes state. A consumer requiring current truth
+must read a new snapshot.
 
 State-publication request
 -------------------------
@@ -649,6 +667,19 @@ directory or non-directory ownership paths
 It does not carry complete canonical package releases, installed control,
 target binding, typed identities, lifecycle material, runtime requirements,
 application evidence, or publication receipts.
+
+The public compatibility projection is explicit:
+
+```text
+package_identity
+legacy_installed_package
+legacy_snapshot
+store / write_transaction
+legacy_text_store
+```
+
+Canonical `installed_package` and `snapshot` values are different types and
+cannot be passed to the compatibility transaction interface accidentally.
 
 The compatibility backend therefore has four obligations:
 

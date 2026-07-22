@@ -196,9 +196,9 @@ parse_owned_path(std::string_view input)
  * \brief Print every installed package and version.
  */
 void
-print_installed(const pkgstate::snapshot& state)
+print_installed(const pkgstate::legacy_snapshot& state)
 {
-  for (const pkgstate::installed_package& package : state.packages())
+  for (const pkgstate::legacy_installed_package& package : state.packages())
   {
     std::cout << package.identity().name() << ' '
               << package.identity().version() << '\n';
@@ -210,9 +210,10 @@ print_installed(const pkgstate::snapshot& state)
  * \return True when the package exists.
  */
 bool
-print_installed_manifest(const pkgstate::snapshot& state, std::string_view name)
+print_installed_manifest(const pkgstate::legacy_snapshot& state,
+                         std::string_view name)
 {
-  const pkgstate::installed_package* package = state.find_package(name);
+  const pkgstate::legacy_installed_package* package = state.find_package(name);
   if (package == nullptr)
     return false;
 
@@ -274,7 +275,7 @@ print_archive_manifest(const std::filesystem::path& archive_path)
  * cannot redirect a package-state query into archive inspection.
  */
 void
-print_list(const pkgstate::snapshot& state, std::string_view argument)
+print_list(const pkgstate::legacy_snapshot& state, std::string_view argument)
 {
   if (print_installed_manifest(state, argument))
     return;
@@ -295,12 +296,12 @@ print_list(const pkgstate::snapshot& state, std::string_view argument)
  * \return True when at least one owner was found.
  */
 bool
-print_owners(const pkgstate::snapshot& state, std::string_view input)
+print_owners(const pkgstate::legacy_snapshot& state, std::string_view input)
 {
   const pkgstate::package_path path = parse_owned_path(input);
   const auto owners = state.owners(path);
 
-  for (const pkgstate::installed_package* package : owners)
+  for (const pkgstate::legacy_installed_package* package : owners)
   {
     std::cout << package->identity().name() << ' '
               << package->identity().version() << '\n';
@@ -332,7 +333,7 @@ main(int argc, char** argv)
   try
   {
     const pkgstate::legacy_text_store store(database_path(parsed.root));
-    const pkgstate::snapshot state = store.read();
+    const pkgstate::legacy_snapshot state = store.read();
 
     switch (parsed.selected)
     {
