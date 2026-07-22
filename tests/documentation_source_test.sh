@@ -37,6 +37,9 @@ check_page \
   man/pkgstate_legacy_import.3.scdoc \
   PKGSTATE_LEGACY_IMPORT\(3\)
 check_page \
+  man/pkgstate_plan_adapter.3.scdoc \
+  PKGSTATE_PLAN_ADAPTER\(3\)
+check_page \
   man/pkgstate_legacy_text_store.3.scdoc \
   PKGSTATE_LEGACY_TEXT_STORE\(3\)
 check_page man/pkgstate-db.5.scdoc PKGSTATE-DB\(5\)
@@ -175,6 +178,14 @@ grep -F 'does not invoke the backend publication primitive' \
   "$source_root/man/pkgstate_legacy_import.3.scdoc" >/dev/null ||
   fail "legacy import manual omits stale no-publication contract"
 
+grep -F 'No overload accepts *legacy_snapshot*.' \
+  "$source_root/man/pkgstate_plan_adapter.3.scdoc" >/dev/null ||
+  fail "planner adapter manual permits incomplete legacy projection"
+
+grep -F 'does not invent partial filesystem metadata' \
+  "$source_root/man/pkgstate_plan_adapter.3.scdoc" >/dev/null ||
+  fail "planner adapter manual permits invented object metadata"
+
 grep -F 'An empty retained manifest is known empty' \
   "$source_root/DESIGN.md" >/dev/null ||
   fail "design collapses known-empty legacy ownership into unavailable"
@@ -193,6 +204,7 @@ for page in \
   'pkgstate_canonical_generation_store(3)' \
   'pkgstate_legacy_compatibility(3)' \
   'pkgstate_legacy_import(3)' \
+  'pkgstate_plan_adapter(3)' \
   'pkgstate_legacy_text_store(3)' \
   'pkgstate-db(5)' \
   'pkgstate-generation(5)' \

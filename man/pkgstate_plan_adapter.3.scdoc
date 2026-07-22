@@ -1,0 +1,108 @@
+PKGSTATE_PLAN_ADAPTER(3)
+
+# NAME
+
+pkgstate_plan_adapter - project canonical installed state into libpkgplan
+
+# SYNOPSIS
+
+```
+#include <libpkgstate-plan/adapter.h>
+
+pkgstate::plan_adapter::planning_target_context target(
+    planner_target_identity,
+    durable_state_projection);
+
+auto facts = pkgstate::plan_adapter::project_installed_state(
+    installed_snapshot,
+    target);
+```
+
+# DESCRIPTION
+
+*libpkgstate-plan* is an optional adapter library. It depends on both
+*libpkgstate* and *libpkgplan* so neither core library depends on the other.
+
+*project_installed_state()* accepts one complete canonical
+*pkgstate::snapshot*. No overload accepts *legacy_snapshot*. Compatibility
+observations must pass through explicit migration before they can become
+canonical installed authority.
+
+The projection contains:
+
+- one caller-authoritative *target_system_context_identity*;
+- one *installed_package_fact* for every canonical installed package; and
+- one complete *installed_ownership_inventory*.
+
+Package facts remain in snapshot package-name order. Ownership claims are
+normalized by *libpkgplan*.
+
+# IDENTITY TRANSLATION
+
+The adapter copies canonical `v1:sha256:` representation into matching planner
+identity domains by parsing it through the planner type. It does not recompute
+or reinterpret:
+
+- package-release identity;
+- installed-control identity;
+- installed-package identity;
+- ownership-inventory identity; or
+- installed-state-snapshot identity.
+
+A representation rejected by planner vocabulary raises
+*projection_error_code::identity_translation*.
+
+# TARGET CONTEXT
+
+A state snapshot contains only its durable *state_target_binding*. It does not
+contain the complete planner target-system context.
+
+The caller therefore supplies *planning_target_context*, which pairs one
+planner *target_system_context_identity* with the binding claimed as its durable
+state projection. The adapter compares that binding with the snapshot binding.
+A mismatch raises *projection_error_code::target_binding_mismatch*.
+
+The comparison verifies only the durable state projection. It does not make
+*libpkgstate* the authority for the rest of planner target context.
+
+# OWNERSHIP METADATA
+
+The adapter emits every canonical path-to-installed-package claim and marks the
+claim set complete for that declared relation.
+
+Canonical installed state retains directory versus non-directory ownership.
+The current planner *filesystem_object_metadata* requires object kind together
+with mode, uid, and gid. Since state cannot supply those fields, the adapter
+does not invent partial filesystem metadata. Every projected ownership claim
+has no *recorded_object* value.
+
+The copied ownership-inventory identity still names the exact durable state
+relation from which the claim set was projected.
+
+# ERRORS
+
+*projection_error_code::target_binding_mismatch*
+	The caller's durable target projection differs from the snapshot binding.
+
+*projection_error_code::identity_translation*
+	Planner identity vocabulary rejected canonical digest representation.
+
+*projection_error_code::path_translation*
+	Planner path vocabulary rejected a canonical state path.
+
+# BUILD
+
+The adapter is disabled by default. Enable and link it with:
+
+```
+meson setup build -Dplanner_adapter=enabled
+pkg-config --cflags --libs libpkgstate-plan
+```
+
+The installed adapter library and pkg-config module are named
+*libpkgstate-plan*. The core *libpkgstate* pkg-config closure does not acquire a
+*libpkgplan* dependency.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_legacy_import*(3)

@@ -903,15 +903,25 @@ libpkgstate      libpkgplan
         adapter or pkgman
 ```
 
-An optional adapter may depend on both libraries.  It may copy the
-algorithm-qualified bytes from one strong identity domain into the matching
-planner domain after validating representation and completeness.  It must not
-convert incomplete legacy facts into complete planner facts.
+The optional `libpkgstate-plan` adapter depends on both libraries while the
+core `libpkgstate` library remains independent of `libpkgplan`.  It copies the
+canonical algorithm-qualified representation from package-release,
+installed-control, installed-package, ownership-inventory, and installed-
+snapshot identities into the matching planner domains.  It reparses package
+paths through planner vocabulary and emits a complete path-to-owner claim set.
+It accepts only canonical `snapshot`; no overload accepts `legacy_snapshot`.
 
-The adapter also must not derive a complete target-system-context identity from
-a state snapshot.  The caller supplies the composed target context; the adapter
-verifies that its durable state projection agrees with the snapshot's target
-binding.
+The adapter does not derive a complete target-system-context identity from a
+state snapshot.  The caller supplies the composed planner target identity and
+its claimed durable `state_target_binding` projection.  Projection proceeds
+only when that binding equals the snapshot binding.  This verifies the durable
+projection without granting state authority over the rest of target context.
+
+Installed state distinguishes directories from other owned objects, while the
+current planner object-metadata vocabulary requires mode, uid, and gid together
+with object kind.  The adapter therefore does not invent partial object metadata.
+Ownership claims carry no `recorded_object`; the copied ownership identity still
+names the exact richer durable state relation.
 
 A future application adapter may translate completed application evidence into
 a state-publication request.  It does not grant `libpkgstate` authority over
@@ -1052,7 +1062,7 @@ The canonical implementation may proceed only in dependency order:
 6. add a lossless canonical backend;
 7. adapt legacy state as explicitly incomplete;
 8. add explicit migration; [implemented]
-9. add optional planner and application adapters.
+9. add optional planner and application adapters. [planner implemented]
 
 A compatibility frontend may preserve old commands and storage formats during
 this transition.  Compatibility skin must not become the canonical ontology.

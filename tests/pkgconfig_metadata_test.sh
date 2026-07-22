@@ -27,3 +27,11 @@ fi
 if grep -E '^Libs(\.private)?:.*-lpkgimage' "$pc" >/dev/null; then
   fail 'core pkg-config metadata still links libpkgimage'
 fi
+
+if grep -E '^Requires(\.private)?:.*libpkgplan' "$pc" >/dev/null; then
+  fail 'core pkg-config metadata exposes optional libpkgplan adapter dependency'
+fi
+
+if grep -E '^Libs(\.private)?:.*-lpkgstate-plan' "$pc" >/dev/null; then
+  fail 'core pkg-config metadata links the optional planner adapter'
+fi

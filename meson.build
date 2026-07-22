@@ -37,11 +37,26 @@ libcrypto_dep = dependency(
   static: want_static,
 )
 
+libpkgplan_dep = dependency(
+  'libpkgplan',
+  version: '>=0.1.0',
+  required: get_option('planner_adapter'),
+  static: want_static,
+  fallback: ['libpkgplan', 'libpkgplan_dep'],
+  default_options: [
+    'default_library=' + library_kind,
+    'link_mode=' + get_option('link_mode'),
+  ],
+)
+
 if get_option('install_tools') and get_option('tools').disabled()
   error('install_tools requires tools to be enabled')
 endif
 
 subdir('src')
+if libpkgplan_dep.found()
+  subdir('adapter')
+endif
 subdir('tools')
 subdir('man')
 subdir('tests')

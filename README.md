@@ -19,6 +19,7 @@ It provides:
 * state-owned canonical package paths and explicit shared ownership;
 * explicitly incomplete compatibility records and snapshots;
 * explicit receipt-bound import into a fresh canonical store;
+* an optional non-contaminating projection adapter for `libpkgplan`;
 * compatibility write transactions for the historical database; and
 * an original compatibility backend for `/var/lib/pkg/db`.
 
@@ -159,6 +160,14 @@ a typed `legacy_import_receipt`; stale destination state never invokes the
 backend publication primitive. Reading `legacy_text_store` alone is not
 migration.
 
+The optional `libpkgstate-plan` adapter projects one complete canonical
+`snapshot` into planner-owned installed-package and ownership facts. It copies
+only canonical algorithm-qualified identities and normalized package paths. The
+caller supplies a complete `target_system_context_identity` together with its
+durable `state_target_binding` projection; the adapter refuses a snapshot whose
+binding differs. The adapter accepts no `legacy_snapshot`, invents no target
+context, and supplies no filesystem metadata absent from planner vocabulary.
+
 Important invariants:
 
 * canonical release coordinates are non-empty and line-safe;
@@ -225,6 +234,7 @@ The installed manual suite is:
 * `pkgstate_legacy_compatibility(3)` — incomplete facts and observation
   identities;
 * `pkgstate_legacy_import(3)` — explicit validation and canonical import;
+* `pkgstate_plan_adapter(3)` — optional projection into `libpkgplan`;
 * `pkgstate_legacy_text_store(3)` — compatibility backend;
 * `pkgstate-db(5)` — line-oriented compatibility database format;
 * `pkgstate-generation(5)` — canonical generation storage format; and
@@ -247,6 +257,10 @@ The core library has no `libpkgimage` dependency.  The optional `pkginfo`
 frontend requires:
 
 * `libpkgimage` 0.3.0 or later when reference tools are enabled.
+
+The optional planner adapter requires:
+
+* `libpkgplan` 0.1.0 or later when `-Dplanner_adapter=enabled` is selected.
 
 Optional documentation dependencies:
 
@@ -284,6 +298,7 @@ Useful options:
 meson setup build -Dtests=disabled
 meson setup build -Dtools=disabled
 meson setup build -Dman_pages=disabled
+meson setup build-plan -Dplanner_adapter=enabled
 meson setup build-tools -Dinstall_tools=true
 ```
 
@@ -366,7 +381,9 @@ Generated HTML is written to `build/docs/html`.
 Layout
 ------
 
-* `include/libpkgstate/` — installed public API;
+* `include/libpkgstate/` — installed-state public API;
+* `include/libpkgstate-plan/` — optional planner adapter API;
+* `adapter/` — optional cross-library projection implementation;
 * `src/` — library implementation;
 * `tools/` — optional reference clients;
 * `tests/` — model, storage, locking, CLI, header, and documentation tests;
