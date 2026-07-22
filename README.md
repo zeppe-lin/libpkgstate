@@ -15,6 +15,7 @@ It provides:
 * immutable expected-snapshot publication requests and package deltas;
 * typed immutable publication receipts with computed identities;
 * non-overridable canonical compare-and-publish orchestration;
+* an immutable-generation canonical state backend;
 * state-owned canonical package paths and explicit shared ownership;
 * explicitly incomplete compatibility records and snapshots;
 * compatibility write transactions for the historical database; and
@@ -113,6 +114,14 @@ only permitted resulting snapshot, and maps the constrained backend
 result into a typed receipt. The method is non-virtual; a backend cannot
 override away the comparison.
 
+`canonical_generation_store` is the concrete lossless backend. It durably
+binds one store directory to one target binding, writes complete snapshots as
+immutable content-addressed generations, atomically selects one generation as
+current, synchronizes the selection domain, and rereads the result under the
+publication lock. Initialization creates and selects the empty snapshot
+generation, so a successfully opened store always has one authoritative current
+selector.
+
 Compatibility storage uses a separate model:
 
 ```text
@@ -146,6 +155,8 @@ Important invariants:
 * successful receipts validate the request-implied resulting snapshot;
 * canonical compare-and-publish performs the comparison under one lock;
 * stale requests never invoke the backend publication primitive;
+* one current selector is the sole authority among immutable generations;
+* selected generation identity is recomputed from complete decoded state;
 * package paths are canonical and root-relative;
 * package manifests contain at most one entry for each path;
 * packages, manifests, and owner results have deterministic order;
@@ -153,9 +164,10 @@ Important invariants:
 * canonical and compatibility snapshots are immutable after construction; and
 * compatibility transactions mutate compatibility storage only.
 
-A `canonical_publication_transaction` is the backend half of canonical
-publication. It exposes the lock-scoped actual snapshot, storage format,
-and one constrained publication primitive; it does not own the comparison.
+A `canonical_publication_transaction` is the mechanism half of canonical
+publication. The concrete `canonical_generation_store` holds one non-blocking
+exclusive directory lock across comparison, generation installation, selection,
+durability synchronization, and result reread. It does not own the comparison.
 
 A `write_transaction` is not a canonical publication request and is not a
 filesystem transaction.  It accepts `legacy_installed_package` values only.
@@ -183,9 +195,11 @@ The installed manual suite is:
 * `libpkgstate(3)` — library overview and boundaries;
 * `pkgstate_model(3)` — canonical installed facts, snapshots, and publication
   requests;
-* `pkgstate_store(3)` — stores and write transactions;
+* `pkgstate_store(3)` — canonical and compatibility store interfaces;
+* `pkgstate_canonical_generation_store(3)` — immutable-generation backend;
 * `pkgstate_legacy_text_store(3)` — compatibility backend;
-* `pkgstate-db(5)` — line-oriented database format; and
+* `pkgstate-db(5)` — line-oriented compatibility database format;
+* `pkgstate-generation(5)` — canonical generation storage format; and
 * `pkginfo(1)` — optional reference inspector.
 
 `pkginfo(1)` is installed only when `-Dinstall_tools=true` is selected.

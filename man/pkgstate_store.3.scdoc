@@ -35,6 +35,11 @@ A backend cannot override away the comparison or report stale state itself.
 Lock acquisition or authoritative reread failure raises *store_error*.
 Ordinary outcomes after actual state is known are returned as receipts.
 
+*canonical_generation_store* is the concrete implementation supplied by this
+library. It stores complete snapshots in immutable content-addressed generation
+directories and atomically replaces one current selector. See
+*pkgstate_canonical_generation_store*(3).
+
 # COMPATIBILITY INTERFACE
 
 *pkgstate::store* is the storage interface retained for the historical package
@@ -129,4 +134,5 @@ facts from mutable current inputs.
 # SEE ALSO
 
 *libpkgstate*(3), *pkgstate_model*(3),
-*pkgstate_legacy_text_store*(3), *pkgstate-db*(5)
+*pkgstate_canonical_generation_store*(3),
+*pkgstate_legacy_text_store*(3), *pkgstate-generation*(5), *pkgstate-db*(5)

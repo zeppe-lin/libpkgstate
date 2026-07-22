@@ -7,8 +7,10 @@ if scdoc.found()
     ['libpkgstate.3', '3'],
     ['pkgstate_model.3', '3'],
     ['pkgstate_store.3', '3'],
+    ['pkgstate_canonical_generation_store.3', '3'],
     ['pkgstate_legacy_text_store.3', '3'],
     ['pkgstate-db.5', '5'],
+    ['pkgstate-generation.5', '5'],
   ]
 
   foreach page : manual_pages

@@ -25,9 +25,10 @@ state-publication receipt
 
 The implementation currently exposes canonical package releases, immutable
 installed control, durable target-state bindings, complete canonical installed
-packages, identified immutable snapshots, publication requests, and typed
-publication receipts.  Canonical package records, ownership inventories,
-snapshots, requests, and receipts compute their own state-domain identities.
+packages, identified immutable snapshots, publication requests, typed
+publication receipts, and the immutable-generation canonical backend. Canonical
+package records, ownership inventories, snapshots, requests, and receipts
+compute their own state-domain identities.
 
 The historical `/var/lib/pkg/db` backend uses explicitly separate
 `legacy_installed_package` and `legacy_snapshot` values.  Those compatibility
@@ -708,12 +709,14 @@ it does not by itself authenticate which process or backend produced the value.
 Canonical storage backend
 -------------------------
 
-The complete canonical model requires a backend that can store rich installed
-control, typed identities, target binding, completeness, and publication
-receipts without loss.
+The complete canonical state backend must store rich installed control, typed
+identities, target binding, completeness, and completed ownership without loss.
+Publication requests and receipts are immutable evidence values; durable
+historical retention belongs to the transaction coordinator or a separate
+receipt authority unless a backend explicitly provides a receipt journal.
 
-The preferred publication shape is immutable generations plus an atomically
-selected current generation:
+`canonical_generation_store` implements immutable generations plus an
+atomically selected current generation:
 
 ```text
 construct complete generation
@@ -723,14 +726,44 @@ synchronize selection domain
 finalize a receipt from the actual publication outcome
 ```
 
-A generation contains one complete installed snapshot and the durable records
-required to validate it.  Incomplete prepublication generations are never
-current and may be collected safely according to explicit garbage-collection
-policy.
+A generation contains one complete installed snapshot and every durable record
+required to reconstruct and validate it. Derived identities are not trusted from
+storage; they are recomputed from decoded canonical facts. Incomplete
+prepublication generations are never current and may be collected safely
+according to explicit garbage-collection policy.
 
-The exact on-disk encoding and generation layout are separate storage-design
-work.  They must preserve the semantic contracts in this document and declare
-their actual crash and durability boundaries.
+The generation layout is:
+
+```text
+store/binding
+store/current
+store/generations/v1-sha256-<snapshot digest>/snapshot
+```
+
+The store directory is the advisory locking and selector-synchronization domain.
+Reads take a non-blocking shared lock. Compare-and-publish takes a non-blocking
+exclusive lock across authoritative reread, stale comparison, generation
+construction, selector replacement, durability synchronization, and
+post-selection reread.
+
+The binding file durably fixes one target-state binding. Initialization creates,
+synchronizes, and selects the empty snapshot generation before construction
+succeeds. The current selector is therefore always present and is the sole
+authority among complete or temporary generations. Selected snapshot identity
+must equal the identity recomputed from the exact decoded state.
+
+Generation installation and selector replacement are separate boundaries. A
+complete generation is synchronized before selection. Selector rename is the
+reported `immutable_generation_selection` atomicity boundary. Store-directory
+synchronization confirms selector durability; failure after rename is reported
+as publication with durability unconfirmed when the selected result can still
+be reread. Failure to establish the selected result after rename is
+indeterminate.
+
+The backend does not garbage-collect unselected generations and does not keep a
+historical publication-request or receipt journal. Neither omission weakens the
+current-state authority: audit retention and generation collection are separate
+policies.
 
 Legacy compatibility backend
 ----------------------------

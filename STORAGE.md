@@ -37,6 +37,68 @@ Failure to acquire the lock or obtain a trustworthy actual snapshot raises
 `store_error`, because no receipt can truthfully cite an observed prior state.
 Once prior state is known, ordinary attempt outcomes are returned as receipts.
 
+Canonical generation backend
+----------------------------
+
+`canonical_generation_store` is the concrete lossless implementation of
+`canonical_store`.
+
+```text
+store/
+|-- binding
+|-- current
+`-- generations/
+    `-- v1-sha256-<snapshot digest>/
+        `-- snapshot
+```
+
+Construction creates the directory layout when necessary. Initialization creates
+and selects the empty snapshot generation, synchronizes that selection, and
+writes the binding record last as the initialization-complete marker. If an
+interrupted unbound initialization already selects the exact empty snapshot, a
+later open may finish the binding write. It never adopts an unbound non-empty
+snapshot. Once binding exists, a missing `current` selector is corruption.
+Reopening the path with another `state_target_binding` is also a storage error.
+
+The store directory is the advisory `flock(2)` domain:
+
+```text
+read()                 shared, non-blocking
+compare_and_publish()  exclusive, non-blocking
+```
+
+A selected generation is decoded into release, installed-control, target, and
+ownership facts. Derived release, control, installed-package, ownership, and
+snapshot identities are recomputed. The selector must equal the recomputed
+snapshot identity. Non-canonical encodings, writable persistent objects,
+multiple hard links, binding mismatch, and identity mismatch are corruption.
+
+Publication performs:
+
+1. canonical encoding of the complete resulting snapshot;
+2. creation and synchronization of an immutable temporary generation;
+3. no-replace installation under its snapshot-identity name;
+4. synchronization of the generations directory;
+5. creation and synchronization of a temporary selector;
+6. atomic rename over `current`;
+7. synchronization of the store directory; and
+8. authoritative reread under the same exclusive lock.
+
+Selector rename is the `immutable_generation_selection` atomicity boundary.
+Failure before rename returns `failed_before_publication`. Failure to
+synchronize the store directory after rename returns
+`published_durability_unconfirmed` when reread establishes the exact result.
+Failure to establish selected state after rename returns `indeterminate`.
+
+Only `current` chooses authoritative state. Orphan temporary and complete
+unselected generations are ignored. Garbage collection is explicit and is not
+implemented by this backend.
+
+The backend returns a receipt containing evidence for the exact encoded
+generation bytes. It persists current installed truth, not a historical request
+or receipt journal. Durable audit retention belongs to the transaction
+coordinator or another receipt authority.
+
 Compatibility store abstraction
 -------------------------------
 
@@ -52,9 +114,9 @@ This interface is explicitly compatibility-scoped.  It reads and mutates
 and does not implement stale-safe compare-and-publish.
 
 The canonical model provides immutable `state_publication_request` values, and
-`canonical_store` now enforces the compare-and-publish sequence. A concrete
-canonical backend must still preserve complete records without loss and
-implement the lock-scoped publication transaction.
+`canonical_store` enforces the compare-and-publish sequence. The concrete
+generation backend preserves complete records without loss and implements the
+lock-scoped publication transaction.
 
 `read()` returns one immutable observation of compatibility records.
 `begin_write()` returns an isolated transaction initialized from current
@@ -252,8 +314,9 @@ Canonical backend boundary
 The compatibility store is not the canonical state backend.
 
 A canonical backend must preserve complete `snapshot` values, installed
-control, target binding, typed identities, publication requests, and receipts
-without loss. It implements the `canonical_store` transaction hook and a
-lossless storage format. The historical transaction API remains available only
-for the old
+control, target binding, and typed identities without loss. The concrete
+generation backend implements the `canonical_store` transaction hook and a
+lossless current-state format. Publication requests and receipts remain typed
+values returned to their caller; historical audit retention is a separate
+authority. The historical transaction API remains available only for the old
 database during migration.

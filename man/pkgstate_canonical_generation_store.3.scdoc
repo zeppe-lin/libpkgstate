@@ -1,0 +1,122 @@
+PKGSTATE_CANONICAL_GENERATION_STORE(3)
+
+# NAME
+
+pkgstate_canonical_generation_store - immutable generation state backend
+
+# SYNOPSIS
+
+```
+#include <libpkgstate/canonical_generation_store.h>
+
+pkgstate::canonical_generation_store store(path, target_binding);
+```
+
+# DESCRIPTION
+
+*pkgstate::canonical_generation_store* is the concrete canonical backend for
+complete *pkgstate::snapshot* values. It derives from *canonical_store* and
+therefore uses the non-virtual stale-safe *compare_and_publish()* algorithm.
+
+Construction creates the store directory when necessary, creates the generation
+container, and durably records exactly one *state_target_binding*. Opening the
+same directory with another binding raises *store_error*.
+
+The backend never reads, imports, enriches, or rewrites the historical
+_/var/lib/pkg/db_ compatibility database.
+
+# LAYOUT
+
+```
+store/
+|-- binding
+|-- current
+`-- generations/
+    `-- v1-sha256-<snapshot digest>/
+        `-- snapshot
+```
+
+The _binding_ and _current_ files are always present after successful
+construction. Initialization creates, synchronizes, and selects the empty
+snapshot generation, then writes _binding_ last as the initialization-complete
+marker.
+
+Each selected generation contains one complete canonical snapshot. Derived
+release, control, package, ownership, and snapshot identities are recomputed
+while reading. The selector identity must equal the recomputed snapshot
+identity.
+
+Binding, selector, and snapshot files are mode 0444. Completed generation
+directories are mode 0555. Writable persistent generation objects and multiply
+linked state files are rejected as corruption.
+
+# LOCKING
+
+The store directory itself is the advisory *flock*(2) domain.
+
+```
+read()                 shared, non-blocking
+compare_and_publish()  exclusive, non-blocking
+```
+
+The exclusive lock covers the authoritative reread, stale comparison, result
+projection, generation construction, current-generation selection, durability
+synchronization, and post-selection reread.
+
+Programs that mutate the store without taking the same lock violate the backend
+contract. The backend still validates selectors, modes, link counts, canonical
+encoding, target binding, and recomputed identities when reading.
+
+# PUBLICATION
+
+A current request is published as follows:
+
+1. encode the complete resulting snapshot canonically;
+2. construct and synchronize an immutable temporary generation;
+3. install it under the snapshot-identity generation name without replacement;
+4. synchronize the generations directory;
+5. write and synchronize a temporary current selector;
+6. atomically rename that selector to _current_;
+7. synchronize the store directory; and
+8. reread the selected generation under the publication lock.
+
+The reported state-storage atomicity boundary is
+*immutable_generation_selection*.
+
+Failure before selector rename returns *failed_before_publication*. A successful
+rename followed by failed store-directory synchronization returns
+*published_durability_unconfirmed* when the selected result can be reread.
+Failure to establish the selected result after rename returns *indeterminate*.
+
+A stale request never creates or selects a generation.
+
+# RECOVERY
+
+Only the _current_ selector chooses authoritative state. Unselected complete
+generations and temporary generation directories are not current. This backend
+does not perform garbage collection.
+
+When _binding_ is absent, construction may finish an interrupted initialization
+only if _current_ selects the exact empty snapshot for the caller's binding. It
+never adopts an unbound non-empty generation. Once _binding_ exists, a missing
+_current_ selector is corruption and is not recreated as empty state.
+
+A missing, malformed, writable, multiply linked, non-canonical,
+target-mismatched, or identity-mismatched selected generation raises
+*store_error*. Recovery must repair or replace storage explicitly; the backend
+does not guess another current generation.
+
+# RECEIPTS
+
+*compare_and_publish()* returns one typed *state_publication_receipt*. The
+backend supplies an evidence identity for the exact encoded generation bytes.
+
+The generation store persists current installed truth. It does not maintain a
+historical request or receipt journal. Durable audit retention belongs to the
+transaction coordinator or a separate receipt authority.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_store*(3),
+*pkgstate_legacy_text_store*(3), *pkgstate-generation*(5), *flock*(2),
+*fsync*(2), *renameat*(2)

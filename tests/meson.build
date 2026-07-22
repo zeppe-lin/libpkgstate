@@ -78,6 +78,14 @@ if get_option('tests').allowed()
   test('classify typed state publication receipts',
        publication_receipt_test)
 
+  canonical_generation_store_test = executable(
+    'canonical-generation-store-test',
+    'canonical_generation_store_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('publish immutable canonical generations',
+       canonical_generation_store_test)
+
   canonical_store_test = executable(
     'canonical-store-test',
     'canonical_store_test.cpp',
@@ -138,6 +146,8 @@ if get_option('tests').allowed()
     ['publication-receipt',
      'libpkgstate/publication_receipt.h'],
     ['canonical-store', 'libpkgstate/canonical_store.h'],
+    ['canonical-generation-store',
+     'libpkgstate/canonical_generation_store.h'],
     ['legacy-installed-package',
      'libpkgstate/legacy_installed_package.h'],
     ['legacy-snapshot', 'libpkgstate/legacy_snapshot.h'],

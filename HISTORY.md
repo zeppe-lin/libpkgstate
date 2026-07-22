@@ -65,3 +65,21 @@ changing the installed-state library boundary:
 * migration documentation records `pkginfo -f` as the remaining build-layer
   transition gate; and
 * the public libpkgstate ABI and soversion remain unchanged.
+
+Canonical generation storage
+----------------------------
+
+The canonical authority reconstruction added the first lossless concrete state
+backend:
+
+* one durable target binding per store directory;
+* complete binary canonical snapshot generations;
+* content-addressed immutable generation names;
+* non-blocking shared reads and exclusive compare-and-publish locking;
+* atomic current-generation selection;
+* file and directory synchronization with truthful durability outcomes;
+* post-selection authoritative reread;
+* recomputation of every state-owned identity while loading; and
+* explicit separation between current-state authority and receipt journaling.
+
+The historical `/var/lib/pkg/db` backend remains byte-compatible and separate.

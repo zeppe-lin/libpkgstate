@@ -66,6 +66,10 @@ The canonical model consists of:
 	Complete canonical reads and one non-virtual stale-safe
 	compare-and-publish operation.
 
+*canonical_generation_store*
+	Concrete lossless backend using immutable snapshot generations and one
+	atomically replaced current selector.
+
 Canonical constructors do not accept caller-selected installed-package,
 publication-request, or publication-receipt identities. A package record
 contains no containing-snapshot identity, keeping the canonical identity graph
@@ -103,7 +107,9 @@ See *pkgstate_model*(3) for the complete model contract.
 # STORAGE
 
 The abstract *canonical_store* interface reads complete *snapshot* values and
-enforces stale-safe compare-and-publish.
+enforces stale-safe compare-and-publish. The concrete
+*canonical_generation_store* persists complete snapshots in immutable
+generations and selects one current generation atomically.
 
 The abstract *store* and *write_transaction* interfaces are compatibility
 storage interfaces. They read and mutate *legacy_snapshot* and
@@ -169,4 +175,6 @@ pkg-config --static --libs libpkgstate
 # SEE ALSO
 
 *pkgstate_model*(3), *pkgstate_store*(3),
-*pkgstate_legacy_text_store*(3), *pkgstate-db*(5), *pkginfo*(1)
+*pkgstate_canonical_generation_store*(3),
+*pkgstate_legacy_text_store*(3), *pkgstate-generation*(5),
+*pkgstate-db*(5), *pkginfo*(1)

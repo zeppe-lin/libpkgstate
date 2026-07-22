@@ -28,9 +28,13 @@ check_page man/libpkgstate.3.scdoc LIBPKGSTATE\(3\)
 check_page man/pkgstate_model.3.scdoc PKGSTATE_MODEL\(3\)
 check_page man/pkgstate_store.3.scdoc PKGSTATE_STORE\(3\)
 check_page \
+  man/pkgstate_canonical_generation_store.3.scdoc \
+  PKGSTATE_CANONICAL_GENERATION_STORE\(3\)
+check_page \
   man/pkgstate_legacy_text_store.3.scdoc \
   PKGSTATE_LEGACY_TEXT_STORE\(3\)
 check_page man/pkgstate-db.5.scdoc PKGSTATE-DB\(5\)
+check_page man/pkgstate-generation.5.scdoc PKGSTATE-GENERATION\(5\)
 check_page man/pkginfo.1.scdoc PKGINFO\(1\)
 
 grep -F 'A package-state transaction is not a filesystem transaction.' \
@@ -45,6 +49,23 @@ grep -F 'without invoking publication when they differ.' \
   "$source_root/man/pkgstate_store.3.scdoc" >/dev/null ||
   fail "store manual omits stale no-publication contract"
 
+
+grep -F 'Only the _current_ selector chooses authoritative state.' \
+  "$source_root/man/pkgstate_canonical_generation_store.3.scdoc" >/dev/null ||
+  fail "generation backend manual omits selector authority"
+
+grep -F 'writes _binding_ last as the initialization-complete' \
+  "$source_root/man/pkgstate_canonical_generation_store.3.scdoc" >/dev/null ||
+  fail "generation backend manual omits initialization marker"
+
+grep -F '*immutable_generation_selection*.' \
+  "$source_root/man/pkgstate_canonical_generation_store.3.scdoc" >/dev/null ||
+  fail "generation backend manual omits atomicity boundary"
+
+grep -F 'does not maintain a' \
+  "$source_root/man/pkgstate_canonical_generation_store.3.scdoc" >/dev/null ||
+  fail "generation backend manual omits receipt-journal boundary"
+
 grep -F 'non-blocking' \
   "$source_root/man/pkgstate_legacy_text_store.3.scdoc" >/dev/null ||
   fail "legacy backend manual omits non-blocking lock semantics"
@@ -56,6 +77,15 @@ grep -F 'db.backup' \
 grep -F 'A blank line or end-of-file terminates' \
   "$source_root/man/pkgstate-db.5.scdoc" >/dev/null ||
   fail "database manual omits record terminator"
+
+
+grep -F '"pkgstate-snapshot\0"' \
+  "$source_root/man/pkgstate-generation.5.scdoc" >/dev/null ||
+  fail "generation format manual omits snapshot magic"
+
+grep -F 're-encodes the snapshot' \
+  "$source_root/man/pkgstate-generation.5.scdoc" >/dev/null ||
+  fail "generation format manual omits canonical re-encoding"
 
 grep -F 'Shared ownership is valid state.' \
   "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
@@ -129,8 +159,10 @@ for page in \
   'libpkgstate(3)' \
   'pkgstate_model(3)' \
   'pkgstate_store(3)' \
+  'pkgstate_canonical_generation_store(3)' \
   'pkgstate_legacy_text_store(3)' \
   'pkgstate-db(5)' \
+  'pkgstate-generation(5)' \
   'pkginfo(1)'
 do
   grep -F "$page" "$source_root/README.md" >/dev/null ||

@@ -1,0 +1,189 @@
+PKGSTATE-GENERATION(5)
+
+# NAME
+
+pkgstate-generation - canonical immutable-generation storage format
+
+# DESCRIPTION
+
+The *canonical_generation_store*(3) backend stores one durable target binding
+and zero or more complete canonical installed-state generations.
+
+All integer fields are unsigned big-endian values. A _bytes_ field is one u64
+length followed by exactly that many bytes. A _digest_ field is a bytes field
+containing canonical `v1:sha256:<64 lowercase hexadecimal digits>` text. Records
+contain no alignment padding.
+
+The implementation rejects an individual binding or snapshot file larger than
+1 GiB.
+
+# LAYOUT
+
+```
+store/
+|-- binding
+|-- current
+`-- generations/
+    `-- v1-sha256-<snapshot digest>/
+        `-- snapshot
+```
+
+The _binding_, _current_, and _snapshot_ files have mode 0444. Completed
+generation directories have mode 0555. Persistent state files must be regular,
+non-writable, and have one hard link.
+
+# BINDING RECORD
+
+The _binding_ file contains:
+
+```
+bytes[17]  "pkgstate-binding\0"
+u16        storage version, currently 1
+digest     managed-target identity
+digest     state-store identity
+digest     root-view identity
+digest     state-backend identity
+digest     publication-domain identity
+```
+
+The five identities reconstruct one *state_target_binding*. Recomputed binding
+identity must match the binding expected by the store opener.
+
+# CURRENT SELECTOR
+
+The _current_ file is text containing exactly one canonical
+*installed_state_snapshot_identity* followed by one newline. No other line or
+byte is valid.
+
+Initialization creates and selects the empty snapshot generation, synchronizes
+the selector, and writes _binding_ last as the initialization-complete marker.
+A successfully opened bound store therefore always has _current_; its absence
+is corruption. An unbound store is recoverable only when _current_ selects the
+exact empty snapshot for the caller's binding.
+
+The selected generation directory name is:
+
+```
+v1-sha256-<64 lowercase hexadecimal digits>
+```
+
+The directory suffix is the hexadecimal field of the selected snapshot
+identity.
+
+# SNAPSHOT RECORD
+
+The generation _snapshot_ file contains:
+
+```
+bytes[18]  "pkgstate-snapshot\0"
+u16        storage version, currently 1
+u16        installed-state schema version, currently 1
+binding    five digest fields from the binding record
+u64        installed-package count
+package[]  installed packages in canonical package-name order
+```
+
+Each package contains:
+
+```
+bytes       package name
+bytes       upstream version
+bytes       distribution release
+control     durable installed control
+u64         ownership-entry count
+ownership[] completed manifest in canonical path order
+```
+
+The control record contains:
+
+```
+u8          runtime-dependency completeness
+u8          removal-lifecycle completeness
+u8          target-profile completeness
+u8          provenance completeness
+u64         runtime-dependency count
+bytes[]     dependency expressions in canonical order
+u64         removal-lifecycle count
+lifecycle[] lifecycle declarations
+u64         target-profile count
+profile[]   profile facts in name order
+u64         provenance count
+provenance[] provenance references in kind order
+```
+
+One lifecycle declaration contains:
+
+```
+u8         phase
+bytes      format identifier
+bytes      exact material, including any NUL or line-separator bytes
+```
+
+One profile fact contains two bytes fields: name then value. One provenance
+reference contains a u8 kind followed by a bytes field containing canonical
+digest text.
+
+One ownership entry contains a bytes field with the canonical root-relative path
+followed by one u8 object type.
+
+# ENUMERATIONS
+
+Installed-control completeness values are:
+
+```
+1  recorded_at_installation
+2  recorded_in_compatibility_storage
+3  supplied_by_migration
+4  historically_unavailable
+```
+
+Removal lifecycle phases are:
+
+```
+1  pre_remove
+2  post_remove
+```
+
+Provenance kinds are:
+
+```
+1  candidate_control
+2  artifact
+3  artifact_manifest
+4  application_evidence
+5  transaction_evidence
+```
+
+Ownership object types are:
+
+```
+1  non_directory
+2  directory
+```
+
+# VALIDATION
+
+The backend reconstructs public canonical values through their validating
+constructors. It then re-encodes the snapshot and requires byte-for-byte
+equality with the stored record. Alternate field order, trailing bytes,
+duplicate values,
+invalid enumeration values, and non-canonical strings are rejected.
+
+Package-release, installed-control, installed-package, ownership-inventory, and
+snapshot identities are recomputed. Stored generations do not carry trusted
+copies of those derived identities. The recomputed snapshot identity must match
+both the _current_ selector and the generation directory name.
+
+# AUTHORITY
+
+Only _current_ selects authoritative installed state. An unselected complete
+generation, an incomplete temporary directory, or a generation whose name is
+not selected is not current state.
+
+This format stores current installed truth. It is not a publication-request or
+receipt journal.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_store*(3),
+*pkgstate_canonical_generation_store*(3)
