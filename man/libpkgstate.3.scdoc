@@ -49,8 +49,8 @@ The canonical model consists of:
 	ownership manifest, and computed installed-package identity.
 
 *snapshot*
-	Complete immutable installed truth for one target binding, with package
-	and exact shared-ownership indexes.
+	Complete immutable installed truth for one target binding, with computed
+	ownership-inventory and installed-state snapshot identities.
 
 Canonical constructors do not accept caller-selected installed-package
 identities. A package record contains no containing-snapshot identity, keeping

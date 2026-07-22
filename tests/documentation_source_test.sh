@@ -73,6 +73,14 @@ grep -F 'complete canonical installed truth for one' \
   "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
   fail "model manual omits complete installed-package boundary"
 
+grep -F 'Callers cannot attach arbitrary ownership or' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual omits snapshot identity authority"
+
+grep -F 'path-ordered ownership groups' \
+  "$source_root/DESIGN.md" >/dev/null ||
+  fail "design omits canonical ownership identity ordering"
+
 grep -F 'legacy_snapshot read() const;' \
   "$source_root/man/pkgstate_store.3.scdoc" >/dev/null ||
   fail "store manual does not expose compatibility snapshot type"

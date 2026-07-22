@@ -54,6 +54,14 @@ if get_option('tests').allowed()
   )
   test('validate installed package state', model_test)
 
+  snapshot_identity_test = executable(
+    'snapshot-identity-test',
+    'snapshot_identity_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('identify ownership and installed snapshots',
+       snapshot_identity_test)
+
   legacy_model_test = executable(
     'legacy-model-test',
     'legacy_model_test.cpp',

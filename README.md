@@ -11,7 +11,7 @@ It provides:
 * immutable durable installed control with explicit completeness;
 * durable target-state bindings with computed identities;
 * complete canonical installed package records with computed identities;
-* complete immutable snapshots with package and ownership indexes;
+* complete immutable snapshots with ownership and snapshot identities;
 * state-owned canonical package paths and explicit shared ownership;
 * explicitly incomplete compatibility records and snapshots;
 * compatibility write transactions for the historical database; and
@@ -63,21 +63,28 @@ state_target_binding+ completed ownership manifest
              computed identity
                     |
                     v
+          ownership inventory
+             computed identity
+                    |
+                    v
                snapshot
        one target binding, package lookup,
-       and derived shared ownership index
+       derived shared ownership index,
+       and computed snapshot identity
 ```
 
 `installed_package::make()` requires one canonical release, control for exactly
 that release, one target binding, and the completed ownership manifest.  The
-library normalizes the manifest and computes `installed_package_identity` from
-those facts.  Snapshot identity and ownership-inventory identity are added by
-the next model layer; the complete facts they cover are already present.
+library normalizes the manifest and computes `installed_package_identity`
+from those facts.
 
 `snapshot::make()` accepts only complete canonical installed packages.  Every
 package must carry the snapshot's exact target binding.  Packages are sorted by
 name, duplicate package names are rejected, and shared path ownership remains
-valid state.
+valid state.  The library computes `ownership_inventory_identity` from the
+normalized path-to-installed-package relation, then computes
+`installed_state_snapshot_identity` from the schema version, target binding,
+installed-package identities, and ownership-inventory identity.
 
 Compatibility storage uses a separate model:
 
@@ -103,6 +110,7 @@ Important invariants:
 * installed packages bind release, control, target, and completed ownership;
 * installed-package identity excludes containing snapshot identity;
 * canonical snapshots contain packages from exactly one target binding;
+* ownership and snapshot identities are computed from normalized state;
 * package paths are canonical and root-relative;
 * package manifests contain at most one entry for each path;
 * packages, manifests, and owner results have deterministic order;

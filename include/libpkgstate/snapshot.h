@@ -3,7 +3,7 @@
 
 /*!
  * \file snapshot.h
- * \brief Complete immutable installed-state snapshots.
+ * \brief Identified immutable installed-state snapshots.
  */
 
 #pragma once
@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <libpkgstate/digest.h>
 #include <libpkgstate/installed_package.h>
 #include <libpkgstate/state_target_binding.h>
 
@@ -31,17 +32,19 @@ inline constexpr std::uint16_t installed_state_schema_version = 1;
  * another binding and duplicate package names.  Shared path ownership remains
  * valid and is exposed in deterministic package-name order.
  *
- * Snapshot and ownership-inventory identities are added by the next model
- * layer.  This value already contains the complete facts those identities
- * cover.
+ * The snapshot computes two derived identities.  ownership_identity() covers
+ * the canonical path-to-installed-package relation.  identity() covers the
+ * schema version, target binding, normalized installed packages, and that
+ * ownership-inventory identity.  Neither identity is caller supplied.
  */
 class snapshot final {
 public:
   /*!
-   * \brief Validate and construct one complete installed-state snapshot.
+   * \brief Validate, identify, and construct complete installed state.
    * \param target_binding Durable state target represented by the snapshot.
    * \param packages Complete installed package records in arbitrary order.
-   * \throws state_error on duplicate names or target-binding mismatch.
+   * \throws state_error on duplicate names, target-binding mismatch, duplicate
+   *         ownership claims, or canonical identity failure.
    */
   [[nodiscard]] static snapshot
   make(state_target_binding target_binding,
@@ -49,6 +52,14 @@ public:
 
   /*! \brief Return the canonical snapshot schema version. */
   [[nodiscard]] std::uint16_t schema_version() const noexcept;
+
+  /*! \brief Return the computed path-to-owner inventory identity. */
+  [[nodiscard]] const ownership_inventory_identity&
+  ownership_identity() const noexcept;
+
+  /*! \brief Return the computed installed-state snapshot identity. */
+  [[nodiscard]] const installed_state_snapshot_identity&
+  identity() const noexcept;
 
   /*! \brief Return the target-state binding shared by every package. */
   [[nodiscard]] const state_target_binding&
@@ -74,10 +85,14 @@ public:
   is_owned(const package_path& path) const noexcept;
 
 private:
-  snapshot(state_target_binding target_binding,
+  snapshot(installed_state_snapshot_identity identity,
+           ownership_inventory_identity ownership_identity,
+           state_target_binding target_binding,
            std::vector<installed_package> packages,
            std::unordered_map<std::string, std::vector<std::size_t>> owners);
 
+  installed_state_snapshot_identity identity_;
+  ownership_inventory_identity ownership_identity_;
   state_target_binding target_binding_;
   std::vector<installed_package> packages_;
   std::unordered_map<std::string, std::vector<std::size_t>> owners_;

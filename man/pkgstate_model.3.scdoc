@@ -247,14 +247,29 @@ by canonical package name, rejects duplicate names, and derives the exact
 path-to-package reverse index from the per-package ownership manifests.
 
 The schema version is *installed_state_schema_version* and is returned by
-*schema_version()*. Ownership-inventory and snapshot identities are added by a
-later model layer; this object already contains the complete facts those
-identities cover.
+*schema_version()*.
+
+The library computes *ownership_inventory_identity* from path-ordered ownership
+groups. Each group contains one canonical path and the identities of its owning
+installed packages in identity order. The reverse lookup index is derived and
+is not hashed as a second serialized copy.
+
+The library then computes *installed_state_snapshot_identity* from, in order:
+
+1. snapshot schema version;
+2. state-target-binding identity;
+3. installed-package identities in package-name order; and
+4. ownership-inventory identity.
+
+Both identities are state-owned. Callers cannot attach arbitrary ownership or
+snapshot identity bytes to different facts.
 
 Queries provide:
 
 ```
 schema_version()
+ownership_identity()
+identity()
 target_binding()
 packages()
 size()
@@ -313,7 +328,8 @@ The following ordering is part of the contract:
 - installed-control provenance is sorted by semantic kind;
 - target bindings are ordered by their five component identities;
 - package manifests are sorted by canonical path;
-- snapshots are sorted by package name; and
+- snapshots are sorted by package name;
+- ownership identity groups are sorted by path and owner identity; and
 - owner results are sorted by package name.
 
 Input order does not affect observable order.

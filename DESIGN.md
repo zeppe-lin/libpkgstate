@@ -25,9 +25,8 @@ state-publication receipt
 
 The implementation currently exposes canonical package releases, immutable
 installed control, durable target-state bindings, complete canonical installed
-packages, and complete immutable snapshots.  Canonical package records compute
-their own installed-package identities; ownership-inventory and snapshot
-identities are introduced by the next model layer.
+packages, and identified immutable snapshots.  Canonical package records,
+ownership inventories, and snapshots compute their own state-domain identities.
 
 The historical `/var/lib/pkg/db` backend uses explicitly separate
 `legacy_installed_package` and `legacy_snapshot` values.  Those compatibility
@@ -504,12 +503,22 @@ Construction must validate:
 * consistency between installed package and control release bindings; and
 * explicit completeness for every compatibility limitation.
 
-The public `snapshot::make()` constructor implements the complete fact
-container. It accepts one state target binding and complete canonical installed
-packages only, rejects packages from another binding and duplicate package
-names, and derives exact shared ownership from the per-package manifests. The
-schema version is explicit. Ownership-inventory and snapshot identities are
-added by the next model layer.
+The public `snapshot::make()` constructor implements the complete identified
+fact container. It accepts one state target binding and complete canonical
+installed packages only, rejects packages from another binding and duplicate
+package names, and derives exact shared ownership from the per-package
+manifests.
+
+The ownership-inventory identity is computed over path-ordered ownership groups.
+Each group contains one canonical path and its installed-package identities in
+identity order. Owner package names are not substituted for installed-package
+identities, so a changed canonical owner record changes the admitted ownership
+relation even when its name and paths remain the same.
+
+The installed-state snapshot identity is computed over the explicit schema
+version, state-target-binding identity, installed-package identities in package
+name order, and ownership-inventory identity. The reverse ownership index is
+not hashed as a second implementation-dependent copy.
 
 A canonical snapshot remains immutable after construction. It does not refresh
 itself after another process publishes state. A consumer requiring current truth
