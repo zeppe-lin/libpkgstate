@@ -4,77 +4,199 @@ libpkgstate design
 Purpose
 -------
 
-`libpkgstate` represents durable installed package state independently of the
-archive, installation, audit, and orchestration layers.
+`libpkgstate` owns durable installed package truth.
 
-Its input and output are facts about recorded ownership:
+It represents what one managed target records as installed, owned, and required
+for future package operations.  It does not reconstruct that truth from an
+archive, a current package source, a live filesystem scan, or current policy.
 
-```text
-package identity
-ownership manifest
-shared ownership
-durable snapshot
-```
-
-The library does not decide what should be installed.  It records and queries
-what a completed installation policy has declared installed.
-
-Architectural boundary
-----------------------
+The canonical state model contains:
 
 ```text
-archive truth                    installed-state truth
-libpkgimage                      libpkgstate
-     |                                |
-     v                                v
-package_image                    installed_package
-     |                                |
-     +---------- higher layer --------+
-                    |
-                    v
-          policy and transaction
+package release
+installed package
+installed ownership
+installed control
+state target binding
+installed-state snapshot
+state-publication request
+state-publication receipt
 ```
 
-`libpkgimage` and `libpkgstate` intentionally describe different realities.
+The current 0.3.x implementation exposes a smaller compatibility-shaped model:
+validated name and version lines, ownership manifests, immutable snapshots, and
+the historical `/var/lib/pkg/db` backend.  That implementation is a sound
+migration base.  It is not yet the complete canonical model defined here.
 
-A package archive may contain an object that policy preserves, rejects, omits,
-or replaces.  The resulting installed manifest therefore cannot be inferred
-by copying the archive manifest into the state database.
+This document is normative for the direction of the public model and storage
+interfaces.  Existing behavior remains current until a later commit implements
+and documents its replacement.  Documentation must not describe an intended
+interface as already available.
 
-`libpkgstate` does not:
+Authority boundary
+------------------
+
+Package management crosses several independent truth domains:
+
+```text
+source truth          libpkgsource
+archive truth         libpkgimage
+planning truth        libpkgplan
+application truth     libpkgapply or the application boundary
+installed truth       libpkgstate
+filesystem truth      an explicit observation backend
+orchestration policy  pkgman
+```
+
+`libpkgstate` consumes completed application outcomes and explicit publication
+requests.  It returns immutable installed snapshots and publication receipts.
+It does not decide installation policy or execute package operations.
+
+```text
+candidate and artifact facts
+             |
+             v
+        libpkgplan
+             |
+             v
+  package-operation plan
+             |
+             v
+ application boundary
+             |
+             v
+ completed application evidence
+             |
+             v
+        libpkgstate
+             |
+             v
+ installed snapshot and publication receipt
+```
+
+The library does not:
 
 * open package archives;
 * replay package payloads;
-* inspect the live filesystem;
-* evaluate install or upgrade rules;
+* inspect the live target filesystem;
+* evaluate preserve, replace, omit, or reject policy;
 * create rejected objects;
-* execute package scripts;
-* resolve dependencies; or
+* execute lifecycle or maintenance actions;
+* resolve dependencies;
+* compose a complete target-system context;
+* coordinate a complete package transaction; or
 * claim atomicity with filesystem changes.
 
-Identity model
---------------
+Archive truth and installed truth
+---------------------------------
 
-`package_identity` stores one package name and one version string.
+`libpkgimage` and `libpkgstate` intentionally describe different realities.
 
-Both fields are durable line-oriented data.  They must be:
+A package image states what one exact archive contains.  Installed ownership
+states what durable package state records after completed installation policy.
+An archive entry may be preserved, rejected, omitted, replaced, shared, or
+otherwise resolved before state publication.
 
-* non-empty;
-* free of NUL bytes;
-* free of carriage returns; and
-* free of newlines.
+The following equations are forbidden:
 
-Naming policy beyond those representation constraints belongs to a higher
-layer.  `libpkgstate` does not impose collection, repository, epoch, or release
-syntax.
+```text
+package image == installed ownership
+archive filename == package identity
+planned ownership == completed installed ownership
+```
 
-Ownership model
----------------
+`libpkgstate` must not create an installed package by copying package-image
+entries.  A higher application boundary supplies completed ownership outcomes
+and evidence.  State validates and publishes those outcomes.
 
-An `owned_entry` contains:
+Installed truth and observed filesystem truth
+---------------------------------------------
 
-* one canonical `pkgimage::package_path`; and
-* one durable object class.
+Installed truth is durable recorded state.  Observed filesystem truth is a
+bounded observation of a root view at one time.
+
+A scan may show that durable state is stale.  It does not silently rewrite
+installed truth.  Audit and reconciliation return facts to a consumer; they do
+not acquire package-state mutation authority merely by detecting a mismatch.
+
+An installed snapshot therefore does not claim that the live filesystem still
+matches its ownership records.  Plans and applications that require freshness
+must carry and validate explicit filesystem observations separately.
+
+Canonical package release
+-------------------------
+
+A canonical package release has four fields:
+
+```text
+package_release_identity
+name
+version
+release
+```
+
+The identity is an authority-bearing digest.  The three descriptive fields are
+validated coordinates of the same release.  Version ordering remains outside
+`libpkgstate`; canonical record ordering is not package-version precedence.
+
+The historical database stores only:
+
+```text
+name
+opaque version line
+```
+
+A value such as `1.0-1` cannot be decomposed reliably into upstream version and
+distribution release.  Hyphens may belong to either coordinate, and the legacy
+format did not record the boundary.
+
+Consequently:
+
+* the legacy version line remains an opaque compatibility fact;
+* reading legacy state must not guess a release decomposition;
+* a complete canonical package release requires explicit authoritative input;
+* migration-supplied decomposition must be marked as migration provenance; and
+* adapters that require complete release facts must refuse incomplete records.
+
+Current `package_identity` remains the 0.3.x compatibility value until the
+canonical package-release model replaces or quarantines it.  Its line-safety
+validation remains valid for the legacy format but is not the complete future
+identity contract.
+
+Canonical package paths
+-----------------------
+
+Canonical installed state owns its logical package-path value and validation
+contract.  A package path is root-relative, normalized, and independent of the
+pathname at which a target root happens to be mounted.
+
+The current 0.3.x API reuses `pkgimage::package_path`.  That is a transitional
+public dependency, not a transfer of path authority from installed state to the
+archive layer.  The canonical state model must own its path type and use narrow
+adapters plus shared conformance vectors where archive and state paths must
+agree.
+
+Installed ownership
+-------------------
+
+Installed ownership records which package owns each canonical logical package
+path after completed application policy.
+
+Shared ownership is valid state.  More than one installed package may own the
+same path.  State must preserve every ownership claim in deterministic order;
+it must neither collapse the relation to one owner nor infer that sharing is an
+error.
+
+Canonical ownership is recorded once in the per-package manifests:
+
+```text
+installed package record -> canonical owned paths
+```
+
+The snapshot derives the aggregate path-to-owner inventory and reverse lookup
+index from those manifests.  The derived inventory has its own identity for
+planning and precondition binding, but it is not a second independently mutable
+copy of ownership truth.
 
 The compatibility database preserves only two object classes:
 
@@ -84,107 +206,483 @@ non_directory
 ```
 
 `non_directory` may represent a regular file, symbolic link, FIFO, socket, or
-device.  The state model does not invent a more precise type than the durable
-format carries.
+device.  Legacy import must not invent more precise metadata than durable
+storage contains.  A future canonical backend may retain richer recorded object
+facts, but unknown metadata remains unknown rather than reconstructed from an
+archive or live observation.
 
-An `installed_package` combines a validated identity with its ownership
-manifest.
+An empty ownership manifest is representable.  It means that the installed
+package record owns no paths.  It must not be confused with an ownership set
+whose historical contents are unavailable.
 
-Construction:
+Installed package
+-----------------
 
-* accepts manifest entries in arbitrary order;
-* sorts entries by canonical path;
-* rejects duplicate paths; and
-* permits an empty manifest.
+A canonical installed package is the durable fact that one package release is
+installed in one installed-state snapshot.
 
-A manifest describes ownership after policy resolution.  It is not an archive
-footprint and does not contain payload hashes, modes, owners, timestamps, link
-targets, or device numbers.
+It binds:
 
-Snapshot model
---------------
+* canonical package release;
+* installed package identity;
+* installed-control identity;
+* completed per-package ownership manifest;
+* target-state binding; and
+* application and transaction evidence supplied for publication.
 
-A `snapshot` is an immutable indexed collection of installed packages.
+Its canonical content identity covers those state-owned fields and references.
+Computing that identity while constructing a publication request does not by
+itself claim that the package is installed.  Installed authority begins only
+when a successful publication receipt and resulting snapshot cite the record.
 
-Construction:
+The containing snapshot and publication receipt bind the installed package to
+the resulting snapshot identity.  The installed-package identity itself must
+not contain the snapshot identity, because the snapshot contains the installed
+package and that would create an identity cycle.
 
-* accepts packages in arbitrary order;
-* sorts packages by name;
-* rejects duplicate package names; and
-* builds a reverse ownership index.
+An installed package is not a package image, artifact manifest, source
+candidate, current source directory, or live filesystem subtree.
 
-Queries provide:
+The installed package identity is assigned by `libpkgstate` from the canonical
+installed record.  Callers may supply the facts and subordinate evidence, but
+they do not select an arbitrary installed package identity and ask state to
+bless it.
 
-* all packages in package-name order;
-* exact package lookup;
-* exact path ownership;
-* shared ownership; and
-* a boolean owned-path test.
+Installed control
+-----------------
 
-Shared ownership is valid state.  It is retained and returned in deterministic
-package-name order.  The model neither collapses it to one owner nor treats it
-as an automatic error.
+Installed control contains durable non-payload facts required after the
+candidate, provider, source snapshot, or build cache has disappeared.
 
-Storage model
--------------
+At minimum it must be able to retain:
 
-`store` is the backend-neutral durable storage interface.
+* canonical package release;
+* runtime dependency declarations selected at installation;
+* exact pre-remove and post-remove lifecycle declarations;
+* package target or profile facts needed for later reasoning;
+* candidate-control provenance;
+* artifact and artifact-manifest provenance;
+* application and transaction evidence references; and
+* explicit completeness and provenance for compatibility-sourced fields.
 
-A read produces one immutable snapshot.  A write begins an isolated
-`write_transaction` initialized from current durable state.
+Lifecycle declarations must contain durable executable material or durable
+content-addressed references sufficient to retrieve the exact material.  A
+source-tree pathname, candidate pathname, or temporary source-snapshot root is
+not durable installed control.
 
-A write transaction supports:
+A candidate-control identity alone is not sufficient.  Removal must remain
+possible when the candidate database and provider are unavailable.  State must
+not reopen current source or candidate storage to reconstruct historical
+removal actions or runtime requirements.
 
-* reading its uncommitted snapshot;
-* adding or replacing a package by name;
-* erasing a package by name;
-* publishing the current state; and
-* reporting whether publication completed.
-
-Destroying an uncommitted transaction discards its uncommitted state.
-
-The transaction boundary is deliberately narrow:
+Known absence and historical unavailability are distinct:
 
 ```text
-state storage only
+known empty               the authority recorded that no values exist
+historically unavailable  the compatibility format did not retain the facts
 ```
 
-It does not coordinate payload staging, filesystem mutation, rejected-file
-creation, post-install actions, or rollback.
+A single Boolean completeness flag is insufficient where those states differ.
+Canonical records must retain field-level or group-level completeness adequate
+to distinguish them.
 
-Compatibility backend
----------------------
+State target binding
+--------------------
+
+`pkgman` composes the complete target-system context.  `libpkgstate` owns and
+validates only the durable state projection required to identify its storage
+and publication domain.
+
+A canonical `state_target_binding` binds at least:
+
+```text
+managed target identity
+state store identity
+root-view identity
+state backend identity
+publication-domain identity
+```
+
+A pathname such as `/` or `/altroot` is only a locator.  It is not sufficient
+identity because mount namespace, bind mounts, filesystem replacement, symlink
+resolution, and backend selection can change what the same string denotes.
+
+The complete target-system context also contains the installed snapshot,
+package target profile, observation and application backends, execution
+capabilities, configuration scopes, and mutation-lock domain.  Those wider
+operational facts remain caller-owned.
+
+The installed snapshot must not contain the complete target-system-context
+identity.  The complete context includes the installed snapshot identity, so
+including the context identity in the snapshot would create a recursive digest:
+
+```text
+snapshot identity
+    -> target-system-context identity
+        -> snapshot identity
+```
+
+The snapshot instead contains the narrower state target binding.  `pkgman`
+composes the complete target context from that binding plus the snapshot and
+other operational facts.
+
+Canonical identities
+--------------------
+
+Every durable semantic object has a strongly typed identity domain.  At
+minimum, the canonical model requires:
+
+```text
+package_release_identity
+installed_control_identity
+installed_package_identity
+ownership_inventory_identity
+installed_state_snapshot_identity
+state_publication_request_identity
+state_publication_receipt_identity
+```
+
+The identity dependency graph is acyclic:
+
+```text
+release + control + manifest + target binding + evidence
+                         |
+                         v
+                installed package
+                         |
+                         v
+                ownership inventory
+                         |
+                         v
+             installed-state snapshot
+```
+
+Publication identities extend that graph:
+
+```text
+expected snapshot + transition + completed evidence
+                         |
+                         v
+              publication request
+                         |
+                         v
+              publication receipt
+```
+
+Canonical digest text uses an algorithm-qualified representation:
+
+```text
+v1:sha256:<lowercase hexadecimal>
+```
+
+Each semantic identity remains a distinct C++ type even when two values use the
+same representation and algorithm.  A package-release identity cannot be
+passed where a snapshot identity is required merely because both contain 32
+SHA-256 bytes.
+
+Canonical record encoding
+-------------------------
+
+Identity is computed over versioned, domain-separated canonical records.
+Domain labels are state-owned and include a format version, for example:
+
+```text
+pkgstate/package-release/1
+pkgstate/installed-control/1
+pkgstate/installed-package/1
+pkgstate/ownership-inventory/1
+pkgstate/installed-snapshot/1
+pkgstate/publication-request/1
+pkgstate/publication-receipt/1
+```
+
+Canonical encoding must use explicit integer encodings, explicit optional-value
+markers, and length-prefixed byte strings.  It must define ordering for every
+set or map before hashing.
+
+Canonical identity must never depend on:
+
+* C++ object layout or padding;
+* pointer values;
+* enum ABI representation without an explicit canonical mapping;
+* insertion order of an unordered container;
+* diagnostic text;
+* storage pathnames;
+* inode numbers or process-local descriptors; or
+* presentation-only whitespace.
+
+The reverse ownership index is derived and excluded as a second serialized
+copy.  Canonical vectors must prove that arbitrary input order yields identical
+normalized records and identities.
+
+Installed-state snapshot
+------------------------
+
+A canonical installed-state snapshot is one complete immutable fact universe
+for installed-state planning and publication.
+
+It binds:
+
+* snapshot schema version;
+* state target binding;
+* canonical schema and completeness profile;
+* normalized installed package records;
+* installed control records;
+* canonical ownership relation;
+* ownership-inventory identity; and
+* installed-state snapshot identity.
+
+Construction must validate:
+
+* deterministic package and path ordering;
+* unique installed package names within the declared namespace;
+* one installed control for every installed package;
+* no orphan installed controls;
+* no duplicate ownership claim;
+* no ownership claim naming an absent package;
+* consistency between installed package and control release bindings; and
+* explicit completeness for every compatibility limitation.
+
+A snapshot returned by a read remains immutable.  It does not refresh itself
+after another process publishes state.  A consumer requiring current truth must
+read a new snapshot.
+
+State-publication request
+-------------------------
+
+A state-publication request is an immutable request to publish completed
+installed-state consequences against one expected prior snapshot.
+
+The primitive transition is a one-package delta derived from one accepted
+package-operation plan and completed application evidence.  A transaction-level
+request may compose more than one non-conflicting package delta so one state
+publication can record a completed multi-package transaction.  A request is not
+an arbitrary complete snapshot authored by the caller, and it cannot silently
+reassert unrelated installed truth.
+
+A request binds:
+
+```text
+expected prior snapshot identity
+state target binding
+one or more package-operation deltas
+operation-plan identity for every delta
+completed application evidence identity for every delta
+affected old installed package, where applicable
+proposed installed package facts and control, where applicable
+completed ownership transition
+explicit package absence, for removal
+transaction evidence, when deltas are composed
+publication request identity
+```
+
+The request contains installed-state consequences and evidence.  Proposed
+installed records are not yet installed truth; state validates their canonical
+identities and the receipt records whether they entered the resulting snapshot.
+The request contains no filesystem mutation instructions, payload replay source,
+preserve policy, lifecycle execution policy, or maintenance action.
+
+Planning publication intent is not sufficient evidence.  A failed or partial
+application cannot be published as successful installed truth merely because a
+plan described the desired result.  The application boundary must report the
+completed effects actually eligible for publication.
+
+Compare-and-publish
+-------------------
+
+Canonical publication is compare-and-publish under the backend's publication
+lock.
+
+The backend must:
+
+1. acquire its exclusive state-publication lock;
+2. reread durable state under that lock;
+3. compute or validate the actual snapshot identity;
+4. compare it with the request's expected snapshot identity;
+5. refuse without mutation when the identities differ;
+6. apply every validated, non-conflicting delta to the actual snapshot;
+7. compute and validate the resulting snapshot;
+8. publish according to the backend's declared atomicity boundary; and
+9. return a structured publication receipt.
+
+An exclusive lock does not replace the comparison.  A plan may have been
+created from snapshot A, another writer may publish snapshot B, and the first
+writer may acquire the lock only afterwards.  Beginning a write from B and
+blindly applying an A-based result would accept stale planning authority.
+
+A stale-state refusal is an ordinary typed publication outcome.  It is not an
+I/O exception and must not mutate durable state.
+
+State-publication receipt
+-------------------------
+
+A publication receipt is immutable evidence of one publication attempt.
+
+It records at least:
+
+```text
+receipt identity
+request identity
+expected prior snapshot identity
+actual prior snapshot identity
+target and store binding
+resulting snapshot identity, when established
+backend identity and storage format
+publication outcome
+durability outcome
+actual state-storage atomicity boundary
+subordinate evidence identities
+```
+
+The outcome taxonomy must distinguish at least:
+
+```text
+published
+stale expected state
+request rejected before publication
+failed before publication
+published but durability confirmation failed
+publication outcome indeterminate; reread required
+```
+
+A Boolean `committed()` value cannot express these states.  In particular, a
+backend may rename a new state into place and then fail to synchronize the
+containing directory.  The new state may be visible even though durable
+confirmation failed.  The receipt must record that boundary without claiming
+that the old state remained authoritative.
+
+A receipt records state-storage publication only.  It must not imply that
+filesystem application, rejected-object staging, lifecycle execution,
+maintenance, and installed-state publication were globally atomic.
+
+Canonical storage backend
+-------------------------
+
+The complete canonical model requires a backend that can store rich installed
+control, typed identities, target binding, completeness, and publication
+receipts without loss.
+
+The preferred publication shape is immutable generations plus an atomically
+selected current generation:
+
+```text
+construct complete generation
+write and synchronize generation
+atomically select generation as current
+synchronize selection domain
+finalize a receipt from the actual publication outcome
+```
+
+A generation contains one complete installed snapshot and the durable records
+required to validate it.  Incomplete prepublication generations are never
+current and may be collected safely according to explicit garbage-collection
+policy.
+
+The exact on-disk encoding and generation layout are separate storage-design
+work.  They must preserve the semantic contracts in this document and declare
+their actual crash and durability boundaries.
+
+Legacy compatibility backend
+----------------------------
 
 `legacy_text_store` implements the historical `/var/lib/pkg/db` format with
 original Zeppe-Lin code.
 
-It provides migration interoperability while keeping the storage format behind
-the `store` interface.  Consumers should depend on `store`, `snapshot`, and
-`write_transaction` when backend identity is not part of their contract.
-
-Detailed parsing, locking, backup, rename, and synchronization semantics are
-specified in `STORAGE.md` and `pkgstate_legacy_text_store(3)`.
-
-Errors
-------
-
-All public failures derive from `pkgstate::error`:
+The legacy format carries:
 
 ```text
-identity_error       invalid identity representation
-state_error          invalid package or snapshot state
-store_error          parsing, locking, I/O, or publication failure
-transaction_error    invalid transaction lifecycle use
+package name
+opaque version line
+directory or non-directory ownership paths
 ```
 
-Errors carry human-readable diagnostics.  Consumers should select behavior
-from the typed exception class rather than parse diagnostic text.
+It does not carry complete canonical package releases, installed control,
+target binding, typed identities, lifecycle material, runtime requirements,
+application evidence, or publication receipts.
 
-Reference tool
---------------
+The compatibility backend therefore has four obligations:
 
-`pkginfo(1)` is a small composition client for `legacy_text_store` and the
-`libpkgimage` libarchive backend.
+* read existing valid databases without automatic rewrite;
+* expose unavailable canonical facts explicitly as unavailable;
+* preserve byte-compatible legacy serialization for representable records; and
+* reject attempts to down-convert complete canonical records when doing so
+  would discard required facts.
+
+A compatibility read is an adapter from a limited durable format.  It must not
+make the old format appear complete by deriving missing facts from current
+source trees, archives, candidate databases, package filenames, or
+configuration.
+
+The legacy database must not be extended casually with independent sidecar
+files.  Two or more files do not form one atomic state publication merely
+because they share a directory.  A sidecar design would require an explicit
+multi-object generation and selection protocol, at which point it is a new
+backend rather than an invisible extension of the old format.
+
+The existing `write_transaction` remains a compatibility transaction while the
+canonical publication interface is introduced.  It protects legacy storage
+mutation but does not provide caller-supplied expected-state comparison and
+must not be described as the canonical stale-safe publication API.
+
+Migration
+---------
+
+Migration from legacy state is explicit and receipt-bound.
+
+A migration operation must:
+
+* identify the source backend and exact source observation;
+* identify the destination target and canonical store;
+* preserve every fact the legacy format actually carries;
+* mark unavailable release, control, and provenance facts as unavailable;
+* accept supplementary facts only from explicit named migration inputs;
+* record which fields came from legacy storage and which were supplied;
+* perform no source-tree or provider reconstruction behind the caller's back;
+* support a non-mutating validation or dry-run path; and
+* return a structured migration receipt.
+
+Reading legacy state is not migration.  A read must never rewrite or enrich the
+source database automatically.
+
+Adapters and dependency direction
+---------------------------------
+
+`libpkgstate` must not depend on `libpkgplan` or `libpkgapply`.
+
+The planner consumes caller-authoritative installed-package, installed-control,
+ownership-inventory, installed-snapshot, and target-context identities.  State
+owns the corresponding durable facts and their identities.  Their semantic
+representations may be wire-compatible without sharing planner-owned C++ types.
+
+The dependency direction is:
+
+```text
+libpkgstate      libpkgplan
+      \            /
+       \          /
+        adapter or pkgman
+```
+
+An optional adapter may depend on both libraries.  It may copy the
+algorithm-qualified bytes from one strong identity domain into the matching
+planner domain after validating representation and completeness.  It must not
+convert incomplete legacy facts into complete planner facts.
+
+The adapter also must not derive a complete target-system-context identity from
+a state snapshot.  The caller supplies the composed target context; the adapter
+verifies that its durable state projection agrees with the snapshot's target
+binding.
+
+A future application adapter may translate completed application evidence into
+a state-publication request.  It does not grant `libpkgstate` authority over
+application semantics, and it does not grant the application layer authority
+to assign canonical installed identities.
+
+Reference frontend
+------------------
+
+`pkginfo(1)` is a small composition client for the compatibility state backend
+and the `libpkgimage` archive backend.
 
 It owns:
 
@@ -204,28 +702,117 @@ The inherited `pkginfo -f` footprint command is not part of this composition.
 Footprint generation and comparison belong to the build layer.  `pkgman`
 remains the supported package-management integration layer.
 
+Canonical state diagnostics should use a separate non-mutating frontend or
+explicit new modes.  Existing `pkginfo -i`, `-l`, and `-o` output must not gain
+identity or completeness fields accidentally during migration.
+
 Determinism
 -----------
 
-The following results are deterministic:
+Determinism is part of the public contract.
 
-* installed-package order;
-* per-package manifest order;
-* owner-query order;
+The following are deterministic:
+
+* package-release canonical records;
+* installed-control canonical records;
+* installed package ordering;
+* ownership claim ordering;
+* shared-owner ordering;
+* installed snapshot identity;
+* publication request and receipt identity;
 * compatibility database serialization; and
-* `pkginfo(1)` line order.
+* existing `pkginfo(1)` line order.
 
-Deterministic ordering is part of the public contract, not an incidental
-property of one backend.
+Canonical state constructors accept values in arbitrary caller order where the
+semantic object is unordered, normalize them, reject duplicates or
+contradictions, and expose the canonical order.
 
-Concurrency
------------
+Concurrency and atomicity
+-------------------------
 
-Snapshots are immutable values after construction.
+Snapshots and receipts are immutable after construction and may be read
+concurrently when their contained values provide ordinary immutable-value
+semantics.
 
-Storage concurrency is backend-specific.  The compatibility backend uses
-non-blocking advisory directory locks and is specified in `STORAGE.md`.
+Storage concurrency is backend-specific.  Every backend must document:
 
-The public API does not claim that a snapshot automatically refreshes after
-another process commits new state.  Consumers that require current state must
-read a new snapshot.
+* lock scope and interoperability;
+* whether reads block, wait, or fail on contention;
+* compare-and-publish serialization;
+* publication and durability boundaries;
+* post-failure reread requirements; and
+* recovery authority.
+
+A package-database lock alone is not a target mutation lease.  The complete
+transaction coordinator must protect the package-owned filesystem and state
+publication under one declared target mutation domain.  `libpkgstate` validates
+the state-publication projection of that authority but does not own the complete
+lease protocol.
+
+Process-group handling, signal deferral, temporary files, rename, and directory
+synchronization are mechanisms.  None by itself proves global package
+transaction atomicity.
+
+Errors and typed outcomes
+-------------------------
+
+Programming errors, invalid records, storage failures, and ordinary publication
+outcomes are different classes.
+
+Exceptions remain appropriate for:
+
+* malformed identity representations;
+* invalid state object construction;
+* storage I/O or locking failures that prevent a structured result;
+* backend corruption; and
+* invalid transaction lifecycle use.
+
+Structured result objects are required for expected semantic outcomes such as:
+
+* stale expected state;
+* incomplete compatibility facts;
+* unsupported down-conversion;
+* publication rejection; and
+* publication whose visibility or durability requires reread.
+
+Consumers must select behavior from typed error or outcome classes.  Diagnostic
+text is presentation and must not become a machine-readable protocol.
+
+Forbidden shortcuts
+-------------------
+
+The following designs violate the authority model:
+
+1. Parsing a legacy version line into version and release by convention.
+2. Treating current candidate control as durable installed control.
+3. Retaining temporary source-snapshot paths in installed state.
+4. Copying a package image into installed ownership.
+5. Embedding complete target-context identity in snapshot identity.
+6. Hashing a database pathname to invent target or store identity.
+7. Calling exclusive locking alone stale-state protection.
+8. Publishing an A-based result after silently rebasing it onto snapshot B.
+9. Extending the legacy database with uncoordinated sidecars while claiming one
+   atomic publication.
+10. Letting an application layer assign authoritative installed identities.
+11. Making the state core depend on planner or application C++ types.
+12. Publishing intended plan outcomes after partial or failed application.
+13. Treating a receipt as proof of filesystem/state global atomicity.
+14. Reconstructing historical runtime or lifecycle facts from current source.
+
+Implementation gates
+--------------------
+
+The canonical implementation may proceed only in dependency order:
+
+1. freeze identity domains and canonical records;
+2. add structured package release and installed control;
+3. add state target binding and complete immutable snapshots;
+4. add publication requests and typed receipts;
+5. implement compare-and-publish;
+6. add a lossless canonical backend;
+7. adapt legacy state as explicitly incomplete;
+8. add explicit migration; and
+9. add optional planner and application adapters.
+
+A compatibility frontend may preserve old commands and storage formats during
+this transition.  Compatibility skin must not become the canonical ontology.
