@@ -25,6 +25,13 @@ if get_option('tests').allowed()
   )
   test('identify canonical package releases', package_release_test)
 
+  installed_control_test = executable(
+    'installed-control-test',
+    'installed_control_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('retain durable installed control', installed_control_test)
+
   package_path_test = executable(
     'package-path-test',
     'package_path_test.cpp',
@@ -72,6 +79,7 @@ if get_option('tests').allowed()
     ['error', 'libpkgstate/error.h'],
     ['digest', 'libpkgstate/digest.h'],
     ['package-release', 'libpkgstate/package_release.h'],
+    ['installed-control', 'libpkgstate/installed_control.h'],
     ['package-identity', 'libpkgstate/package_identity.h'],
     ['package-path', 'libpkgstate/package_path.h'],
     ['owned-entry', 'libpkgstate/owned_entry.h'],

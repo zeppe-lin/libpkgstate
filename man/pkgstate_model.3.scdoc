@@ -2,13 +2,14 @@ PKGSTATE_MODEL(3)
 
 # NAME
 
-pkgstate_model - package releases, installed ownership, and snapshots
+pkgstate_model - package releases, installed control, ownership, and snapshots
 
 # SYNOPSIS
 
 ```
 #include <libpkgstate/digest.h>
 #include <libpkgstate/package_release.h>
+#include <libpkgstate/installed_control.h>
 #include <libpkgstate/package_identity.h>
 #include <libpkgstate/package_path.h>
 #include <libpkgstate/owned_entry.h>
@@ -64,6 +65,59 @@ cannot attach arbitrary identity bytes to different coordinates.
 Equality includes the identity and all coordinates. Relational ordering is
 stable record ordering by name, version, release, and identity; it is not
 package-version precedence.
+
+# INSTALLED CONTROL
+
+*pkgstate::installed_control* is immutable historical non-payload control for
+one exact *package_release*. It remains useful after the original provider,
+candidate, source tree, and archive have disappeared.
+
+Construct control with *installed_control::make()*. The value may retain:
+
+- runtime dependency declarations accepted at installation;
+- exact pre-remove and post-remove lifecycle material;
+- named target or package-profile facts;
+- candidate-control, package-artifact, and artifact-manifest identities;
+- application and transaction evidence identities; and
+- per-group historical completeness.
+
+Runtime dependency declarations are non-empty line-safe text. Construction
+sorts them lexicographically and rejects duplicates. libpkgstate preserves the
+declarations but does not parse, order, or solve dependencies.
+
+A *removal_lifecycle_declaration* carries a pre-remove or post-remove phase, a
+non-empty line-safe format identifier, and exact material bytes. Material may
+contain NUL and line separators. Construction places all pre-remove declarations
+before post-remove declarations while preserving declaration order within each
+phase. The library stores but does not execute or interpret lifecycle material.
+
+Target/profile facts are sorted by name and duplicate names are rejected.
+Retained provenance is sorted by semantic kind, permits at most one identity per
+kind, and requires canonical `v1:sha256` representation. The original component
+remains authority for those external identities; libpkgstate does not recompute
+them.
+
+Each fact group has one *installed_control_fact_state*:
+
+```
+recorded_at_installation
+recorded_in_compatibility_storage
+supplied_by_migration
+historically_unavailable
+```
+
+Known empty and historically unavailable are different states. An empty group
+in the first three states is known empty. A historically unavailable group must
+contain no values. Facts reconstructed from current mutable sources are not a
+representable provenance state.
+
+The library computes *installed_control_identity* from the package-release
+identity, every completeness state, and all normalized retained values. Callers
+cannot attach an arbitrary identity to different historical control.
+
+Installed control is separate from the ownership manifest. It contains no
+filesystem mutation instructions and grants no authority to execute lifecycle
+actions, solve dependencies, or publish installed state.
 
 # COMPATIBILITY PACKAGE IDENTITY
 
@@ -180,6 +234,11 @@ Read a new snapshot when current state is required.
 
 The following ordering is part of the contract:
 
+- runtime dependency declarations are sorted lexicographically;
+- removal lifecycle declarations are grouped by phase and retain within-phase
+  order;
+- target/profile facts are sorted by name;
+- installed-control provenance is sorted by semantic kind;
 - package manifests are sorted by canonical path;
 - snapshots are sorted by package name; and
 - owner results are sorted by package name.

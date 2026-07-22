@@ -23,11 +23,12 @@ state-publication request
 state-publication receipt
 ```
 
-The implementation currently exposes canonical package releases and a smaller
-compatibility-shaped installed model: validated legacy name and version lines,
-state-owned canonical package paths, ownership manifests, immutable snapshots,
-and the historical `/var/lib/pkg/db` backend.  That implementation is a sound
-migration base.  It is not yet the complete canonical model defined here.
+The implementation currently exposes canonical package releases, immutable
+installed control, and a smaller compatibility-shaped installed model:
+validated legacy name and version lines, state-owned canonical package paths,
+ownership manifests, immutable snapshots, and the historical `/var/lib/pkg/db`
+backend.  That implementation is a sound migration base.  It is not yet the
+complete canonical model defined here.
 
 This document is normative for the direction of the public model and storage
 interfaces.  Existing behavior remains current until a later commit implements
@@ -292,6 +293,26 @@ historically unavailable  the compatibility format did not retain the facts
 A single Boolean completeness flag is insufficient where those states differ.
 Canonical records must retain field-level or group-level completeness adequate
 to distinguish them.
+
+The public `installed_control` value implements this durable layer independently
+of installed ownership.  It normalizes runtime dependency declarations as a
+set, preserves ordered pre-remove and post-remove declarations as exact bytes,
+retains named target/profile facts, and stores canonical external provenance
+identities without recomputing their authority.
+
+Each control group records one of four historical states:
+
+```text
+recorded at installation
+recorded in compatibility storage
+supplied by explicit migration
+historically unavailable
+```
+
+An empty group in any of the first three states is known empty.  A historically
+unavailable group must contain no values.  There is deliberately no state for
+facts inferred from current mutable sources, candidates, archives, or the live
+filesystem.
 
 State target binding
 --------------------

@@ -59,6 +59,10 @@ grep -F 'cannot attach arbitrary identity bytes to different coordinates.' \
   "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
   fail "model manual omits package-release identity authority"
 
+grep -F 'Known empty and historically unavailable are different states.' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual omits installed-control completeness"
+
 for document in DESIGN.md STORAGE.md MIGRATION.md TESTING.md HISTORY.md
 do
   test -s "$source_root/$document" || fail "missing or empty $document"
