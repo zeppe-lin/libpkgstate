@@ -396,9 +396,22 @@ pkgstate/publication-request/1
 pkgstate/publication-receipt/1
 ```
 
-Canonical encoding must use explicit integer encodings, explicit optional-value
-markers, and length-prefixed byte strings.  It must define ordering for every
-set or map before hashing.
+Canonical records use one common envelope:
+
+```text
+9 bytes   literal `pkgstate` followed by NUL
+u16be     canonical-record encoding version, currently 1
+u64be     domain-label byte length
+octets    exact domain-label bytes
+...       schema-owned fields
+```
+
+Schema fields use unsigned big-endian integers, one-byte Boolean or optional
+markers with values 0 and 1, and byte strings prefixed by an unsigned 64-bit
+big-endian length.  An embedded digest is encoded as its unsigned 16-bit
+representation version, unsigned 16-bit algorithm identifier, unsigned 64-bit
+byte length, and exact digest bytes.  Lists and maps must encode an explicit
+count and define canonical member ordering before hashing.
 
 Canonical identity must never depend on:
 

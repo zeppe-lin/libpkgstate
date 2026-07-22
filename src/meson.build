@@ -7,6 +7,8 @@ libpkgstate = library(
   'pkgstate',
   [
     'error.cpp',
+    'digest.cpp',
+    'canonical_record.cpp',
     'package_identity.cpp',
     'package_path.cpp',
     'owned_entry.cpp',
@@ -16,6 +18,7 @@ libpkgstate = library(
   ],
   cpp_args: ['-D_FILE_OFFSET_BITS=64'],
   include_directories: public_inc,
+  dependencies: libcrypto_dep,
   install: true,
   version: meson.project_version(),
   soversion: '0',
@@ -24,6 +27,7 @@ libpkgstate = library(
 libpkgstate_dep = declare_dependency(
   link_with: libpkgstate,
   include_directories: public_inc,
+  dependencies: libcrypto_dep,
   compile_args: ['-D_FILE_OFFSET_BITS=64'],
 )
 
@@ -32,6 +36,7 @@ meson.override_dependency('libpkgstate', libpkgstate_dep)
 install_headers(
   '../include/libpkgstate/libpkgstate.h',
   '../include/libpkgstate/error.h',
+  '../include/libpkgstate/digest.h',
   '../include/libpkgstate/package_identity.h',
   '../include/libpkgstate/package_path.h',
   '../include/libpkgstate/owned_entry.h',
@@ -49,4 +54,5 @@ pkgconf.generate(
   filebase: 'libpkgstate',
   description: 'Installed package state and ownership library',
   subdirs: '.',
+  requires_private: [libcrypto_dep],
 )

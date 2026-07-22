@@ -7,12 +7,40 @@ pkgstate_model - identities, installed ownership, and snapshots
 # SYNOPSIS
 
 ```
+#include <libpkgstate/digest.h>
 #include <libpkgstate/package_identity.h>
 #include <libpkgstate/package_path.h>
 #include <libpkgstate/owned_entry.h>
 #include <libpkgstate/installed_package.h>
 #include <libpkgstate/snapshot.h>
 ```
+
+# DIGEST IDENTITIES
+
+Canonical installed-state identities are strongly typed digest values. The
+public representation is:
+
+```
+v1:sha256:<64 lowercase hexadecimal digits>
+```
+
+Parsing rejects unsupported representation versions, unsupported algorithms,
+wrong lengths, uppercase hexadecimal, and non-hexadecimal bytes with
+*pkgstate::digest_error*. The exception carries a *digest_error_code* and
+derives from *pkgstate::identity_error*.
+
+Each semantic domain is a distinct C++ type. For example,
+*package_release_identity*, *installed_control_identity*,
+*installed_package_identity*, *ownership_inventory_identity*, and
+*installed_state_snapshot_identity* cannot be substituted for one another even
+when their represented SHA-256 bytes are equal.
+
+Publication, target-binding, store, root-view, backend, and locking-domain
+identities use the same representation but remain separate strong types.
+
+The canonical record domain assigned to an identity type is available through
+*canonical_domain()*. Record hashing is library-owned; parsing digest text does
+not grant a caller authority to assert that the represented object exists.
 
 # PACKAGE IDENTITY
 

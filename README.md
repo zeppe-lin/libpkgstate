@@ -7,6 +7,7 @@ durable installed package state.
 It provides:
 
 * validated package names and versions;
+* strongly typed algorithm-qualified state identities;
 * state-owned canonical package paths;
 * canonical installed ownership manifests;
 * immutable snapshots with package and ownership indexes;
@@ -52,6 +53,10 @@ snapshot -------------> package lookup and shared ownership
        v
 store / write_transaction
 ```
+
+Canonical state identities use distinct C++ types and the strict textual form
+`v1:sha256:<lowercase-hex>`.  The identity substrate is present before those
+identities are attached to the compatibility-shaped package and snapshot model.
 
 Important invariants:
 
@@ -100,8 +105,9 @@ Build-time requirements:
 
 * a C++17 compiler;
 * Meson 1.6.0 or later;
-* Ninja; and
-* pkg-config.
+* Ninja;
+* pkg-config; and
+* `libcrypto` with SHA-256 EVP support.
 
 The core library has no `libpkgimage` dependency.  The optional `pkginfo`
 frontend requires:

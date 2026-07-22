@@ -3,6 +3,21 @@
 
 if get_option('tests').allowed()
   sh = find_program('sh')
+  digest_test = executable(
+    'digest-test',
+    'digest_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('validate versioned state identities', digest_test)
+
+  canonical_record_test = executable(
+    'canonical-record-test',
+    'canonical_record_test.cpp',
+    include_directories: include_directories('../src'),
+    dependencies: libpkgstate_dep,
+  )
+  test('hash canonical state records', canonical_record_test)
+
   package_path_test = executable(
     'package-path-test',
     'package_path_test.cpp',
@@ -48,6 +63,7 @@ if get_option('tests').allowed()
   public_headers = [
     ['libpkgstate', 'libpkgstate/libpkgstate.h'],
     ['error', 'libpkgstate/error.h'],
+    ['digest', 'libpkgstate/digest.h'],
     ['package-identity', 'libpkgstate/package_identity.h'],
     ['package-path', 'libpkgstate/package_path.h'],
     ['owned-entry', 'libpkgstate/owned_entry.h'],

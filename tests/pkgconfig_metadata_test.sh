@@ -13,6 +13,13 @@ fail()
 
 test -s "$pc" || fail "missing generated metadata: $pc"
 
+if grep -E '^Requires:.*libcrypto' "$pc" >/dev/null; then
+  fail 'libcrypto leaked into public pkg-config requirements'
+fi
+
+test "$(grep -Ec '^Requires\.private:.*(^|[[:space:],])libcrypto([[:space:],]|$)' "$pc")" -eq 1 ||
+  fail 'private pkg-config metadata does not require libcrypto exactly once'
+
 if grep -E '^Requires(\.private)?:.*libpkgimage' "$pc" >/dev/null; then
   fail 'core pkg-config metadata still exposes libpkgimage'
 fi

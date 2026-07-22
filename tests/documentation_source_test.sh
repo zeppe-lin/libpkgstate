@@ -51,6 +51,10 @@ grep -F 'Shared ownership is valid state.' \
   "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
   fail "model manual omits shared ownership"
 
+grep -F 'v1:sha256:<64 lowercase hexadecimal digits>' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual omits canonical digest representation"
+
 for document in DESIGN.md STORAGE.md MIGRATION.md TESTING.md HISTORY.md
 do
   test -s "$source_root/$document" || fail "missing or empty $document"

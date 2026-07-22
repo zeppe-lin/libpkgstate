@@ -32,6 +32,9 @@ copy of the package image.
 
 The public model consists of:
 
+*digest identities*
+	Strongly typed algorithm-qualified identities for canonical state domains.
+
 *package_identity*
 	Validated package name and version.
 
@@ -72,6 +75,9 @@ All public failures derive from *pkgstate::error*.
 
 *identity_error*
 	Invalid identity representation.
+
+*digest_error*
+	Invalid versioned algorithm-qualified digest representation.
 
 *path_error*
 	Invalid canonical installed package path.

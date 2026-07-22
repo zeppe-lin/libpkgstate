@@ -31,6 +31,12 @@ libpkgimage_dep = dependency(
 
 pkgconf = import('pkgconfig')
 
+libcrypto_dep = dependency(
+  'libcrypto',
+  required: true,
+  static: want_static,
+)
+
 if get_option('install_tools') and get_option('tools').disabled()
   error('install_tools requires tools to be enabled')
 endif

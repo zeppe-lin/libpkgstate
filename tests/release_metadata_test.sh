@@ -20,6 +20,13 @@ grep -F 'PROJECT_NUMBER         = 0.3.0' "$root/Doxyfile" >/dev/null ||
 grep -F "soversion: '0'" "$root/src/meson.build" >/dev/null ||
   fail 'libpkgstate soversion changed unexpectedly'
 
+grep -F "'libcrypto'" "$root/meson.build" >/dev/null ||
+  fail 'Meson metadata omits the canonical digest backend'
+
+grep -F 'requires_private: [libcrypto_dep]' \
+  "$root/src/meson.build" >/dev/null ||
+  fail 'pkg-config metadata omits private libcrypto closure'
+
 grep -F "version: '>=0.3.0'" "$root/meson.build" >/dev/null ||
   fail 'Meson dependency floor does not require libpkgimage 0.3.0'
 
