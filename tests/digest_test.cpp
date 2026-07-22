@@ -90,8 +90,12 @@ main()
         "pkgstate/publication-request/1");
   CHECK(pkgstate::state_publication_receipt_identity::canonical_domain() ==
         "pkgstate/publication-receipt/1");
+  CHECK(pkgstate::legacy_package_observation_identity::canonical_domain() ==
+        "pkgstate/legacy-package-observation/1");
+  CHECK(pkgstate::legacy_snapshot_observation_identity::canonical_domain() ==
+        "pkgstate/legacy-snapshot-observation/1");
 
-  const std::array<std::string_view, 13> domains = {
+  const std::array<std::string_view, 15> domains = {
       pkgstate::package_release_identity::canonical_domain(),
       pkgstate::installed_control_identity::canonical_domain(),
       pkgstate::installed_package_identity::canonical_domain(),
@@ -105,6 +109,8 @@ main()
       pkgstate::installed_state_snapshot_identity::canonical_domain(),
       pkgstate::state_publication_request_identity::canonical_domain(),
       pkgstate::state_publication_receipt_identity::canonical_domain(),
+      pkgstate::legacy_package_observation_identity::canonical_domain(),
+      pkgstate::legacy_snapshot_observation_identity::canonical_domain(),
   };
   for (std::size_t left = 0; left < domains.size(); ++left)
   {

@@ -111,7 +111,10 @@ std::unique_ptr<write_transaction> begin_write() const;
 
 This interface is explicitly compatibility-scoped.  It reads and mutates
 `legacy_snapshot` values only.  It does not publish canonical `snapshot` values
-and does not implement stale-safe compare-and-publish.
+and does not implement stale-safe compare-and-publish.  Returned package and
+snapshot values expose fixed completeness profiles and exact compatibility
+observation identities.  Those identities commit only to retained legacy facts
+and are not canonical installed-state identities.
 
 The canonical model provides immutable `state_publication_request` values, and
 `canonical_store` enforces the compare-and-publish sequence. The concrete

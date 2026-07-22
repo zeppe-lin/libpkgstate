@@ -224,6 +224,14 @@ struct state_publication_receipt_identity_domain final {
   static constexpr std::string_view canonical_domain =
       "pkgstate/publication-receipt/1";
 };
+struct legacy_package_observation_identity_domain final {
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/legacy-package-observation/1";
+};
+struct legacy_snapshot_observation_identity_domain final {
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/legacy-snapshot-observation/1";
+};
 
 } // namespace detail
 
@@ -278,5 +286,13 @@ using state_publication_request_identity =
 /*! \brief Identity of one immutable state-publication receipt. */
 using state_publication_receipt_identity =
     detail::typed_digest<detail::state_publication_receipt_identity_domain>;
+
+/*! \brief Identity of exact incomplete facts in one legacy package record. */
+using legacy_package_observation_identity =
+    detail::typed_digest<detail::legacy_package_observation_identity_domain>;
+
+/*! \brief Identity of one exact incomplete legacy database observation. */
+using legacy_snapshot_observation_identity =
+    detail::typed_digest<detail::legacy_snapshot_observation_identity_domain>;
 
 } // namespace pkgstate

@@ -11,6 +11,8 @@
 #include <cstddef>
 #include <vector>
 
+#include <libpkgstate/digest.h>
+#include <libpkgstate/legacy_completeness.h>
 #include <libpkgstate/owned_entry.h>
 #include <libpkgstate/package_identity.h>
 
@@ -23,7 +25,8 @@ namespace pkgstate {
  * an ownership manifest.  It does not retain a canonical package release,
  * installed control, target binding, application evidence, or canonical
  * installed-package identity.  This type preserves that limitation instead of
- * inventing missing canonical facts.
+ * inventing missing canonical facts.  Its observation identity commits only to
+ * the retained compatibility fields.
  */
 class legacy_installed_package final {
 public:
@@ -39,6 +42,13 @@ public:
 
   /*! \brief Return the historical package identity. */
   [[nodiscard]] const package_identity& identity() const noexcept;
+
+  /*! \brief Return the exact identity of this incomplete observation. */
+  [[nodiscard]] const legacy_package_observation_identity&
+  observation_identity() const noexcept;
+
+  /*! \brief Return the fixed historical completeness profile. */
+  [[nodiscard]] legacy_package_completeness completeness() const noexcept;
 
   /*! \brief Return the canonical path-sorted ownership manifest. */
   [[nodiscard]] const std::vector<owned_entry>& manifest() const noexcept;
@@ -56,6 +66,7 @@ public:
 private:
   package_identity identity_;
   std::vector<owned_entry> manifest_;
+  legacy_package_observation_identity observation_identity_;
 };
 
 } // namespace pkgstate

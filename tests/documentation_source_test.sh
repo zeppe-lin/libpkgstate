@@ -31,6 +31,9 @@ check_page \
   man/pkgstate_canonical_generation_store.3.scdoc \
   PKGSTATE_CANONICAL_GENERATION_STORE\(3\)
 check_page \
+  man/pkgstate_legacy_compatibility.3.scdoc \
+  PKGSTATE_LEGACY_COMPATIBILITY\(3\)
+check_page \
   man/pkgstate_legacy_text_store.3.scdoc \
   PKGSTATE_LEGACY_TEXT_STORE\(3\)
 check_page man/pkgstate-db.5.scdoc PKGSTATE-DB\(5\)
@@ -148,6 +151,19 @@ grep -F 'constructs *legacy_installed_package* records' \
   "$source_root/man/pkgstate_legacy_text_store.3.scdoc" >/dev/null ||
   fail "legacy backend manual claims canonical installed records"
 
+
+grep -F 'derived_from_retained_facts' \
+  "$source_root/man/pkgstate_legacy_compatibility.3.scdoc" >/dev/null ||
+  fail "legacy compatibility manual omits derived fact origin"
+
+grep -F 'legacy_snapshot_observation_identity' \
+  "$source_root/man/pkgstate_legacy_compatibility.3.scdoc" >/dev/null ||
+  fail "legacy compatibility manual omits observation identity"
+
+grep -F 'An empty retained manifest is known empty' \
+  "$source_root/DESIGN.md" >/dev/null ||
+  fail "design collapses known-empty legacy ownership into unavailable"
+
 for document in DESIGN.md STORAGE.md MIGRATION.md TESTING.md HISTORY.md
 do
   test -s "$source_root/$document" || fail "missing or empty $document"
@@ -160,6 +176,7 @@ for page in \
   'pkgstate_model(3)' \
   'pkgstate_store(3)' \
   'pkgstate_canonical_generation_store(3)' \
+  'pkgstate_legacy_compatibility(3)' \
   'pkgstate_legacy_text_store(3)' \
   'pkgstate-db(5)' \
   'pkgstate-generation(5)' \

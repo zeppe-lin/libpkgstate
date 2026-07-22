@@ -60,6 +60,7 @@ install_headers(
   '../include/libpkgstate/publication_receipt.h',
   '../include/libpkgstate/canonical_store.h',
   '../include/libpkgstate/canonical_generation_store.h',
+  '../include/libpkgstate/legacy_completeness.h',
   '../include/libpkgstate/legacy_installed_package.h',
   '../include/libpkgstate/legacy_snapshot.h',
   '../include/libpkgstate/write_transaction.h',

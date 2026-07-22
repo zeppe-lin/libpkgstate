@@ -39,7 +39,9 @@ legacy_snapshot               one incomplete database observation
 ```
 
 Those values do not pretend to contain canonical releases, installed control,
-target binding, typed installed identities, or snapshot identity.
+target binding, typed installed identities, or canonical snapshot identity.
+They expose fixed completeness profiles and separate observation identities for
+the exact incomplete facts that were read.
 
 The `libpkgstate` library does not inspect package archives, apply installation
 policy, mutate the installed filesystem, stage rejected objects, run maintenance
@@ -127,7 +129,10 @@ Compatibility storage uses a separate model:
 ```text
 package_identity                 historical name + opaque version line
 legacy_installed_package         compatibility ownership record
+legacy_package_completeness      retained, derived, and unavailable facts
 legacy_snapshot                  indexed compatibility observation
+legacy_snapshot_completeness     snapshot-level fact availability
+legacy observation identities    exact incomplete source observations
 store / write_transaction        compatibility mutation only
 legacy_text_store                /var/lib/pkg/db backend
 ```
@@ -135,7 +140,11 @@ legacy_text_store                /var/lib/pkg/db backend
 A compatibility read does not parse an opaque version line into canonical
 version and release fields.  It does not reconstruct missing control or target
 facts from current sources, archives, filenames, configuration, or the live
-filesystem.
+filesystem.  Completeness profiles distinguish facts retained by the database
+format, facts derived only from those retained values, and facts that are
+historically unavailable.  Package and snapshot observation identities name
+the exact incomplete source without impersonating canonical installed
+authority.
 
 Important invariants:
 
@@ -197,6 +206,8 @@ The installed manual suite is:
   requests;
 * `pkgstate_store(3)` — canonical and compatibility store interfaces;
 * `pkgstate_canonical_generation_store(3)` — immutable-generation backend;
+* `pkgstate_legacy_compatibility(3)` — incomplete facts and observation
+  identities;
 * `pkgstate_legacy_text_store(3)` — compatibility backend;
 * `pkgstate-db(5)` — line-oriented compatibility database format;
 * `pkgstate-generation(5)` — canonical generation storage format; and

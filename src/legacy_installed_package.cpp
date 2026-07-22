@@ -4,24 +4,72 @@
 #include <libpkgstate/legacy_installed_package.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <utility>
 
 #include <libpkgstate/error.h>
 
+#include "canonical_record.h"
+
 namespace pkgstate {
 namespace {
 
-void
-validate_entry_type(owned_entry_type type)
+std::uint8_t
+canonical_entry_type(owned_entry_type type)
 {
   switch (type)
   {
     case owned_entry_type::non_directory:
+      return 1;
     case owned_entry_type::directory:
-      return;
+      return 2;
   }
 
   throw state_error("invalid legacy ownership entry type");
+}
+
+std::vector<owned_entry>
+normalize_manifest(const package_identity& identity,
+                   std::vector<owned_entry> manifest)
+{
+  for (const owned_entry& entry : manifest)
+    static_cast<void>(canonical_entry_type(entry.type));
+
+  std::sort(manifest.begin(), manifest.end(),
+            [](const owned_entry& lhs, const owned_entry& rhs) {
+              return lhs.path < rhs.path;
+            });
+
+  const auto duplicate = std::adjacent_find(
+      manifest.begin(), manifest.end(),
+      [](const owned_entry& lhs, const owned_entry& rhs) {
+        return lhs.path == rhs.path;
+      });
+  if (duplicate != manifest.end())
+  {
+    throw state_error("duplicate owned path in legacy package " +
+                      identity.name() + ": " + duplicate->path.string());
+  }
+
+  return manifest;
+}
+
+legacy_package_observation_identity
+compute_observation_identity(const package_identity& identity,
+                             const std::vector<owned_entry>& manifest)
+{
+  detail::canonical_record record(
+      legacy_package_observation_identity::canonical_domain());
+  record.append_bytes(identity.name());
+  record.append_bytes(identity.version());
+  record.append_u64(static_cast<std::uint64_t>(manifest.size()));
+  for (const owned_entry& entry : manifest)
+  {
+    record.append_bytes(entry.path.string());
+    record.append_u8(canonical_entry_type(entry.type));
+  }
+
+  return legacy_package_observation_identity::from_sha256(record.sha256());
 }
 
 } // namespace
@@ -29,32 +77,28 @@ validate_entry_type(owned_entry_type type)
 legacy_installed_package::legacy_installed_package(
     package_identity identity,
     std::vector<owned_entry> manifest)
-    : identity_(std::move(identity)), manifest_(std::move(manifest))
+    : identity_(std::move(identity)),
+      manifest_(normalize_manifest(identity_, std::move(manifest))),
+      observation_identity_(compute_observation_identity(identity_, manifest_))
 {
-  for (const owned_entry& entry : manifest_)
-    validate_entry_type(entry.type);
-
-  std::sort(manifest_.begin(), manifest_.end(),
-            [](const owned_entry& lhs, const owned_entry& rhs) {
-              return lhs.path < rhs.path;
-            });
-
-  const auto duplicate = std::adjacent_find(
-      manifest_.begin(), manifest_.end(),
-      [](const owned_entry& lhs, const owned_entry& rhs) {
-        return lhs.path == rhs.path;
-      });
-  if (duplicate != manifest_.end())
-  {
-    throw state_error("duplicate owned path in legacy package " +
-                      identity_.name() + ": " + duplicate->path.string());
-  }
 }
 
 const package_identity&
 legacy_installed_package::identity() const noexcept
 {
   return identity_;
+}
+
+const legacy_package_observation_identity&
+legacy_installed_package::observation_identity() const noexcept
+{
+  return observation_identity_;
+}
+
+legacy_package_completeness
+legacy_installed_package::completeness() const noexcept
+{
+  return {};
 }
 
 const std::vector<owned_entry>&

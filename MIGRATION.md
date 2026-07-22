@@ -136,9 +136,12 @@ Existing valid records are read into `legacy_installed_package` values inside a
 
 That compatibility observation is not a canonical installed-state snapshot. It
 has no canonical release decomposition, installed control, target binding,
-installed-package identity, ownership-inventory identity, or snapshot identity.
-The frontend needs none of those facts for its preserved `-i`, `-l`, and `-o`
-queries.
+installed-package identity, ownership-inventory identity, or canonical snapshot
+identity.  Its completeness profile reports those facts as historically
+unavailable.  Separate package and snapshot observation identities commit to the
+exact incomplete facts that were read, so a later migration can cite its source
+without promoting it to canonical installed authority.  The frontend needs none
+of the unavailable facts for its preserved `-i`, `-l`, and `-o` queries.
 
 Invalid historical records are rejected rather than silently normalized beyond
 the documented path and ordering rules. Missing canonical facts are not

@@ -788,10 +788,27 @@ The public compatibility projection is explicit:
 ```text
 package_identity
 legacy_installed_package
+legacy_package_completeness
 legacy_snapshot
+legacy_snapshot_completeness
+legacy package and snapshot observation identities
 store / write_transaction
 legacy_text_store
 ```
+
+Every compatibility fact is classified as retained by the compatibility format,
+derived only from retained compatibility facts, or historically unavailable.
+An empty retained manifest is known empty; it is not unavailable.  The fixed
+completeness profiles expose this distinction without allowing callers to mark
+missing canonical history as known.
+
+Each legacy package computes an observation identity over its name, opaque
+version line, normalized paths, and coarse object classes.  Each legacy snapshot
+computes an observation identity over package observation identities in package
+name order.  These identities name exact incomplete observations for diagnostics
+and migration binding.  They are distinct domains from canonical installed
+package and installed snapshot identities and carry no target, control,
+application, transaction, or publication authority.
 
 Canonical `installed_package` and `snapshot` values are different types and
 cannot be passed to the compatibility transaction interface accidentally.

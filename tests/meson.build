@@ -100,6 +100,13 @@ if get_option('tests').allowed()
   )
   test('preserve incomplete legacy state', legacy_model_test)
 
+  legacy_completeness_test = executable(
+    'legacy-completeness-test',
+    'legacy_completeness_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('identify incomplete legacy observations', legacy_completeness_test)
+
   legacy_text_store_test = executable(
     'legacy-text-store-test',
     'legacy_text_store_test.cpp',
@@ -148,6 +155,7 @@ if get_option('tests').allowed()
     ['canonical-store', 'libpkgstate/canonical_store.h'],
     ['canonical-generation-store',
      'libpkgstate/canonical_generation_store.h'],
+    ['legacy-completeness', 'libpkgstate/legacy_completeness.h'],
     ['legacy-installed-package',
      'libpkgstate/legacy_installed_package.h'],
     ['legacy-snapshot', 'libpkgstate/legacy_snapshot.h'],

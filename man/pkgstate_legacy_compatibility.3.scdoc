@@ -1,0 +1,79 @@
+PKGSTATE_LEGACY_COMPATIBILITY(3)
+
+# NAME
+
+pkgstate_legacy_compatibility - incomplete historical state and observation
+identity
+
+# SYNOPSIS
+
+```
+#include <libpkgstate/legacy_completeness.h>
+#include <libpkgstate/legacy_installed_package.h>
+#include <libpkgstate/legacy_snapshot.h>
+```
+
+# DESCRIPTION
+
+The historical _/var/lib/pkg/db_ format records package names, opaque version
+lines, and directory-versus-non-directory ownership paths. It does not record
+the complete facts required by the canonical installed-state model.
+
+*pkgstate::legacy_installed_package* and *pkgstate::legacy_snapshot* expose that
+limited observation without reconstructing absent history.
+
+# FACT ORIGIN
+
+*pkgstate::legacy_fact_availability* classifies each exposed fact as:
+
+*retained_by_compatibility_format*
+	The historical format can retain the exact fact.
+
+*derived_from_retained_facts*
+	The fact is computed only from retained compatibility facts.
+
+*historically_unavailable*
+	The historical format did not retain the fact.
+
+*legacy_package_completeness* reports the package-record profile.
+*legacy_snapshot_completeness* reports the database-observation profile.
+The profiles are fixed by the historical format, not selected by callers.
+
+An empty retained ownership manifest is known empty. It is not historically
+unavailable.
+
+# OBSERVATION IDENTITIES
+
+Each compatibility package computes one
+*legacy_package_observation_identity* from:
+
+- package name;
+- opaque version line; and
+- normalized ownership paths and coarse object classes.
+
+Each compatibility snapshot computes one
+*legacy_snapshot_observation_identity* from package-observation identities in
+package-name order.
+
+These identities name exact incomplete observations. They are not canonical
+*installed_package_identity* or *installed_state_snapshot_identity* values and
+do not assert a target binding, installed control, application evidence, or
+publication history.
+
+Input package and manifest order do not affect observation identity. Any change
+to a retained name, opaque version line, path, or object class changes the
+corresponding observation identity.
+
+# AUTHORITY BOUNDARY
+
+A compatibility observation may support old installed-package and ownership
+queries. It cannot be admitted as complete canonical installed truth.
+
+Migration must cite the legacy snapshot observation identity, preserve recorded
+facts, and obtain missing canonical facts through explicit named inputs. Reading
+compatibility state alone is not migration.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3),
+*pkgstate_legacy_text_store*(3), *pkgstate-db*(5)

@@ -14,6 +14,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <libpkgstate/digest.h>
+#include <libpkgstate/legacy_completeness.h>
 #include <libpkgstate/legacy_installed_package.h>
 
 namespace pkgstate {
@@ -23,7 +25,8 @@ namespace pkgstate {
  *
  * This value is explicitly incomplete installed truth.  It has no target
  * binding, canonical package releases, installed control, typed installed
- * identities, or canonical snapshot identity.
+ * identities, or canonical snapshot identity.  Its separate observation
+ * identity commits only to normalized compatibility records.
  */
 class legacy_snapshot final {
 public:
@@ -33,6 +36,13 @@ public:
    */
   explicit legacy_snapshot(
       std::vector<legacy_installed_package> packages = {});
+
+  /*! \brief Return the exact identity of this incomplete observation. */
+  [[nodiscard]] const legacy_snapshot_observation_identity&
+  observation_identity() const noexcept;
+
+  /*! \brief Return the fixed historical completeness profile. */
+  [[nodiscard]] legacy_snapshot_completeness completeness() const noexcept;
 
   /*! \brief Return records in package-name order. */
   [[nodiscard]] const std::vector<legacy_installed_package>&
@@ -55,6 +65,7 @@ public:
 
 private:
   std::vector<legacy_installed_package> packages_;
+  legacy_snapshot_observation_identity observation_identity_;
   std::unordered_map<std::string, std::vector<std::size_t>> owners_;
 };
 
