@@ -1,6 +1,42 @@
 libpkgstate storage contract
 ============================
 
+Canonical compare-and-publish
+-----------------------------
+
+`pkgstate::canonical_store` exposes complete canonical state:
+
+```cpp
+snapshot read() const;
+state_publication_receipt
+compare_and_publish(const state_publication_request&) const;
+```
+
+`compare_and_publish()` is non-virtual and owns the publication sequence. It:
+
+1. obtains one exclusive `canonical_publication_transaction`;
+2. reads the actual complete snapshot held by that transaction;
+3. rejects a target-binding mismatch as backend corruption;
+4. returns a stale receipt without mutation when snapshot identities differ;
+5. derives the only snapshot permitted by the request deltas;
+6. invokes the backend publication primitive exactly once; and
+7. maps the constrained backend result into a typed receipt.
+
+The transaction constructor acquires the publication lock and performs the
+authoritative reread under that lock. Its destructor releases the lock. The
+backend receives the already validated resulting snapshot; it cannot replace it
+with a caller-authored state value through this interface.
+
+`state_publication_backend_result` can report confirmed publication, semantic
+rejection, failure before publication, publication without durable confirmation,
+or an indeterminate attempt. It cannot report stale state. Staleness is decided
+only by the non-virtual comparison layer. Publication outcomes that crossed a
+storage boundary require an explicit atomicity boundary.
+
+Failure to acquire the lock or obtain a trustworthy actual snapshot raises
+`store_error`, because no receipt can truthfully cite an observed prior state.
+Once prior state is known, ordinary attempt outcomes are returned as receipts.
+
 Compatibility store abstraction
 -------------------------------
 
@@ -15,12 +51,10 @@ This interface is explicitly compatibility-scoped.  It reads and mutates
 `legacy_snapshot` values only.  It does not publish canonical `snapshot` values
 and does not implement stale-safe compare-and-publish.
 
-
-The canonical model now provides immutable `state_publication_request` values.
-A request binds one exact expected canonical snapshot to normalized package
-deltas and completed evidence. It does not publish itself. Canonical storage
-still requires a separate compare-and-publish interface, typed receipts, and a
-backend able to preserve complete canonical records without loss.
+The canonical model provides immutable `state_publication_request` values, and
+`canonical_store` now enforces the compare-and-publish sequence. A concrete
+canonical backend must still preserve complete records without loss and
+implement the lock-scoped publication transaction.
 
 `read()` returns one immutable observation of compatibility records.
 `begin_write()` returns an isolated transaction initialized from current
@@ -199,17 +233,18 @@ alternate root further.
 Typed receipt boundary
 ----------------------
 
-`state_publication_receipt` is the immutable result vocabulary for a future
-canonical backend.  It distinguishes stale comparison, semantic rejection,
+`state_publication_receipt` is the immutable result vocabulary used by the
+canonical compare-and-publish interface. It distinguishes stale comparison,
+semantic rejection,
 failure before publication, confirmed publication, publication without durable
 confirmation, and an indeterminate outcome that requires an authoritative
 reread.
 
 The receipt factories validate coherent state facts and compute receipt
-identity.  They do not acquire locks, reread storage, publish state, confirm
-durability, or implement compare-and-publish.  A backend must construct a
-receipt from the actual state observed and the actual publication boundary; a
-caller-created value is not independent proof that publication occurred.
+identity. They do not acquire locks or publish state. The non-virtual
+`canonical_store::compare_and_publish()` method constructs receipts from the
+actual lock-scoped state and backend result; a caller-created value is not
+independent proof that publication occurred.
 
 Canonical backend boundary
 --------------------------
@@ -218,6 +253,7 @@ The compatibility store is not the canonical state backend.
 
 A canonical backend must preserve complete `snapshot` values, installed
 control, target binding, typed identities, publication requests, and receipts
-without loss.  It requires a separate compare-and-publish interface and storage
-format.  The historical transaction API remains available only for the old
+without loss. It implements the `canonical_store` transaction hook and a
+lossless storage format. The historical transaction API remains available only
+for the old
 database during migration.

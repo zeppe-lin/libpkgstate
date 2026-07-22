@@ -615,6 +615,23 @@ blindly applying an A-based result would accept stale planning authority.
 A stale-state refusal is an ordinary typed publication outcome.  It is not an
 I/O exception and must not mutate durable state.
 
+The public `canonical_store::compare_and_publish()` method implements this
+sequence and is deliberately non-virtual. A backend supplies only one
+exclusive `canonical_publication_transaction`: the actual snapshot read
+under its lock, a line-safe storage-format identifier, and a constrained
+publication primitive that receives the one request-derived result. The
+backend cannot override the comparison or report stale state itself.
+
+`state_publication_backend_result` reports only outcomes after the actual
+prior snapshot is known. Confirmed, durability-unconfirmed, and
+indeterminate outcomes require an explicit storage atomicity boundary.
+The indeterminate form can state only whether the already computed result
+is established; it cannot cite arbitrary snapshot identity bytes.
+
+Lock acquisition or authoritative-reread failure raises `store_error`,
+because no truthful receipt can be built without an actual prior snapshot.
+After that snapshot is known, ordinary attempt outcomes use typed receipts.
+
 State-publication receipt
 -------------------------
 
@@ -954,7 +971,7 @@ The canonical implementation may proceed only in dependency order:
 2. add structured package release and installed control;
 3. add state target binding and complete immutable snapshots;
 4. add publication requests and typed receipts;
-5. implement compare-and-publish;
+5. implement compare-and-publish; [implemented]
 6. add a lossless canonical backend;
 7. adapt legacy state as explicitly incomplete;
 8. add explicit migration; and

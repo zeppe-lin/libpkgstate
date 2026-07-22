@@ -4,6 +4,7 @@
 #include <libpkgstate/publication_receipt.h>
 
 #include "canonical_record.h"
+#include "publication_projection.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -95,58 +96,6 @@ normalize_evidence(
   return subordinate_evidence;
 }
 
-snapshot
-apply_request(const state_publication_request& request,
-              const snapshot& actual_prior)
-{
-  std::vector<installed_package> packages = actual_prior.packages();
-
-  for (const package_state_delta& delta : request.deltas())
-  {
-    const auto position = std::lower_bound(
-        packages.begin(), packages.end(), delta.package_name(),
-        [](const installed_package& package, std::string_view name) {
-          return package.release().name() < name;
-        });
-
-    switch (delta.kind())
-    {
-      case package_state_delta_kind::install:
-        if (position != packages.end() &&
-            position->release().name() == delta.package_name())
-        {
-          throw state_error(
-              "publication receipt install result is internally inconsistent");
-        }
-        packages.insert(position, *delta.proposed_package());
-        break;
-
-      case package_state_delta_kind::replace:
-        if (position == packages.end() ||
-            position->release().name() != delta.package_name())
-        {
-          throw state_error(
-              "publication receipt replacement result is internally "
-              "inconsistent");
-        }
-        *position = *delta.proposed_package();
-        break;
-
-      case package_state_delta_kind::remove:
-        if (position == packages.end() ||
-            position->release().name() != delta.package_name())
-        {
-          throw state_error(
-              "publication receipt removal result is internally inconsistent");
-        }
-        packages.erase(position);
-        break;
-    }
-  }
-
-  return snapshot::make(request.target_binding(), std::move(packages));
-}
-
 installed_state_snapshot_identity
 validate_result(const state_publication_request& request,
                 const snapshot& actual_prior,
@@ -158,7 +107,8 @@ validate_result(const state_publication_request& request,
         "publication receipt result belongs to another target");
   }
 
-  const snapshot expected_result = apply_request(request, actual_prior);
+  const snapshot expected_result =
+      detail::project_publication_request(request, actual_prior);
   if (resulting_snapshot.identity() != expected_result.identity())
   {
     throw state_error(
@@ -386,7 +336,8 @@ state_publication_receipt::indeterminate(
 
   if (resulting_snapshot.has_value())
   {
-    const snapshot expected_result = apply_request(request, actual_prior);
+    const snapshot expected_result =
+      detail::project_publication_request(request, actual_prior);
     if (*resulting_snapshot != expected_result.identity())
     {
       throw state_error(

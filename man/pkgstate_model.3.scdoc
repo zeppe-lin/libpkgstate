@@ -349,9 +349,9 @@ transaction evidence.
 
 The request is immutable and does not mutate storage. It is not an arbitrary
 caller-authored complete snapshot and does not grant planning intent the status
-of completed installed truth. A later compare-and-publish backend must reread
-state under its publication lock and compare *expected_snapshot()* before
-applying the deltas.
+of completed installed truth. *canonical_store::compare_and_publish()*
+rereads state under one publication lock and compares *expected_snapshot()*
+before applying the deltas.
 
 Queries provide:
 
@@ -441,6 +441,18 @@ atomicity_boundary()
 resulting_snapshot()
 subordinate_evidence()
 ```
+
+# COMPARE AND PUBLISH
+
+*pkgstate::canonical_store::compare_and_publish()* is non-virtual. It obtains
+one exclusive *canonical_publication_transaction*, compares the lock-scoped
+actual snapshot with the request, and returns a stale receipt without calling
+the backend publication primitive when identities differ.
+
+When current, it computes the only snapshot permitted by the request and passes
+that value to the backend. *state_publication_backend_result* reports the actual
+attempt outcome but cannot report stale state or attach an arbitrary resulting
+snapshot identity.
 
 # LEGACY COMPATIBILITY MODEL
 

@@ -62,6 +62,10 @@ The canonical model consists of:
 	outcomes, actual storage atomicity boundary, optional resulting snapshot,
 	storage format, subordinate evidence, and one computed receipt identity.
 
+*canonical_store*
+	Complete canonical reads and one non-virtual stale-safe
+	compare-and-publish operation.
+
 Canonical constructors do not accept caller-selected installed-package,
 publication-request, or publication-receipt identities. A package record
 contains no containing-snapshot identity, keeping the canonical identity graph
@@ -72,6 +76,11 @@ snapshot. It is a stale-safe transition request whose old package identities,
 proposed records, and evidence are validated against one expected snapshot.
 A receipt classifies one actual attempt but does not itself perform locking,
 publication, durability confirmation, or filesystem mutation.
+
+*canonical_store::compare_and_publish()* acquires one backend transaction,
+compares the actual snapshot under that lock, refuses stale requests without
+calling publication, computes the only permitted result, and returns a typed
+receipt. The method is non-virtual.
 
 The historical database uses explicitly different types:
 
@@ -92,6 +101,9 @@ Shared ownership is valid in both models and is returned explicitly.
 See *pkgstate_model*(3) for the complete model contract.
 
 # STORAGE
+
+The abstract *canonical_store* interface reads complete *snapshot* values and
+enforces stale-safe compare-and-publish.
 
 The abstract *store* and *write_transaction* interfaces are compatibility
 storage interfaces. They read and mutate *legacy_snapshot* and

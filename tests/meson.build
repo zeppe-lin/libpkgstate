@@ -78,6 +78,13 @@ if get_option('tests').allowed()
   test('classify typed state publication receipts',
        publication_receipt_test)
 
+  canonical_store_test = executable(
+    'canonical-store-test',
+    'canonical_store_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('enforce canonical compare and publish', canonical_store_test)
+
   legacy_model_test = executable(
     'legacy-model-test',
     'legacy_model_test.cpp',
@@ -130,6 +137,7 @@ if get_option('tests').allowed()
      'libpkgstate/publication_request.h'],
     ['publication-receipt',
      'libpkgstate/publication_receipt.h'],
+    ['canonical-store', 'libpkgstate/canonical_store.h'],
     ['legacy-installed-package',
      'libpkgstate/legacy_installed_package.h'],
     ['legacy-snapshot', 'libpkgstate/legacy_snapshot.h'],

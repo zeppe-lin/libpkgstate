@@ -2,14 +2,38 @@ PKGSTATE_STORE(3)
 
 # NAME
 
-pkgstate_store - compatibility package-state stores and write transactions
+pkgstate_store - canonical and compatibility package-state stores
 
 # SYNOPSIS
 
 ```
+#include <libpkgstate/canonical_store.h>
 #include <libpkgstate/store.h>
 #include <libpkgstate/write_transaction.h>
 ```
+
+# CANONICAL INTERFACE
+
+*pkgstate::canonical_store* exposes complete canonical state:
+
+```
+snapshot read() const;
+state_publication_receipt
+compare_and_publish(const state_publication_request&) const;
+```
+
+*compare_and_publish()* is non-virtual. It acquires one exclusive
+*canonical_publication_transaction*, obtains the actual snapshot under that
+lock, compares the request expected snapshot, and returns a stale receipt
+without invoking publication when they differ.
+
+When current, it derives the only snapshot permitted by the request deltas
+and passes that snapshot to the backend publication primitive. A constrained
+*state_publication_backend_result* is then converted into the typed receipt.
+A backend cannot override away the comparison or report stale state itself.
+
+Lock acquisition or authoritative reread failure raises *store_error*.
+Ordinary outcomes after actual state is known are returned as receipts.
 
 # COMPATIBILITY INTERFACE
 

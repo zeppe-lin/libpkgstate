@@ -37,6 +37,14 @@ grep -F 'A package-state transaction is not a filesystem transaction.' \
   "$source_root/man/pkgstate_store.3.scdoc" >/dev/null ||
   fail "store manual omits filesystem-transaction boundary"
 
+grep -F '*compare_and_publish()* is non-virtual.' \
+  "$source_root/man/pkgstate_store.3.scdoc" >/dev/null ||
+  fail "store manual omits non-overridable comparison"
+
+grep -F 'without invoking publication when they differ.' \
+  "$source_root/man/pkgstate_store.3.scdoc" >/dev/null ||
+  fail "store manual omits stale no-publication contract"
+
 grep -F 'non-blocking' \
   "$source_root/man/pkgstate_legacy_text_store.3.scdoc" >/dev/null ||
   fail "legacy backend manual omits non-blocking lock semantics"

@@ -14,6 +14,7 @@ It provides:
 * complete immutable snapshots with ownership and snapshot identities;
 * immutable expected-snapshot publication requests and package deltas;
 * typed immutable publication receipts with computed identities;
+* non-overridable canonical compare-and-publish orchestration;
 * state-owned canonical package paths and explicit shared ownership;
 * explicitly incomplete compatibility records and snapshots;
 * compatibility write transactions for the historical database; and
@@ -104,6 +105,14 @@ subordinate evidence.  Successful factories validate the exact resulting
 snapshot implied by the request deltas.  A stale-state receipt requires a
 different actual prior snapshot and records no mutation.
 
+`canonical_store::compare_and_publish()` owns the stale-safe publication
+algorithm. It begins one exclusive backend transaction, obtains the
+actual durable snapshot under that lock, compares its identity with the
+request, refuses stale state without calling publication, derives the
+only permitted resulting snapshot, and maps the constrained backend
+result into a typed receipt. The method is non-virtual; a backend cannot
+override away the comparison.
+
 Compatibility storage uses a separate model:
 
 ```text
@@ -135,12 +144,18 @@ Important invariants:
 * receipts distinguish stale, rejected, failed, published, durability-unknown,
   and indeterminate publication outcomes;
 * successful receipts validate the request-implied resulting snapshot;
+* canonical compare-and-publish performs the comparison under one lock;
+* stale requests never invoke the backend publication primitive;
 * package paths are canonical and root-relative;
 * package manifests contain at most one entry for each path;
 * packages, manifests, and owner results have deterministic order;
 * multiple packages may own the same path;
 * canonical and compatibility snapshots are immutable after construction; and
 * compatibility transactions mutate compatibility storage only.
+
+A `canonical_publication_transaction` is the backend half of canonical
+publication. It exposes the lock-scoped actual snapshot, storage format,
+and one constrained publication primitive; it does not own the comparison.
 
 A `write_transaction` is not a canonical publication request and is not a
 filesystem transaction.  It accepts `legacy_installed_package` values only.
