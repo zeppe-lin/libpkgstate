@@ -41,7 +41,7 @@ public:
 };
 
 /*!
- * \brief Reports an invalid installed control, package, or state snapshot.
+ * \brief Reports invalid installed state or publication model construction.
  */
 class state_error : public error {
 public:

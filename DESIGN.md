@@ -25,8 +25,9 @@ state-publication receipt
 
 The implementation currently exposes canonical package releases, immutable
 installed control, durable target-state bindings, complete canonical installed
-packages, and identified immutable snapshots.  Canonical package records,
-ownership inventories, and snapshots compute their own state-domain identities.
+packages, identified immutable snapshots, publication requests, and typed
+publication receipts.  Canonical package records, ownership inventories,
+snapshots, requests, and receipts compute their own state-domain identities.
 
 The historical `/var/lib/pkg/db` backend uses explicitly separate
 `legacy_installed_package` and `legacy_snapshot` values.  Those compatibility
@@ -655,6 +656,37 @@ that the old state remained authoritative.
 A receipt records state-storage publication only.  It must not imply that
 filesystem application, rejected-object staging, lifecycle execution,
 maintenance, and installed-state publication were globally atomic.
+
+The public `state_publication_receipt` factories implement this outcome model.
+Every receipt binds one request to the actual prior snapshot observed by the
+backend, the request target and store binding, one line-safe storage-format
+identifier, the typed outcome, durability knowledge, the actual state-storage
+atomicity boundary, an optional resulting snapshot identity, and normalized
+subordinate publication evidence.
+
+The factories enforce coherent outcome combinations:
+
+* `stale_expected_state` requires actual prior state to differ from the
+  request's expected snapshot and records no publication;
+* rejection and failure-before-publication require the expected prior state and
+  record no publication boundary;
+* confirmed and durability-unconfirmed publication require the expected prior
+  state, a declared state-storage atomicity boundary, and the exact resulting
+  snapshot implied by the request deltas; and
+* an indeterminate receipt requires the expected prior state and a publication
+  boundary, while any established resulting identity must equal the only result
+  permitted by the request.
+
+Subordinate evidence identities are backend-authoritative references.  Receipt
+construction sorts them by identity and rejects duplicates.  The receipt
+identity covers its schema, request, expected and actual prior snapshots, target
+binding, storage format, typed outcome, durability, atomicity boundary,
+resulting snapshot presence and identity, and subordinate evidence.
+
+Receipt construction is not storage mutation and does not implement
+compare-and-publish.  A trusted backend returns the value after observing the
+actual attempt.  The content identity prevents internally contradictory fields;
+it does not by itself authenticate which process or backend produced the value.
 
 Canonical storage backend
 -------------------------

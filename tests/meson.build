@@ -70,6 +70,14 @@ if get_option('tests').allowed()
   test('validate immutable state publication requests',
        publication_request_test)
 
+  publication_receipt_test = executable(
+    'publication-receipt-test',
+    'publication_receipt_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('classify typed state publication receipts',
+       publication_receipt_test)
+
   legacy_model_test = executable(
     'legacy-model-test',
     'legacy_model_test.cpp',
@@ -120,6 +128,8 @@ if get_option('tests').allowed()
     ['snapshot', 'libpkgstate/snapshot.h'],
     ['publication-request',
      'libpkgstate/publication_request.h'],
+    ['publication-receipt',
+     'libpkgstate/publication_receipt.h'],
     ['legacy-installed-package',
      'libpkgstate/legacy_installed_package.h'],
     ['legacy-snapshot', 'libpkgstate/legacy_snapshot.h'],

@@ -13,6 +13,7 @@ It provides:
 * complete canonical installed package records with computed identities;
 * complete immutable snapshots with ownership and snapshot identities;
 * immutable expected-snapshot publication requests and package deltas;
+* typed immutable publication receipts with computed identities;
 * state-owned canonical package paths and explicit shared ownership;
 * explicitly incomplete compatibility records and snapshots;
 * compatibility write transactions for the historical database; and
@@ -95,6 +96,14 @@ operation plan and matching completed application evidence.  Multi-package
 requests require transaction evidence.  The request is identified by
 libpkgstate and is not a caller-authored replacement snapshot.
 
+`state_publication_receipt` classifies one actual publication attempt.  Its
+factories bind the request to the actual prior snapshot, target and store
+binding, backend storage format, typed outcome, durability knowledge, actual
+state-storage atomicity boundary, optional resulting snapshot, and normalized
+subordinate evidence.  Successful factories validate the exact resulting
+snapshot implied by the request deltas.  A stale-state receipt requires a
+different actual prior snapshot and records no mutation.
+
 Compatibility storage uses a separate model:
 
 ```text
@@ -123,6 +132,9 @@ Important invariants:
 * publication requests compare against one exact prior snapshot identity;
 * proposed records retain the application and transaction evidence they cite;
 * composed requests contain no conflicting package-name deltas;
+* receipts distinguish stale, rejected, failed, published, durability-unknown,
+  and indeterminate publication outcomes;
+* successful receipts validate the request-implied resulting snapshot;
 * package paths are canonical and root-relative;
 * package manifests contain at most one entry for each path;
 * packages, manifests, and owner results have deterministic order;

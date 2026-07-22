@@ -196,6 +196,21 @@ For example, `pkginfo -r /mnt/root` constructs the database pathname:
 The library itself receives that explicit pathname and does not interpret the
 alternate root further.
 
+Typed receipt boundary
+----------------------
+
+`state_publication_receipt` is the immutable result vocabulary for a future
+canonical backend.  It distinguishes stale comparison, semantic rejection,
+failure before publication, confirmed publication, publication without durable
+confirmation, and an indeterminate outcome that requires an authoritative
+reread.
+
+The receipt factories validate coherent state facts and compute receipt
+identity.  They do not acquire locks, reread storage, publish state, confirm
+durability, or implement compare-and-publish.  A backend must construct a
+receipt from the actual state observed and the actual publication boundary; a
+caller-created value is not independent proof that publication occurred.
+
 Canonical backend boundary
 --------------------------
 

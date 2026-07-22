@@ -86,6 +86,14 @@ grep -F 'requires *transaction_evidence_identity*' \
   "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
   fail "model manual omits composed request evidence"
 
+grep -F 'A stale-state receipt is an ordinary typed outcome.' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual omits typed stale-state outcome"
+
+grep -F 'it does not acquire a lock,' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual makes receipt construction a publication operation"
+
 grep -F 'caller-authored complete replacement snapshot.' \
   "$source_root/DESIGN.md" >/dev/null ||
   fail "design permits caller-authored replacement snapshots"

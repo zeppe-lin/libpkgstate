@@ -57,13 +57,21 @@ The canonical model consists of:
 	completed application evidence, optional transaction evidence, and one
 	computed request identity.
 
-Canonical constructors do not accept caller-selected installed-package or
-publication-request identities. A package record contains no containing-snapshot
-identity, keeping the canonical identity graph acyclic.
+*state_publication_receipt*
+	One request and actual prior snapshot, typed publication and durability
+	outcomes, actual storage atomicity boundary, optional resulting snapshot,
+	storage format, subordinate evidence, and one computed receipt identity.
+
+Canonical constructors do not accept caller-selected installed-package,
+publication-request, or publication-receipt identities. A package record
+contains no containing-snapshot identity, keeping the canonical identity graph
+acyclic.
 
 A publication request is not a storage mutation and not an arbitrary complete
 snapshot. It is a stale-safe transition request whose old package identities,
 proposed records, and evidence are validated against one expected snapshot.
+A receipt classifies one actual attempt but does not itself perform locking,
+publication, durability confirmation, or filesystem mutation.
 
 The historical database uses explicitly different types:
 

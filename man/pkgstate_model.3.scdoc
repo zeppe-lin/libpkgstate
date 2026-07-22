@@ -2,7 +2,7 @@ PKGSTATE_MODEL(3)
 
 # NAME
 
-pkgstate_model - canonical installed facts and publication requests
+pkgstate_model - canonical installed facts and publication outcomes
 
 # SYNOPSIS
 
@@ -19,6 +19,7 @@ pkgstate_model - canonical installed facts and publication requests
 #include <libpkgstate/installed_package.h>
 #include <libpkgstate/snapshot.h>
 #include <libpkgstate/publication_request.h>
+#include <libpkgstate/publication_receipt.h>
 ```
 
 # DIGEST IDENTITIES
@@ -363,6 +364,84 @@ deltas()
 transaction_evidence()
 ```
 
+# STATE PUBLICATION RECEIPTS
+
+*pkgstate::state_publication_receipt* is an immutable typed result of one
+state-publication attempt.  Construct one through the outcome-specific
+factories:
+
+```
+published(...)
+stale_expected_state(...)
+request_rejected(...)
+failed_before_publication(...)
+published_but_durability_unconfirmed(...)
+indeterminate(...)
+```
+
+The outcome taxonomy distinguishes:
+
+```
+published
+stale_expected_state
+request_rejected
+failed_before_publication
+published_durability_unconfirmed
+indeterminate
+```
+
+A stale-state receipt is an ordinary typed outcome. It requires the actual prior
+snapshot to differ from the request's expected snapshot, records
+*state_publication_durability::not_attempted*, and records no state-storage
+atomicity boundary. Rejection and failure-before-publication likewise record no
+publication, but require the actual prior snapshot to match the request.
+
+Confirmed and durability-unconfirmed publication require a non-empty actual
+state-storage atomicity boundary and the exact resulting snapshot implied by
+the request deltas. The supported boundaries are complete state-object
+replacement and immutable generation selection. An indeterminate receipt may
+omit the resulting snapshot when an authoritative reread is required; any
+resulting identity it carries must equal the request-implied result.
+
+Every receipt records:
+
+- receipt and request identities;
+- expected and actual prior snapshot identities;
+- the request target and store binding;
+- the backend identity and a non-empty line-safe storage-format identifier;
+- typed publication and durability outcomes;
+- the actual state-storage atomicity boundary;
+- the resulting snapshot identity when established; and
+- subordinate backend evidence identities in canonical order.
+
+Duplicate subordinate evidence is rejected. The library computes
+*state_publication_receipt_identity* from every recorded field. Callers cannot
+attach arbitrary receipt identity bytes to contradictory outcomes.
+
+Receipt construction validates a result vocabulary; it does not acquire a lock,
+reread storage, publish state, or confirm durability. It therefore does not
+implement compare-and-publish and is not proof that filesystem application and
+state publication were globally atomic.
+
+Queries provide:
+
+```
+schema_version()
+identity()
+request()
+expected_prior_snapshot()
+actual_prior_snapshot()
+target_binding()
+state_store()
+backend()
+storage_format()
+outcome()
+durability()
+atomicity_boundary()
+resulting_snapshot()
+subordinate_evidence()
+```
+
 # LEGACY COMPATIBILITY MODEL
 
 The historical `/var/lib/pkg/db` format cannot construct canonical
@@ -408,7 +487,8 @@ The following ordering is part of the contract:
 - snapshots are sorted by package name;
 - ownership identity groups are sorted by path and owner identity; and
 - owner results are sorted by package name; and
-- publication-request deltas are sorted by package name.
+- publication-request deltas are sorted by package name; and
+- publication-receipt subordinate evidence is sorted by identity.
 
 Input order does not affect observable order.
 
