@@ -15,6 +15,13 @@ This interface is explicitly compatibility-scoped.  It reads and mutates
 `legacy_snapshot` values only.  It does not publish canonical `snapshot` values
 and does not implement stale-safe compare-and-publish.
 
+
+The canonical model now provides immutable `state_publication_request` values.
+A request binds one exact expected canonical snapshot to normalized package
+deltas and completed evidence. It does not publish itself. Canonical storage
+still requires a separate compare-and-publish interface, typed receipts, and a
+backend able to preserve complete canonical records without loss.
+
 `read()` returns one immutable observation of compatibility records.
 `begin_write()` returns an isolated transaction initialized from current
 durable compatibility state.

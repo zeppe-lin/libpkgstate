@@ -77,6 +77,19 @@ grep -F 'Callers cannot attach arbitrary ownership or' \
   "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
   fail "model manual omits snapshot identity authority"
 
+
+grep -F 'The request is immutable and does not mutate storage.' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual omits immutable publication boundary"
+
+grep -F 'requires *transaction_evidence_identity*' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual omits composed request evidence"
+
+grep -F 'caller-authored complete replacement snapshot.' \
+  "$source_root/DESIGN.md" >/dev/null ||
+  fail "design permits caller-authored replacement snapshots"
+
 grep -F 'path-ordered ownership groups' \
   "$source_root/DESIGN.md" >/dev/null ||
   fail "design omits canonical ownership identity ordering"

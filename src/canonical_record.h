@@ -26,8 +26,8 @@ public:
   void append_bytes(std::string_view value);
   void append_bytes(const digest_bytes& value);
 
-  template<typename Domain>
-  void append_digest(const typed_digest<Domain>& value)
+  template<typename Identity>
+  void append_digest(const Identity& value)
   {
     append_u16(value.representation_version());
     append_u16(static_cast<std::uint16_t>(value.algorithm()));

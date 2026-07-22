@@ -12,6 +12,7 @@ It provides:
 * durable target-state bindings with computed identities;
 * complete canonical installed package records with computed identities;
 * complete immutable snapshots with ownership and snapshot identities;
+* immutable expected-snapshot publication requests and package deltas;
 * state-owned canonical package paths and explicit shared ownership;
 * explicitly incomplete compatibility records and snapshots;
 * compatibility write transactions for the historical database; and
@@ -86,6 +87,14 @@ normalized path-to-installed-package relation, then computes
 `installed_state_snapshot_identity` from the schema version, target binding,
 installed-package identities, and ownership-inventory identity.
 
+`state_publication_request::make()` binds one exact expected snapshot to one or
+more non-conflicting package deltas.  Install and replacement deltas carry
+complete proposed installed packages; replacement and removal deltas require
+the exact old installed-package identity.  Each delta cites one accepted
+operation plan and matching completed application evidence.  Multi-package
+requests require transaction evidence.  The request is identified by
+libpkgstate and is not a caller-authored replacement snapshot.
+
 Compatibility storage uses a separate model:
 
 ```text
@@ -111,6 +120,9 @@ Important invariants:
 * installed-package identity excludes containing snapshot identity;
 * canonical snapshots contain packages from exactly one target binding;
 * ownership and snapshot identities are computed from normalized state;
+* publication requests compare against one exact prior snapshot identity;
+* proposed records retain the application and transaction evidence they cite;
+* composed requests contain no conflicting package-name deltas;
 * package paths are canonical and root-relative;
 * package manifests contain at most one entry for each path;
 * packages, manifests, and owner results have deterministic order;
@@ -142,8 +154,8 @@ Manual pages
 The installed manual suite is:
 
 * `libpkgstate(3)` — library overview and boundaries;
-* `pkgstate_model(3)` — package releases, installed control, target binding,
-  ownership, and snapshots;
+* `pkgstate_model(3)` — canonical installed facts, snapshots, and publication
+  requests;
 * `pkgstate_store(3)` — stores and write transactions;
 * `pkgstate_legacy_text_store(3)` — compatibility backend;
 * `pkgstate-db(5)` — line-oriented database format; and

@@ -62,6 +62,14 @@ if get_option('tests').allowed()
   test('identify ownership and installed snapshots',
        snapshot_identity_test)
 
+  publication_request_test = executable(
+    'publication-request-test',
+    'publication_request_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('validate immutable state publication requests',
+       publication_request_test)
+
   legacy_model_test = executable(
     'legacy-model-test',
     'legacy_model_test.cpp',
@@ -110,6 +118,8 @@ if get_option('tests').allowed()
     ['owned-entry', 'libpkgstate/owned_entry.h'],
     ['installed-package', 'libpkgstate/installed_package.h'],
     ['snapshot', 'libpkgstate/snapshot.h'],
+    ['publication-request',
+     'libpkgstate/publication_request.h'],
     ['legacy-installed-package',
      'libpkgstate/legacy_installed_package.h'],
     ['legacy-snapshot', 'libpkgstate/legacy_snapshot.h'],

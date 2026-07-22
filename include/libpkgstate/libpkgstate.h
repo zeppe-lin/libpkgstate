@@ -19,6 +19,7 @@
 #include <libpkgstate/package_identity.h>
 #include <libpkgstate/package_path.h>
 #include <libpkgstate/snapshot.h>
+#include <libpkgstate/publication_request.h>
 #include <libpkgstate/legacy_snapshot.h>
 
 #include <libpkgstate/write_transaction.h>

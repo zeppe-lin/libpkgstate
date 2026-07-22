@@ -52,9 +52,18 @@ The canonical model consists of:
 	Complete immutable installed truth for one target binding, with computed
 	ownership-inventory and installed-state snapshot identities.
 
-Canonical constructors do not accept caller-selected installed-package
-identities. A package record contains no containing-snapshot identity, keeping
-the canonical identity graph acyclic.
+*state_publication_request*
+	One exact expected snapshot, normalized non-conflicting package deltas,
+	completed application evidence, optional transaction evidence, and one
+	computed request identity.
+
+Canonical constructors do not accept caller-selected installed-package or
+publication-request identities. A package record contains no containing-snapshot
+identity, keeping the canonical identity graph acyclic.
+
+A publication request is not a storage mutation and not an arbitrary complete
+snapshot. It is a stale-safe transition request whose old package identities,
+proposed records, and evidence are validated against one expected snapshot.
 
 The historical database uses explicitly different types:
 

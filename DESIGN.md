@@ -553,11 +553,35 @@ transaction evidence, when deltas are composed
 publication request identity
 ```
 
-The request contains installed-state consequences and evidence.  Proposed
+The public `package_state_delta` factories implement the one-package
+transition. Install requires prior absence and one complete proposed installed
+package. Replace requires one exact old installed-package identity and one
+different complete proposed package with the same name. Remove requires one
+exact old installed-package identity and explicit package absence.
+
+Every delta contains one caller-authoritative operation-plan identity and one
+completed application-evidence identity. Install and replacement require the
+proposed installed control to retain matching application evidence. The public
+`state_publication_request::make()` constructor accepts one complete expected
+snapshot, validates every delta against it, sorts deltas by package name, and
+rejects duplicate package names. More than one delta requires transaction
+evidence; proposed packages retain matching transaction provenance whenever
+transaction evidence is present.
+
+The request identity covers the request schema version, expected snapshot,
+target binding, normalized deltas, old and proposed installed-package
+identities, accepted plans, completed application evidence, and optional
+transaction
+evidence. External evidence values use typed canonical digest references but
+remain caller-authoritative; libpkgstate does not claim to have computed or
+authenticated them.
+
+A request contains installed-state consequences and evidence.  Proposed
 installed records are not yet installed truth; state validates their canonical
 identities and the receipt records whether they entered the resulting snapshot.
 The request contains no filesystem mutation instructions, payload replay source,
-preserve policy, lifecycle execution policy, or maintenance action.
+preserve policy, lifecycle execution policy, or maintenance action. It is not a
+caller-authored complete replacement snapshot.
 
 Planning publication intent is not sufficient evidence.  A failed or partial
 application cannot be published as successful installed truth merely because a

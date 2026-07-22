@@ -2,7 +2,7 @@ PKGSTATE_MODEL(3)
 
 # NAME
 
-pkgstate_model - package releases, control, target binding, and ownership
+pkgstate_model - canonical installed facts and publication requests
 
 # SYNOPSIS
 
@@ -18,6 +18,7 @@ pkgstate_model - package releases, control, target binding, and ownership
 #include <libpkgstate/owned_entry.h>
 #include <libpkgstate/installed_package.h>
 #include <libpkgstate/snapshot.h>
+#include <libpkgstate/publication_request.h>
 ```
 
 # DIGEST IDENTITIES
@@ -42,6 +43,12 @@ when their represented SHA-256 bytes are equal.
 
 Publication, target-binding, store, root-view, backend, and locking-domain
 identities use the same representation but remain separate strong types.
+
+
+*operation_plan_identity*, *application_evidence_identity*, and
+*transaction_evidence_identity* are strong references to identities computed by
+other authorities. They use the same canonical digest representation but do not
+claim a libpkgstate-owned hashing domain.
 
 The canonical record domain assigned to an identity type is available through
 *canonical_domain()*. Record hashing is library-owned; parsing digest text does
@@ -286,6 +293,76 @@ error.
 A snapshot is immutable. It does not refresh itself after another process
 publishes state.
 
+# STATE PUBLICATION REQUESTS
+
+*pkgstate::package_state_delta* represents one completed installed-state
+consequence for one package name:
+
+*package_state_delta_kind::install*
+	Require package absence and propose one complete installed package.
+
+*package_state_delta_kind::replace*
+	Require one exact old installed-package identity and propose one different
+	complete installed package with the same canonical name.
+
+*package_state_delta_kind::remove*
+	Require one exact old installed-package identity and propose package absence.
+
+Construct deltas with:
+
+```
+package_state_delta::install(...)
+package_state_delta::replace(...)
+package_state_delta::remove(...)
+```
+
+Every delta contains one caller-authoritative *operation_plan_identity* and one
+*application_evidence_identity*. Install and replacement constructors require
+the proposed package's durable control to retain matching application evidence.
+The external identities use canonical digest syntax but remain distinct C++
+types; libpkgstate does not claim to have computed or authenticated them.
+
+Construct a request with:
+
+```
+state_publication_request::make(expected_snapshot, deltas,
+                                transaction_evidence)
+```
+
+Construction:
+
+- requires at least one delta;
+- sorts deltas by canonical package name;
+- rejects more than one delta for the same package name;
+- validates install absence and exact replacement or removal identity against
+  the supplied expected snapshot;
+- rejects proposed packages from another target binding;
+- requires matching transaction provenance in proposed control whenever
+  transaction evidence is supplied; and
+- requires *transaction_evidence_identity* for a multi-package request.
+
+The request computes *state_publication_request_identity* from its schema
+version, expected snapshot identity, target-state-binding identity, normalized
+deltas, accepted-plan identities, completed application evidence, and optional
+transaction evidence.
+
+The request is immutable and does not mutate storage. It is not an arbitrary
+caller-authored complete snapshot and does not grant planning intent the status
+of completed installed truth. A later compare-and-publish backend must reread
+state under its publication lock and compare *expected_snapshot()* before
+applying the deltas.
+
+Queries provide:
+
+```
+schema_version()
+identity()
+expected_snapshot()
+target_binding()
+deltas()
+transaction_evidence()
+```
+
 # LEGACY COMPATIBILITY MODEL
 
 The historical `/var/lib/pkg/db` format cannot construct canonical
@@ -330,7 +407,8 @@ The following ordering is part of the contract:
 - package manifests are sorted by canonical path;
 - snapshots are sorted by package name;
 - ownership identity groups are sorted by path and owner identity; and
-- owner results are sorted by package name.
+- owner results are sorted by package name; and
+- publication-request deltas are sorted by package name.
 
 Input order does not affect observable order.
 
