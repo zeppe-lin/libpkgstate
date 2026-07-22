@@ -3,6 +3,13 @@
 
 if get_option('tests').allowed()
   sh = find_program('sh')
+  package_path_test = executable(
+    'package-path-test',
+    'package_path_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('normalize installed package paths', package_path_test)
+
   model_test = executable(
     'model-test',
     'model_test.cpp',
@@ -42,6 +49,7 @@ if get_option('tests').allowed()
     ['libpkgstate', 'libpkgstate/libpkgstate.h'],
     ['error', 'libpkgstate/error.h'],
     ['package-identity', 'libpkgstate/package_identity.h'],
+    ['package-path', 'libpkgstate/package_path.h'],
     ['owned-entry', 'libpkgstate/owned_entry.h'],
     ['installed-package', 'libpkgstate/installed_package.h'],
     ['snapshot', 'libpkgstate/snapshot.h'],
@@ -97,6 +105,16 @@ if get_option('tests').allowed()
   )
 
   if get_option('tools').allowed()
+    package_path_conformance_test = executable(
+      'package-path-conformance-test',
+      'package_path_conformance_test.cpp',
+      dependencies: [libpkgstate_dep, libpkgimage_dep],
+    )
+    test(
+      'conform installed and archive package paths',
+      package_path_conformance_test,
+    )
+
     tar_program = find_program('tar')
 
     test(

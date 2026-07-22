@@ -33,6 +33,14 @@ public:
 };
 
 /*!
+ * \brief Reports an invalid canonical installed package path.
+ */
+class path_error : public error {
+public:
+  using error::error;
+};
+
+/*!
  * \brief Reports an invalid installed package or state snapshot.
  */
 class state_error : public error {

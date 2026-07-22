@@ -23,10 +23,11 @@ state-publication request
 state-publication receipt
 ```
 
-The current 0.3.x implementation exposes a smaller compatibility-shaped model:
-validated name and version lines, ownership manifests, immutable snapshots, and
-the historical `/var/lib/pkg/db` backend.  That implementation is a sound
-migration base.  It is not yet the complete canonical model defined here.
+The implementation currently exposes a smaller compatibility-shaped model:
+validated name and version lines, state-owned canonical package paths, ownership
+manifests, immutable snapshots, and the historical `/var/lib/pkg/db` backend.
+That implementation is a sound migration base.  It is not yet the complete
+canonical model defined here.
 
 This document is normative for the direction of the public model and storage
 interfaces.  Existing behavior remains current until a later commit implements
@@ -170,11 +171,10 @@ Canonical installed state owns its logical package-path value and validation
 contract.  A package path is root-relative, normalized, and independent of the
 pathname at which a target root happens to be mounted.
 
-The current 0.3.x API reuses `pkgimage::package_path`.  That is a transitional
-public dependency, not a transfer of path authority from installed state to the
-archive layer.  The canonical state model must own its path type and use narrow
-adapters plus shared conformance vectors where archive and state paths must
-agree.
+`pkgstate::package_path` owns this contract.  Its normalization currently
+matches `pkgimage::package_path`, but the public types are independent.  Any
+cross-domain conversion remains explicit and must be checked by narrow adapters
+and shared conformance vectors rather than by a public type alias or dependency.
 
 Installed ownership
 -------------------

@@ -23,9 +23,16 @@ grep -F "soversion: '0'" "$root/src/meson.build" >/dev/null ||
 grep -F "version: '>=0.3.0'" "$root/meson.build" >/dev/null ||
   fail 'Meson dependency floor does not require libpkgimage 0.3.0'
 
-grep -F 'requires: [libpkgimage_dep]' \
-  "$root/src/meson.build" >/dev/null ||
-  fail 'pkg-config metadata does not publish the libpkgimage dependency'
+grep -F "required: get_option('tools')" "$root/meson.build" >/dev/null ||
+  fail 'libpkgimage is not scoped to the optional tools feature'
+
+if grep -F 'libpkgimage' "$root/src/meson.build" >/dev/null; then
+  fail 'core library metadata still references libpkgimage'
+fi
+
+grep -F 'dependencies: [libpkgstate_dep, libpkgimage_dep]' \
+  "$root/tools/meson.build" >/dev/null ||
+  fail 'pkginfo frontend metadata omits libpkgimage'
 
 grep -F '0.3.0' "$root/HISTORY.md" >/dev/null ||
   fail 'history omits release 0.3.0'

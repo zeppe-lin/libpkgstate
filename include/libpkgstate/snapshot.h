@@ -58,13 +58,13 @@ public:
    *         is unowned.
    */
   [[nodiscard]] std::vector<const installed_package*>
-  owners(const pkgimage::package_path& path) const;
+  owners(const package_path& path) const;
 
   /*!
    * \brief Test whether any package owns a path.
    */
   [[nodiscard]] bool
-  is_owned(const pkgimage::package_path& path) const noexcept;
+  is_owned(const package_path& path) const noexcept;
 
 private:
   std::vector<installed_package> packages_;

@@ -78,6 +78,6 @@ grep -F 'Historical CRUX `pkgmk` calls `pkginfo -f`' \
   "$source_root/MIGRATION.md" >/dev/null ||
   fail "migration omits footprint transition gate"
 
-grep -F '`libpkgimage` 0.3.0 or later' \
+grep -F '`libpkgimage` 0.3.0 or later when reference tools are enabled' \
   "$source_root/README.md" >/dev/null ||
-  fail "README omits libpkgimage dependency floor"
+  fail "README omits optional libpkgimage dependency floor"

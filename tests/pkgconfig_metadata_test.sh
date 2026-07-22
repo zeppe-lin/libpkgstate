@@ -13,14 +13,10 @@ fail()
 
 test -s "$pc" || fail "missing generated metadata: $pc"
 
-test "$(grep -c '^Requires:' "$pc")" -eq 1 ||
-  fail 'generated metadata does not contain exactly one Requires field'
+if grep -E '^Requires(\.private)?:.*libpkgimage' "$pc" >/dev/null; then
+  fail 'core pkg-config metadata still exposes libpkgimage'
+fi
 
-grep -E \
-  '^Requires:[[:space:]]*libpkgimage[[:space:]]*>=[[:space:]]*0\.3\.0[[:space:]]*$' \
-  "$pc" >/dev/null ||
-  fail 'generated metadata does not require libpkgimage 0.3.0 exactly once'
-
-if grep -E '^Requires\.private:.*libpkgimage' "$pc" >/dev/null; then
-  fail 'public libpkgimage dependency was demoted to Requires.private'
+if grep -E '^Libs(\.private)?:.*-lpkgimage' "$pc" >/dev/null; then
+  fail 'core pkg-config metadata still links libpkgimage'
 fi

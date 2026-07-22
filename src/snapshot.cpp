@@ -60,7 +60,7 @@ snapshot::find_package(std::string_view name) const noexcept
 }
 
 std::vector<const installed_package*>
-snapshot::owners(const pkgimage::package_path& path) const
+snapshot::owners(const package_path& path) const
 {
   std::vector<const installed_package*> result;
   const auto found = owners_.find(path.string());
@@ -75,7 +75,7 @@ snapshot::owners(const pkgimage::package_path& path) const
 }
 
 bool
-snapshot::is_owned(const pkgimage::package_path& path) const noexcept
+snapshot::is_owned(const package_path& path) const noexcept
 {
   return owners_.find(path.string()) != owners_.end();
 }

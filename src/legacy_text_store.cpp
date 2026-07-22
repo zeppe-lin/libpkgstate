@@ -3,8 +3,8 @@
 
 #include <libpkgstate/legacy_text_store.h>
 
-#include <libpkgimage/error.h>
 #include <libpkgstate/error.h>
+#include <libpkgstate/package_path.h>
 
 #include <cerrno>
 #include <cstdlib>
@@ -132,12 +132,12 @@ read_database(const std::filesystem::path& database)
       {
         const bool directory = line.back() == '/';
         manifest.push_back(owned_entry{
-            pkgimage::package_path::parse(line),
+            package_path::parse(line),
             directory ? owned_entry_type::directory
                       : owned_entry_type::non_directory,
         });
       }
-      catch (const pkgimage::path_error& failure)
+      catch (const path_error& failure)
       {
         parse_failure(database, line_number,
                       std::string("invalid owned path: ") + failure.what());

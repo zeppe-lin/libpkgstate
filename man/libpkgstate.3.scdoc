@@ -35,6 +35,9 @@ The public model consists of:
 *package_identity*
 	Validated package name and version.
 
+*package_path*
+	State-owned canonical root-relative installed path.
+
 *owned_entry*
 	One canonical root-relative path and its durable directory or
 	non-directory class.
@@ -69,6 +72,9 @@ All public failures derive from *pkgstate::error*.
 
 *identity_error*
 	Invalid identity representation.
+
+*path_error*
+	Invalid canonical installed package path.
 
 *state_error*
 	Invalid installed package or snapshot state.

@@ -7,6 +7,7 @@ durable installed package state.
 It provides:
 
 * validated package names and versions;
+* state-owned canonical package paths;
 * canonical installed ownership manifests;
 * immutable snapshots with package and ownership indexes;
 * explicit shared ownership;
@@ -38,9 +39,11 @@ Contracts
 The public model has four levels:
 
 ```text
-package_identity
-       |
-       v
+package_identity      package_path
+       |                    |
+       +---------+----------+
+                 |
+                 v
 installed_package ----> ordered owned_entry manifest
        |
        v
@@ -96,10 +99,14 @@ Requirements
 Build-time requirements:
 
 * a C++17 compiler;
-* Meson 1.2.0 or later;
-* Ninja;
-* pkg-config; and
-* `libpkgimage` 0.3.0 or later.
+* Meson 1.6.0 or later;
+* Ninja; and
+* pkg-config.
+
+The core library has no `libpkgimage` dependency.  The optional `pkginfo`
+frontend requires:
+
+* `libpkgimage` 0.3.0 or later when reference tools are enabled.
 
 Optional documentation dependencies:
 

@@ -8,6 +8,7 @@ pkgstate_model - identities, installed ownership, and snapshots
 
 ```
 #include <libpkgstate/package_identity.h>
+#include <libpkgstate/package_path.h>
 #include <libpkgstate/owned_entry.h>
 #include <libpkgstate/installed_package.h>
 #include <libpkgstate/snapshot.h>
@@ -32,11 +33,29 @@ not impose repository, epoch, release, or collection syntax.
 
 Invalid input raises *pkgstate::identity_error*.
 
+# PACKAGE PATHS
+
+*pkgstate::package_path* is the canonical logical path of an installed object
+inside a managed target root.
+
+Construct a path with:
+
+```
+auto path = pkgstate::package_path::parse(input);
+```
+
+Parsing removes empty and `.` components, rejects `..` and absolute paths,
+removes trailing separators, and rejects NUL, carriage-return, and newline
+bytes. Directory identity belongs to *owned_entry_type*, not to path spelling.
+
+The value is independent of the host pathname at which the target root is
+mounted. Invalid input raises *pkgstate::path_error*.
+
 # OWNED ENTRIES
 
 *pkgstate::owned_entry* contains:
 
-- one canonical *pkgimage::package_path*; and
+- one canonical *pkgstate::package_path*; and
 - one *pkgstate::owned_entry_type*.
 
 The durable object classes are:

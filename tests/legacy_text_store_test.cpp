@@ -11,10 +11,10 @@
 
 namespace {
 
-pkgimage::package_path
+pkgstate::package_path
 path(const char* value)
 {
-  return pkgimage::package_path::parse(value);
+  return pkgstate::package_path::parse(value);
 }
 
 void

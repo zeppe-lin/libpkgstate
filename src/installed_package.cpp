@@ -48,11 +48,11 @@ installed_package::size() const noexcept
 }
 
 const owned_entry*
-installed_package::find(const pkgimage::package_path& path) const noexcept
+installed_package::find(const package_path& path) const noexcept
 {
   const auto found = std::lower_bound(
       manifest_.begin(), manifest_.end(), path,
-      [](const owned_entry& entry, const pkgimage::package_path& searched) {
+      [](const owned_entry& entry, const package_path& searched) {
         return entry.path < searched;
       });
 
@@ -63,7 +63,7 @@ installed_package::find(const pkgimage::package_path& path) const noexcept
 }
 
 bool
-installed_package::owns(const pkgimage::package_path& path) const noexcept
+installed_package::owns(const package_path& path) const noexcept
 {
   return find(path) != nullptr;
 }

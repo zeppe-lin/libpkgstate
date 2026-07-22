@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <libpkgimage/package_path.h>
+#include <libpkgstate/package_path.h>
 
 namespace pkgstate {
 
@@ -28,7 +28,7 @@ enum class owned_entry_type {
  * \brief One canonical path owned by an installed package.
  */
 struct owned_entry final {
-  pkgimage::package_path path; //!< Canonical root-relative path.
+  package_path path; //!< Canonical root-relative installed path.
   owned_entry_type type;       //!< Durable object class.
 };
 

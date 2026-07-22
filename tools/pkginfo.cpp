@@ -21,9 +21,9 @@
 #include <libpkgimage/libarchive_backend.h>
 #include <libpkgimage/package_entry.h>
 #include <libpkgimage/package_image.h>
-#include <libpkgimage/package_path.h>
 #include <libpkgstate/error.h>
 #include <libpkgstate/legacy_text_store.h>
+#include <libpkgstate/package_path.h>
 
 #ifndef PKGSTATE_VERSION
 #define PKGSTATE_VERSION "unknown"
@@ -183,13 +183,13 @@ database_path(const std::filesystem::path& root)
  * conventional absolute spelling and removes only leading separators before
  * applying package-path validation.
  */
-pkgimage::package_path
+pkgstate::package_path
 parse_owned_path(std::string_view input)
 {
   while (!input.empty() && input.front() == '/')
     input.remove_prefix(1);
 
-  return pkgimage::package_path::parse(input);
+  return pkgstate::package_path::parse(input);
 }
 
 /*!
@@ -297,7 +297,7 @@ print_list(const pkgstate::snapshot& state, std::string_view argument)
 bool
 print_owners(const pkgstate::snapshot& state, std::string_view input)
 {
-  const pkgimage::package_path path = parse_owned_path(input);
+  const pkgstate::package_path path = parse_owned_path(input);
   const auto owners = state.owners(path);
 
   for (const pkgstate::installed_package* package : owners)

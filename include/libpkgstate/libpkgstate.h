@@ -12,6 +12,7 @@
 #include <libpkgstate/installed_package.h>
 #include <libpkgstate/owned_entry.h>
 #include <libpkgstate/package_identity.h>
+#include <libpkgstate/package_path.h>
 #include <libpkgstate/snapshot.h>
 
 #include <libpkgstate/write_transaction.h>

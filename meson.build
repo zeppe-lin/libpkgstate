@@ -25,7 +25,7 @@ endif
 libpkgimage_dep = dependency(
   'libpkgimage',
   version: '>=0.3.0',
-  required: true,
+  required: get_option('tools'),
   static: want_static,
 )
 

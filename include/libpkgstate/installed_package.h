@@ -56,12 +56,12 @@ public:
    *         the path.
    */
   [[nodiscard]] const owned_entry*
-  find(const pkgimage::package_path& path) const noexcept;
+  find(const package_path& path) const noexcept;
 
   /*!
    * \brief Test whether the package owns a path.
    */
-  [[nodiscard]] bool owns(const pkgimage::package_path& path) const noexcept;
+  [[nodiscard]] bool owns(const package_path& path) const noexcept;
 
 private:
   package_identity identity_;

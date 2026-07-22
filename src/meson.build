@@ -8,6 +8,7 @@ libpkgstate = library(
   [
     'error.cpp',
     'package_identity.cpp',
+    'package_path.cpp',
     'owned_entry.cpp',
     'installed_package.cpp',
     'snapshot.cpp',
@@ -15,7 +16,6 @@ libpkgstate = library(
   ],
   cpp_args: ['-D_FILE_OFFSET_BITS=64'],
   include_directories: public_inc,
-  dependencies: libpkgimage_dep,
   install: true,
   version: meson.project_version(),
   soversion: '0',
@@ -24,7 +24,6 @@ libpkgstate = library(
 libpkgstate_dep = declare_dependency(
   link_with: libpkgstate,
   include_directories: public_inc,
-  dependencies: libpkgimage_dep,
   compile_args: ['-D_FILE_OFFSET_BITS=64'],
 )
 
@@ -34,6 +33,7 @@ install_headers(
   '../include/libpkgstate/libpkgstate.h',
   '../include/libpkgstate/error.h',
   '../include/libpkgstate/package_identity.h',
+  '../include/libpkgstate/package_path.h',
   '../include/libpkgstate/owned_entry.h',
   '../include/libpkgstate/installed_package.h',
   '../include/libpkgstate/snapshot.h',
@@ -49,5 +49,4 @@ pkgconf.generate(
   filebase: 'libpkgstate',
   description: 'Installed package state and ownership library',
   subdirs: '.',
-  requires: [libpkgimage_dep],
 )
