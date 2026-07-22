@@ -147,6 +147,38 @@ Invalid historical records are rejected rather than silently normalized beyond
 the documented path and ordering rules. Missing canonical facts are not
 reconstructed from current sources, archives, filenames, or configuration.
 
+Explicit canonical import
+-------------------------
+
+Compatibility inspection and canonical import are separate operations.
+`legacy_text_store::read()` returns one incomplete `legacy_snapshot`; it does
+not rewrite the database or create canonical state.
+
+A canonical import requires:
+
+1. a `legacy_import_source` naming the historical target, store, root view, and
+   backend;
+2. the exact `legacy_snapshot` observation;
+3. an empty destination snapshot from the selected canonical store;
+4. one `legacy_package_import` for every source package; and
+5. one caller-authoritative `legacy_migration_evidence_identity`.
+
+For each package, provide the canonical version and release explicitly. Do not
+split the opaque legacy version line by convention. Runtime dependencies,
+removal lifecycle, target profile, candidate control, artifact evidence,
+application evidence, and transaction evidence must each be supplied by named
+migration input or marked historically unavailable.
+
+Constructing `legacy_import_request` performs a dry run and exposes the exact
+resulting canonical snapshot. `legacy_import_receipt::validated()` records that
+non-mutating result. `canonical_store::import_legacy()` then compares the empty
+destination under the canonical publication lock and returns a typed receipt.
+A non-empty or concurrently changed destination is stale and is not modified.
+
+The historical database remains unchanged. Retiring it, archiving migration
+receipts, and switching frontends are separate coordinator actions after the
+canonical receipt and an authoritative reread establish the result.
+
 Operational check
 -----------------
 

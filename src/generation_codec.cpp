@@ -264,6 +264,12 @@ encode_provenance_kind(control_provenance_kind value)
       return 4;
     case control_provenance_kind::transaction_evidence:
       return 5;
+    case control_provenance_kind::legacy_package_observation:
+      return 6;
+    case control_provenance_kind::legacy_snapshot_observation:
+      return 7;
+    case control_provenance_kind::legacy_migration_evidence:
+      return 8;
   }
   throw state_error("invalid installed-control provenance kind");
 }
@@ -283,6 +289,12 @@ decode_provenance_kind(std::uint8_t value)
       return control_provenance_kind::application_evidence;
     case 5:
       return control_provenance_kind::transaction_evidence;
+    case 6:
+      return control_provenance_kind::legacy_package_observation;
+    case 7:
+      return control_provenance_kind::legacy_snapshot_observation;
+    case 8:
+      return control_provenance_kind::legacy_migration_evidence;
   }
   throw store_error("invalid installed-control provenance-kind value");
 }

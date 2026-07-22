@@ -150,6 +150,9 @@ enum class control_provenance_kind : std::uint8_t {
   artifact_manifest = 3,
   application_evidence = 4,
   transaction_evidence = 5,
+  legacy_package_observation = 6,
+  legacy_snapshot_observation = 7,
+  legacy_migration_evidence = 8,
 };
 
 /*!

@@ -172,6 +172,80 @@ private:
   digest_value value_;
 };
 
+/*!
+ * \brief Strong reference to an identity computed by another authority.
+ *
+ * The wrapper validates canonical digest representation and keeps external
+ * semantic domains distinct in C++. It does not claim that libpkgstate
+ * computed or authenticated the referenced object.
+ */
+template<typename Domain>
+class referenced_digest final {
+public:
+  /*! \brief Construct a referenced SHA-256 identity from exact bytes. */
+  [[nodiscard]] static referenced_digest
+  from_sha256(sha256_digest_bytes bytes)
+  {
+    return referenced_digest(digest_value::from_sha256(std::move(bytes)));
+  }
+
+  /*! \brief Parse `v1:sha256:<lowercase-hex>`. */
+  [[nodiscard]] static referenced_digest parse(std::string_view input)
+  {
+    return referenced_digest(digest_value::parse(input));
+  }
+
+  /*! \brief Return the representation version. */
+  [[nodiscard]] std::uint16_t representation_version() const noexcept
+  {
+    return value_.representation_version();
+  }
+
+  /*! \brief Return the represented algorithm. */
+  [[nodiscard]] digest_algorithm algorithm() const noexcept
+  {
+    return value_.algorithm();
+  }
+
+  /*! \brief Return the exact digest bytes. */
+  [[nodiscard]] const digest_bytes& bytes() const noexcept
+  {
+    return value_.bytes();
+  }
+
+  /*! \brief Return canonical algorithm-qualified text. */
+  [[nodiscard]] std::string string() const
+  {
+    return value_.string();
+  }
+
+  friend bool operator==(const referenced_digest& lhs,
+                         const referenced_digest& rhs) noexcept
+  {
+    return lhs.value_ == rhs.value_;
+  }
+
+  friend bool operator!=(const referenced_digest& lhs,
+                         const referenced_digest& rhs) noexcept
+  {
+    return !(lhs == rhs);
+  }
+
+  friend bool operator<(const referenced_digest& lhs,
+                        const referenced_digest& rhs) noexcept
+  {
+    return lhs.value_ < rhs.value_;
+  }
+
+private:
+  explicit referenced_digest(digest_value value)
+      : value_(std::move(value))
+  {
+  }
+
+  digest_value value_;
+};
+
 struct package_release_identity_domain final {
   static constexpr std::string_view canonical_domain =
       "pkgstate/package-release/1";
@@ -223,6 +297,14 @@ struct state_publication_request_identity_domain final {
 struct state_publication_receipt_identity_domain final {
   static constexpr std::string_view canonical_domain =
       "pkgstate/publication-receipt/1";
+};
+struct legacy_import_request_identity_domain final {
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/legacy-import-request/1";
+};
+struct legacy_import_receipt_identity_domain final {
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/legacy-import-receipt/1";
 };
 struct legacy_package_observation_identity_domain final {
   static constexpr std::string_view canonical_domain =
@@ -286,6 +368,14 @@ using state_publication_request_identity =
 /*! \brief Identity of one immutable state-publication receipt. */
 using state_publication_receipt_identity =
     detail::typed_digest<detail::state_publication_receipt_identity_domain>;
+
+/*! \brief Identity of one explicit legacy-state import request. */
+using legacy_import_request_identity =
+    detail::typed_digest<detail::legacy_import_request_identity_domain>;
+
+/*! \brief Identity of one explicit legacy-state import receipt. */
+using legacy_import_receipt_identity =
+    detail::typed_digest<detail::legacy_import_receipt_identity_domain>;
 
 /*! \brief Identity of exact incomplete facts in one legacy package record. */
 using legacy_package_observation_identity =

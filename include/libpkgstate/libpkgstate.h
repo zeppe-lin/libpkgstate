@@ -24,6 +24,7 @@
 #include <libpkgstate/canonical_store.h>
 #include <libpkgstate/canonical_generation_store.h>
 #include <libpkgstate/legacy_completeness.h>
+#include <libpkgstate/legacy_import.h>
 #include <libpkgstate/legacy_snapshot.h>
 
 #include <libpkgstate/write_transaction.h>

@@ -311,6 +311,31 @@ identity. They do not acquire locks or publish state. The non-virtual
 actual lock-scoped state and backend result; a caller-created value is not
 independent proof that publication occurred.
 
+Legacy import publication
+-------------------------
+
+`canonical_store::import_legacy()` is a second non-virtual orchestration path
+for the one-time transition from compatibility state. It accepts only a
+validated `legacy_import_request` whose expected destination is empty.
+
+The method:
+
+1. acquires one exclusive canonical publication transaction;
+2. rereads actual destination state under that lock;
+3. returns `stale_destination` without publication when identities differ;
+4. passes the request's precomputed resulting snapshot to the backend exactly
+   once; and
+5. maps the constrained backend result into `legacy_import_receipt`.
+
+The backend does not reinterpret legacy facts and does not receive the legacy
+snapshot. It receives only the complete canonical snapshot already validated by
+the request.
+
+A `validated_only` receipt is constructed without a store and records the dry
+run. An import receipt is not proof that the historical database, package-owned
+filesystem, and canonical state changed atomically. Source retirement and audit
+retention remain coordinator policy.
+
 Canonical backend boundary
 --------------------------
 

@@ -152,6 +152,9 @@ Provenance kinds are:
 3  artifact_manifest
 4  application_evidence
 5  transaction_evidence
+6  legacy_package_observation
+7  legacy_snapshot_observation
+8  legacy_migration_evidence
 ```
 
 Ownership object types are:

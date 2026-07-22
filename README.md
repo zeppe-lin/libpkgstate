@@ -18,6 +18,7 @@ It provides:
 * an immutable-generation canonical state backend;
 * state-owned canonical package paths and explicit shared ownership;
 * explicitly incomplete compatibility records and snapshots;
+* explicit receipt-bound import into a fresh canonical store;
 * compatibility write transactions for the historical database; and
 * an original compatibility backend for `/var/lib/pkg/db`.
 
@@ -146,6 +147,18 @@ historically unavailable.  Package and snapshot observation identities name
 the exact incomplete source without impersonating canonical installed
 authority.
 
+`legacy_import_request::make()` binds one exact compatibility observation to a
+fresh empty canonical destination. Every source package requires one explicit
+release decomposition, explicit supplied-or-unavailable control facts, and one
+decision for every external provenance class. Construction computes the only
+admissible canonical snapshot without mutating storage.
+
+`canonical_store::import_legacy()` compares the empty destination under the
+backend publication lock and publishes only that precomputed result. It returns
+a typed `legacy_import_receipt`; stale destination state never invokes the
+backend publication primitive. Reading `legacy_text_store` alone is not
+migration.
+
 Important invariants:
 
 * canonical release coordinates are non-empty and line-safe;
@@ -171,7 +184,10 @@ Important invariants:
 * packages, manifests, and owner results have deterministic order;
 * multiple packages may own the same path;
 * canonical and compatibility snapshots are immutable after construction; and
-* compatibility transactions mutate compatibility storage only.
+* compatibility transactions mutate compatibility storage only;
+* migration requires one exact source observation and a fresh destination;
+* every unavailable migration fact is declared explicitly; and
+* legacy import never parses version lines or reconstructs current sources.
 
 A `canonical_publication_transaction` is the mechanism half of canonical
 publication. The concrete `canonical_generation_store` holds one non-blocking
@@ -208,6 +224,7 @@ The installed manual suite is:
 * `pkgstate_canonical_generation_store(3)` — immutable-generation backend;
 * `pkgstate_legacy_compatibility(3)` — incomplete facts and observation
   identities;
+* `pkgstate_legacy_import(3)` — explicit validation and canonical import;
 * `pkgstate_legacy_text_store(3)` — compatibility backend;
 * `pkgstate-db(5)` — line-oriented compatibility database format;
 * `pkgstate-generation(5)` — canonical generation storage format; and

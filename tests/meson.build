@@ -107,6 +107,14 @@ if get_option('tests').allowed()
   )
   test('identify incomplete legacy observations', legacy_completeness_test)
 
+  legacy_import_test = executable(
+    'legacy-import-test',
+    'legacy_import_test.cpp',
+    include_directories: include_directories('../src'),
+    dependencies: libpkgstate_dep,
+  )
+  test('import explicit legacy observations', legacy_import_test)
+
   legacy_text_store_test = executable(
     'legacy-text-store-test',
     'legacy_text_store_test.cpp',
@@ -156,6 +164,7 @@ if get_option('tests').allowed()
     ['canonical-generation-store',
      'libpkgstate/canonical_generation_store.h'],
     ['legacy-completeness', 'libpkgstate/legacy_completeness.h'],
+    ['legacy-import', 'libpkgstate/legacy_import.h'],
     ['legacy-installed-package',
      'libpkgstate/legacy_installed_package.h'],
     ['legacy-snapshot', 'libpkgstate/legacy_snapshot.h'],

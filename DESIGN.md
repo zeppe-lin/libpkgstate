@@ -842,20 +842,47 @@ Migration
 
 Migration from legacy state is explicit and receipt-bound.
 
-A migration operation must:
+The public import projection is:
 
-* identify the source backend and exact source observation;
-* identify the destination target and canonical store;
-* preserve every fact the legacy format actually carries;
-* mark unavailable release, control, and provenance facts as unavailable;
-* accept supplementary facts only from explicit named migration inputs;
-* record which fields came from legacy storage and which were supplied;
-* perform no source-tree or provider reconstruction behind the caller's back;
-* support a non-mutating validation or dry-run path; and
-* return a structured migration receipt.
+```text
+legacy_import_source
+legacy_import_provenance
+legacy_package_import
+legacy_import_request
+legacy_import_receipt
+canonical_store::import_legacy()
+```
 
-Reading legacy state is not migration.  A read must never rewrite or enrich the
-source database automatically.
+`legacy_import_source` identifies the managed target, historical store, root
+view, and historical backend. The managed target and root view must match the
+canonical destination; the source store and backend must be distinct.
+
+Every source package requires exactly one `legacy_package_import`. The import
+supplies one canonical `package_release` without parsing the opaque legacy
+version line. Runtime dependencies, removal lifecycle, and target-profile facts
+are each either supplied explicitly or marked historically unavailable. Each
+candidate, artifact, application, and transaction provenance class also has one
+explicit supplied-or-unavailable decision. Known empty and unavailable remain
+different states.
+
+`legacy_import_request::make()` binds the exact source snapshot observation,
+all package observation identities, one migration-evidence identity, and an
+empty canonical destination. It preserves source ownership manifests, adds
+source package and snapshot observations to installed-control provenance,
+constructs the complete installed records, and computes the only admissible
+resulting snapshot. Request construction is the non-mutating validation path.
+
+`canonical_store::import_legacy()` performs expected-destination comparison
+under one exclusive backend transaction. It never merges legacy records into a
+populated canonical snapshot and never calls publication for a stale
+destination. Backend outcomes become `legacy_import_receipt` values covering
+validation, confirmed import, stale state, rejection, prepublication failure,
+unconfirmed durability, and indeterminate publication.
+
+Reading legacy state is not migration. A read never rewrites or enriches the
+source database automatically. Migration never reconstructs historical facts
+from current source trees, candidates, archives, filenames, configuration, or
+the live filesystem.
 
 Adapters and dependency direction
 ---------------------------------
@@ -1024,7 +1051,7 @@ The canonical implementation may proceed only in dependency order:
 5. implement compare-and-publish; [implemented]
 6. add a lossless canonical backend;
 7. adapt legacy state as explicitly incomplete;
-8. add explicit migration; and
+8. add explicit migration; [implemented]
 9. add optional planner and application adapters.
 
 A compatibility frontend may preserve old commands and storage formats during

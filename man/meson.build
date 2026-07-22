@@ -9,6 +9,7 @@ if scdoc.found()
     ['pkgstate_store.3', '3'],
     ['pkgstate_canonical_generation_store.3', '3'],
     ['pkgstate_legacy_compatibility.3', '3'],
+    ['pkgstate_legacy_import.3', '3'],
     ['pkgstate_legacy_text_store.3', '3'],
     ['pkgstate-db.5', '5'],
     ['pkgstate-generation.5', '5'],

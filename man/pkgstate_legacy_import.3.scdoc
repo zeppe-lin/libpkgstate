@@ -1,0 +1,129 @@
+PKGSTATE_LEGACY_IMPORT(3)
+
+# NAME
+
+pkgstate_legacy_import - explicit receipt-bound legacy state import
+
+# SYNOPSIS
+
+```
+#include <libpkgstate/legacy_import.h>
+#include <libpkgstate/canonical_store.h>
+```
+
+# DESCRIPTION
+
+Legacy import is an explicit transition from one exact incomplete
+*legacy_snapshot* observation into a fresh empty canonical destination.
+Reading compatibility state is not import and never rewrites either store.
+
+The import contract has four immutable layers:
+
+```
+legacy_import_source
+legacy_package_import
+legacy_import_request
+legacy_import_receipt
+```
+
+# SOURCE BINDING
+
+*legacy_import_source* identifies:
+
+- the managed target;
+- the historical state store;
+- the logical root view; and
+- the historical backend.
+
+The managed target and root view must match the canonical destination. The
+source store and backend must be distinct from the destination store and
+backend. A database pathname is not an identity.
+
+# PACKAGE INPUT
+
+Each source package requires exactly one *legacy_package_import*.
+
+The input binds the exact *legacy_package_observation_identity* to:
+
+- one explicit canonical *package_release*;
+- runtime requirements supplied by migration or declared historically
+  unavailable;
+- removal lifecycle supplied by migration or declared historically
+  unavailable;
+- target-profile facts supplied by migration or declared historically
+  unavailable; and
+- one explicit supplied-or-unavailable decision for every external provenance
+  class.
+
+The opaque legacy version line is never parsed. The release decomposition is
+caller-authoritative migration input.
+
+An empty supplied fact set is known empty. It is different from a historically
+unavailable fact set.
+
+The resulting installed control records the source package observation, source
+snapshot observation, and migration-evidence identity as migration provenance.
+The source ownership manifest is preserved exactly after canonical ordering.
+
+# REQUEST
+
+*legacy_import_request::make()* requires one empty canonical destination and:
+
+- one *legacy_import_source*;
+- one exact *legacy_snapshot*;
+- one empty canonical destination *snapshot*;
+- exactly one package input for every source package; and
+- one *legacy_migration_evidence_identity*.
+
+Construction validates the complete transition, computes every canonical
+installed package, computes the resulting snapshot, and computes
+*legacy_import_request_identity*. It performs no locking or storage mutation.
+The resulting snapshot is therefore the dry-run result.
+
+Import never merges into an already populated canonical destination. Such a
+transition must be planned as ordinary package-state publication instead of
+being smuggled through migration.
+
+# RECEIPTS
+
+*legacy_import_receipt::validated()* records a non-mutating validation result.
+
+*canonical_store::import_legacy()* compares the expected empty destination under
+one exclusive backend publication transaction. A stale destination returns an
+ordinary typed receipt and does not invoke the backend publication primitive.
+
+Receipt outcomes are:
+
+```
+validated_only
+imported
+stale_destination
+request_rejected
+failed_before_publication
+imported_durability_unconfirmed
+indeterminate
+```
+
+Receipts bind the request, exact source observation, expected and actual
+destination snapshots, target binding, optional resulting snapshot, storage
+format, durability, state-storage atomicity boundary, and subordinate evidence.
+
+A receipt proves only the stated state-storage outcome. It is not proof that the
+legacy source, target filesystem, and canonical store changed atomically.
+
+# FORBIDDEN RECONSTRUCTION
+
+Import does not:
+
+- split an opaque version line by convention;
+- read current source or candidate control;
+- inspect package archives;
+- infer lifecycle material from the live filesystem;
+- invent application or transaction evidence; or
+- modify the historical database.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_store*(3),
+*pkgstate_legacy_compatibility*(3),
+*pkgstate_canonical_generation_store*(3)

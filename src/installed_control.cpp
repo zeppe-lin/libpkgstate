@@ -68,6 +68,9 @@ validate_provenance_kind(control_provenance_kind kind)
     case control_provenance_kind::artifact_manifest:
     case control_provenance_kind::application_evidence:
     case control_provenance_kind::transaction_evidence:
+    case control_provenance_kind::legacy_package_observation:
+    case control_provenance_kind::legacy_snapshot_observation:
+    case control_provenance_kind::legacy_migration_evidence:
       return;
   }
   throw state_error("invalid installed-control provenance kind");

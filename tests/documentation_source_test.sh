@@ -34,6 +34,9 @@ check_page \
   man/pkgstate_legacy_compatibility.3.scdoc \
   PKGSTATE_LEGACY_COMPATIBILITY\(3\)
 check_page \
+  man/pkgstate_legacy_import.3.scdoc \
+  PKGSTATE_LEGACY_IMPORT\(3\)
+check_page \
   man/pkgstate_legacy_text_store.3.scdoc \
   PKGSTATE_LEGACY_TEXT_STORE\(3\)
 check_page man/pkgstate-db.5.scdoc PKGSTATE-DB\(5\)
@@ -160,6 +163,18 @@ grep -F 'legacy_snapshot_observation_identity' \
   "$source_root/man/pkgstate_legacy_compatibility.3.scdoc" >/dev/null ||
   fail "legacy compatibility manual omits observation identity"
 
+grep -F 'The opaque legacy version line is never parsed.' \
+  "$source_root/man/pkgstate_legacy_import.3.scdoc" >/dev/null ||
+  fail "legacy import manual permits version-line guessing"
+
+grep -F 'requires one empty canonical destination' \
+  "$source_root/man/pkgstate_legacy_import.3.scdoc" >/dev/null ||
+  fail "legacy import manual omits fresh-destination boundary"
+
+grep -F 'does not invoke the backend publication primitive' \
+  "$source_root/man/pkgstate_legacy_import.3.scdoc" >/dev/null ||
+  fail "legacy import manual omits stale no-publication contract"
+
 grep -F 'An empty retained manifest is known empty' \
   "$source_root/DESIGN.md" >/dev/null ||
   fail "design collapses known-empty legacy ownership into unavailable"
@@ -177,6 +192,7 @@ for page in \
   'pkgstate_store(3)' \
   'pkgstate_canonical_generation_store(3)' \
   'pkgstate_legacy_compatibility(3)' \
+  'pkgstate_legacy_import(3)' \
   'pkgstate_legacy_text_store(3)' \
   'pkgstate-db(5)' \
   'pkgstate-generation(5)' \
