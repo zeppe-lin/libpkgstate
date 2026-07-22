@@ -11,6 +11,7 @@
 #include <libpkgstate/error.h>
 #include <libpkgstate/digest.h>
 #include <libpkgstate/installed_package.h>
+#include <libpkgstate/package_release.h>
 #include <libpkgstate/owned_entry.h>
 #include <libpkgstate/package_identity.h>
 #include <libpkgstate/package_path.h>

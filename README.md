@@ -8,6 +8,7 @@ It provides:
 
 * validated package names and versions;
 * strongly typed algorithm-qualified state identities;
+* canonical package releases with computed identities;
 * state-owned canonical package paths;
 * canonical installed ownership manifests;
 * immutable snapshots with package and ownership indexes;
@@ -37,9 +38,12 @@ The implementation is original Zeppe-Lin code.  It is not derived from CRUX
 Contracts
 ---------
 
-The public model has four levels:
+The canonical release fact and compatibility installed model currently coexist:
 
 ```text
+package_release
+    name + version + release + computed identity
+
 package_identity      package_path
        |                    |
        +---------+----------+
@@ -55,12 +59,14 @@ store / write_transaction
 ```
 
 Canonical state identities use distinct C++ types and the strict textual form
-`v1:sha256:<lowercase-hex>`.  The identity substrate is present before those
-identities are attached to the compatibility-shaped package and snapshot model.
+`v1:sha256:<lowercase-hex>`.  `package_release` uses that substrate now; the
+compatibility-shaped installed package and snapshot acquire canonical identities
+in later model commits.
 
 Important invariants:
 
-* package identity fields are non-empty and line-safe;
+* canonical release coordinates are non-empty and line-safe;
+* legacy package identity fields are non-empty and line-safe;
 * package paths are canonical and root-relative;
 * an installed package contains at most one entry for each path;
 * packages and manifests are returned in deterministic order;
@@ -90,7 +96,7 @@ Manual pages
 The installed manual suite is:
 
 * `libpkgstate(3)` — library overview and boundaries;
-* `pkgstate_model(3)` — identities, ownership manifests, and snapshots;
+* `pkgstate_model(3)` — package releases, ownership manifests, and snapshots;
 * `pkgstate_store(3)` — stores and write transactions;
 * `pkgstate_legacy_text_store(3)` — compatibility backend;
 * `pkgstate-db(5)` — line-oriented database format; and

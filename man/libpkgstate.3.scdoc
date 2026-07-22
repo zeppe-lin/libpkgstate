@@ -32,6 +32,9 @@ copy of the package image.
 
 The public model consists of:
 
+*package_release*
+	Canonical name, version, distribution release, and computed identity.
+
 *digest identities*
 	Strongly typed algorithm-qualified identities for canonical state domains.
 

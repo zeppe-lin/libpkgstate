@@ -2,12 +2,13 @@ PKGSTATE_MODEL(3)
 
 # NAME
 
-pkgstate_model - identities, installed ownership, and snapshots
+pkgstate_model - package releases, installed ownership, and snapshots
 
 # SYNOPSIS
 
 ```
 #include <libpkgstate/digest.h>
+#include <libpkgstate/package_release.h>
 #include <libpkgstate/package_identity.h>
 #include <libpkgstate/package_path.h>
 #include <libpkgstate/owned_entry.h>
@@ -42,9 +43,32 @@ The canonical record domain assigned to an identity type is available through
 *canonical_domain()*. Record hashing is library-owned; parsing digest text does
 not grant a caller authority to assert that the represented object exists.
 
-# PACKAGE IDENTITY
+# PACKAGE RELEASES
 
-*pkgstate::package_identity* stores a package name and version.
+*pkgstate::package_release* is the canonical package-release fact. Construct one
+with:
+
+```
+auto release =
+    pkgstate::package_release::make(name, version, release_number);
+```
+
+Name, version, and distribution release must be non-empty and must not contain
+NUL, carriage-return, or newline bytes. Invalid coordinates raise
+*pkgstate::identity_error*.
+
+The library computes *package_release_identity* from the domain-separated
+canonical record containing name, version, and release in that order. Callers
+cannot attach arbitrary identity bytes to different coordinates.
+
+Equality includes the identity and all coordinates. Relational ordering is
+stable record ordering by name, version, release, and identity; it is not
+package-version precedence.
+
+# COMPATIBILITY PACKAGE IDENTITY
+
+*pkgstate::package_identity* stores the historical package name and opaque
+version line used by the compatibility database.
 
 Construct an identity with:
 
@@ -57,7 +81,8 @@ Both fields must be non-empty and must not contain NUL, carriage-return, or
 newline bytes.
 
 The library validates representation, not distribution naming policy. It does
-not impose repository, epoch, release, or collection syntax.
+not impose repository, epoch, release, or collection syntax. It also does not
+split the historical version line into canonical version and release fields.
 
 Invalid input raises *pkgstate::identity_error*.
 

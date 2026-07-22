@@ -23,11 +23,11 @@ state-publication request
 state-publication receipt
 ```
 
-The implementation currently exposes a smaller compatibility-shaped model:
-validated name and version lines, state-owned canonical package paths, ownership
-manifests, immutable snapshots, and the historical `/var/lib/pkg/db` backend.
-That implementation is a sound migration base.  It is not yet the complete
-canonical model defined here.
+The implementation currently exposes canonical package releases and a smaller
+compatibility-shaped installed model: validated legacy name and version lines,
+state-owned canonical package paths, ownership manifests, immutable snapshots,
+and the historical `/var/lib/pkg/db` backend.  That implementation is a sound
+migration base.  It is not yet the complete canonical model defined here.
 
 This document is normative for the direction of the public model and storage
 interfaces.  Existing behavior remains current until a later commit implements
@@ -137,8 +137,15 @@ release
 ```
 
 The identity is an authority-bearing digest.  The three descriptive fields are
-validated coordinates of the same release.  Version ordering remains outside
-`libpkgstate`; canonical record ordering is not package-version precedence.
+validated coordinates of the same release.  `package_release::make()` computes
+the identity from a domain-separated canonical record containing `name`,
+`version`, and `release` in that order.  The caller cannot pair arbitrary digest
+bytes with different coordinates.
+
+Version ordering remains outside `libpkgstate`; canonical record ordering is not
+package-version precedence.  A planning adapter may copy the exact
+algorithm-qualified identity into the corresponding `libpkgplan` domain, where
+it remains a caller-supplied authority fact rather than a planner calculation.
 
 The historical database stores only:
 

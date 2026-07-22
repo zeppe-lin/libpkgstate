@@ -55,6 +55,10 @@ grep -F 'v1:sha256:<64 lowercase hexadecimal digits>' \
   "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
   fail "model manual omits canonical digest representation"
 
+grep -F 'cannot attach arbitrary identity bytes to different coordinates.' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual omits package-release identity authority"
+
 for document in DESIGN.md STORAGE.md MIGRATION.md TESTING.md HISTORY.md
 do
   test -s "$source_root/$document" || fail "missing or empty $document"

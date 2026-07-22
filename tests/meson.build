@@ -18,6 +18,13 @@ if get_option('tests').allowed()
   )
   test('hash canonical state records', canonical_record_test)
 
+  package_release_test = executable(
+    'package-release-test',
+    'package_release_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('identify canonical package releases', package_release_test)
+
   package_path_test = executable(
     'package-path-test',
     'package_path_test.cpp',
@@ -64,6 +71,7 @@ if get_option('tests').allowed()
     ['libpkgstate', 'libpkgstate/libpkgstate.h'],
     ['error', 'libpkgstate/error.h'],
     ['digest', 'libpkgstate/digest.h'],
+    ['package-release', 'libpkgstate/package_release.h'],
     ['package-identity', 'libpkgstate/package_identity.h'],
     ['package-path', 'libpkgstate/package_path.h'],
     ['owned-entry', 'libpkgstate/owned_entry.h'],
