@@ -14,9 +14,9 @@ libpkgstate - durable installed package state
 
 *libpkgstate* represents and persists durable installed package state.
 
-The library records package identity, historical installed control, and
-ownership after installation policy has been resolved. It does not describe raw
-archive contents.
+The library records package identity, historical installed control, durable
+target-state binding, and ownership after installation policy has been
+resolved. It does not describe raw archive contents.
 
 The central distinction is:
 
@@ -39,6 +39,10 @@ The public model consists of:
 *installed_control*
 	Immutable historical runtime requirements, removal lifecycle material,
 	target/profile facts, retained provenance, and explicit completeness.
+
+*state_target_binding*
+	Typed managed-target, state-store, root-view, backend, and publication
+	domain identities with one computed binding identity.
 
 *digest identities*
 	Strongly typed algorithm-qualified identities for canonical state domains.

@@ -32,6 +32,14 @@ if get_option('tests').allowed()
   )
   test('retain durable installed control', installed_control_test)
 
+  state_target_binding_test = executable(
+    'state-target-binding-test',
+    'state_target_binding_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('identify durable target-state bindings',
+       state_target_binding_test)
+
   package_path_test = executable(
     'package-path-test',
     'package_path_test.cpp',
@@ -80,6 +88,8 @@ if get_option('tests').allowed()
     ['digest', 'libpkgstate/digest.h'],
     ['package-release', 'libpkgstate/package_release.h'],
     ['installed-control', 'libpkgstate/installed_control.h'],
+    ['state-target-binding',
+     'libpkgstate/state_target_binding.h'],
     ['package-identity', 'libpkgstate/package_identity.h'],
     ['package-path', 'libpkgstate/package_path.h'],
     ['owned-entry', 'libpkgstate/owned_entry.h'],

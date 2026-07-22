@@ -2,7 +2,7 @@ PKGSTATE_MODEL(3)
 
 # NAME
 
-pkgstate_model - package releases, installed control, ownership, and snapshots
+pkgstate_model - package releases, control, target binding, and ownership
 
 # SYNOPSIS
 
@@ -10,6 +10,7 @@ pkgstate_model - package releases, installed control, ownership, and snapshots
 #include <libpkgstate/digest.h>
 #include <libpkgstate/package_release.h>
 #include <libpkgstate/installed_control.h>
+#include <libpkgstate/state_target_binding.h>
 #include <libpkgstate/package_identity.h>
 #include <libpkgstate/package_path.h>
 #include <libpkgstate/owned_entry.h>
@@ -118,6 +119,40 @@ cannot attach an arbitrary identity to different historical control.
 Installed control is separate from the ownership manifest. It contains no
 filesystem mutation instructions and grants no authority to execute lifecycle
 actions, solve dependencies, or publish installed state.
+
+# STATE TARGET BINDING
+
+*pkgstate::state_target_binding* is the durable state projection of one
+managed package target. Construct one with:
+
+```
+auto binding = pkgstate::state_target_binding::make(
+    managed_target, state_store, root_view, state_backend,
+    publication_domain);
+```
+
+The five components are distinct typed identities supplied by their owning
+authorities:
+
+- *managed_target_identity* identifies the managed package target;
+- *state_store_identity* identifies the durable installed-state store;
+- *root_view_identity* identifies the logical target root view;
+- *state_backend_identity* identifies the storage backend; and
+- *publication_domain_identity* identifies the publication and locking domain.
+
+The library computes *state_target_binding_identity* from those identities in
+that order. It does not discover or authenticate the component authorities.
+Equal digest bytes in different component domains remain different semantic
+facts because the C++ types are not interchangeable.
+
+A pathname is a locator, not a target identity. The binding therefore stores no
+root pathname. It also excludes installed-snapshot identity, preventing the
+snapshot-to-target-context-to-snapshot identity cycle.
+
+The binding is narrower than the complete target-system context assembled by
+the package manager. Observation backends, execution capabilities, package
+profiles, configuration scopes, and the installed snapshot remain outside this
+value.
 
 # COMPATIBILITY PACKAGE IDENTITY
 
@@ -239,6 +274,7 @@ The following ordering is part of the contract:
   order;
 - target/profile facts are sorted by name;
 - installed-control provenance is sorted by semantic kind;
+- target bindings are ordered by their five component identities;
 - package manifests are sorted by canonical path;
 - snapshots are sorted by package name; and
 - owner results are sorted by package name.

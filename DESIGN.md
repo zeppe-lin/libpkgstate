@@ -24,7 +24,8 @@ state-publication receipt
 ```
 
 The implementation currently exposes canonical package releases, immutable
-installed control, and a smaller compatibility-shaped installed model:
+installed control, durable target-state bindings, and a smaller
+compatibility-shaped installed model:
 validated legacy name and version lines, state-owned canonical package paths,
 ownership manifests, immutable snapshots, and the historical `/var/lib/pkg/db`
 backend.  That implementation is a sound migration base.  It is not yet the
@@ -354,6 +355,12 @@ The snapshot instead contains the narrower state target binding.  `pkgman`
 composes the complete target context from that binding plus the snapshot and
 other operational facts.
 
+The public `state_target_binding` value implements that narrow projection.  It
+retains typed managed-target, state-store, root-view, state-backend, and
+publication-domain identities supplied by their owning authorities, then
+computes a state-owned binding identity from their canonical record.  It
+contains neither a root pathname nor an installed-snapshot identity.
+
 Canonical identities
 --------------------
 
@@ -364,6 +371,7 @@ minimum, the canonical model requires:
 package_release_identity
 installed_control_identity
 installed_package_identity
+state_target_binding_identity
 ownership_inventory_identity
 installed_state_snapshot_identity
 state_publication_request_identity
@@ -418,6 +426,7 @@ Domain labels are state-owned and include a format version, for example:
 pkgstate/package-release/1
 pkgstate/installed-control/1
 pkgstate/installed-package/1
+pkgstate/target-binding/1
 pkgstate/ownership-inventory/1
 pkgstate/installed-snapshot/1
 pkgstate/publication-request/1

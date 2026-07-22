@@ -63,6 +63,10 @@ grep -F 'Known empty and historically unavailable are different states.' \
   "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
   fail "model manual omits installed-control completeness"
 
+grep -F 'A pathname is a locator, not a target identity.' \
+  "$source_root/man/pkgstate_model.3.scdoc" >/dev/null ||
+  fail "model manual omits target-binding identity boundary"
+
 for document in DESIGN.md STORAGE.md MIGRATION.md TESTING.md HISTORY.md
 do
   test -s "$source_root/$document" || fail "missing or empty $document"

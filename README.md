@@ -10,6 +10,7 @@ It provides:
 * strongly typed algorithm-qualified state identities;
 * canonical package releases with computed identities;
 * immutable durable installed control with explicit completeness;
+* durable target-state bindings with computed identities;
 * state-owned canonical package paths;
 * canonical installed ownership manifests;
 * immutable snapshots with package and ownership indexes;
@@ -49,6 +50,12 @@ package_release --------> installed_control
                            retained provenance
                            computed identity
 
+managed target + store + root view + backend + publication domain
+                              |
+                              v
+                    state_target_binding
+                       computed identity
+
 package_identity      package_path
        |                    |
        +---------+----------+
@@ -65,14 +72,17 @@ store / write_transaction
 
 Canonical state identities use distinct C++ types and the strict textual form
 `v1:sha256:<lowercase-hex>`.  `package_release` and `installed_control` use that
-substrate now; the compatibility-shaped installed package and snapshot acquire
-canonical identities in later model commits.
+substrate now; `state_target_binding` uses it for the durable storage and
+publication projection.  The compatibility-shaped installed package and
+snapshot acquire canonical identities in later model commits.
 
 Important invariants:
 
 * canonical release coordinates are non-empty and line-safe;
 * installed control distinguishes known empty facts from historical absence;
 * unavailable control groups cannot contain invented values;
+* target bindings contain typed identities, not root pathnames;
+* target bindings exclude installed-snapshot identity;
 * legacy package identity fields are non-empty and line-safe;
 * package paths are canonical and root-relative;
 * an installed package contains at most one entry for each path;
@@ -103,7 +113,8 @@ Manual pages
 The installed manual suite is:
 
 * `libpkgstate(3)` — library overview and boundaries;
-* `pkgstate_model(3)` — package releases, installed control, ownership, and snapshots;
+* `pkgstate_model(3)` — package releases, installed control, target binding,
+  ownership, and snapshots;
 * `pkgstate_store(3)` — stores and write transactions;
 * `pkgstate_legacy_text_store(3)` — compatibility backend;
 * `pkgstate-db(5)` — line-oriented database format; and
