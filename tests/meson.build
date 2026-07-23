@@ -142,11 +142,7 @@ if get_option('tests').allowed()
           meson.current_source_dir(),
           'plan_adapter_metadata_test.sh',
         ),
-        join_paths(
-          meson.project_build_root(),
-          'meson-private',
-          'libpkgstate-plan.pc',
-        ),
+        meson.project_build_root(),
       ],
     )
   endif
