@@ -50,5 +50,5 @@ grep -F 'It does not parse opaque' "$manual" >/dev/null ||
   fail 'manual permits legacy version reconstruction'
 grep -F 'Command-line usage is invalid.' "$manual" >/dev/null ||
   fail 'manual omits status 2'
-grep -F 'does not produce a partial' "$manual" >/dev/null ||
+grep -F 'do not produce a partial' "$manual" >/dev/null ||
   fail 'manual omits all-or-nothing report boundary'

@@ -8,7 +8,14 @@ pkgstate_check=$1
 fixture=$2
 
 temporary=$(mktemp -d)
-trap 'rm -rf "$temporary"' EXIT HUP INT TERM
+
+cleanup()
+{
+  chmod -R u+w "$temporary" 2>/dev/null || :
+  rm -rf "$temporary"
+}
+
+trap cleanup EXIT HUP INT TERM
 
 fail()
 {
