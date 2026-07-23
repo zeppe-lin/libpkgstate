@@ -25,7 +25,9 @@ check_page()
 }
 
 check_page man/libpkgstate.3.scdoc LIBPKGSTATE\(3\)
+check_page man/pkgstate_authority.7.scdoc PKGSTATE_AUTHORITY\(7\)
 check_page man/pkgstate_model.3.scdoc PKGSTATE_MODEL\(3\)
+check_page man/pkgstate_publication.3.scdoc PKGSTATE_PUBLICATION\(3\)
 check_page man/pkgstate_store.3.scdoc PKGSTATE_STORE\(3\)
 check_page \
   man/pkgstate_canonical_generation_store.3.scdoc \
@@ -46,6 +48,30 @@ check_page man/pkgstate-db.5.scdoc PKGSTATE-DB\(5\)
 check_page man/pkgstate-generation.5.scdoc PKGSTATE-GENERATION\(5\)
 check_page man/pkginfo.1.scdoc PKGINFO\(1\)
 check_page man/pkgstate-check.1.scdoc PKGSTATE-CHECK\(1\)
+
+grep -F 'Callers provide facts and referenced external identities' \
+  "$source_root/man/pkgstate_authority.7.scdoc" >/dev/null ||
+  fail "authority manual omits state-owned identity authority"
+
+grep -F 'Reading legacy state is not migration.' \
+  "$source_root/man/pkgstate_authority.7.scdoc" >/dev/null ||
+  fail "authority manual collapses compatibility read into migration"
+
+grep -F 'The backend cannot silently rebase an old request' \
+  "$source_root/man/pkgstate_authority.7.scdoc" >/dev/null ||
+  fail "authority manual permits silent rebase"
+
+grep -F '*canonical_store::compare_and_publish()* owns the stale-state' \
+  "$source_root/man/pkgstate_publication.3.scdoc" >/dev/null ||
+  fail "publication manual omits non-overridable stale-state loop"
+
+grep -F 'return *stale_expected_state* without invoking publication' \
+  "$source_root/man/pkgstate_publication.3.scdoc" >/dev/null ||
+  fail "publication manual omits stale no-publication contract"
+
+grep -F 'A publication receipt does not prove atomicity' \
+  "$source_root/man/pkgstate_publication.3.scdoc" >/dev/null ||
+  fail "publication manual overclaims transaction atomicity"
 
 grep -F 'A package-state transaction is not a filesystem transaction.' \
   "$source_root/man/pkgstate_store.3.scdoc" >/dev/null ||
@@ -234,6 +260,14 @@ done
 grep -F 'The frontend may compose installed truth and archive truth' \
   "$source_root/DESIGN.md" >/dev/null ||
   fail "design omits frontend composition boundary"
+
+grep -F '`pkgstate_authority(7)` defines the installed-state authority graph' \
+  "$source_root/HISTORY.md" >/dev/null ||
+  fail "history omits authority manual"
+
+grep -F '`pkgstate_publication(3)` defines immutable requests' \
+  "$source_root/HISTORY.md" >/dev/null ||
+  fail "history omits publication manual"
 
 grep -F 'Historical CRUX `pkgmk` calls `pkginfo -f`' \
   "$source_root/MIGRATION.md" >/dev/null ||

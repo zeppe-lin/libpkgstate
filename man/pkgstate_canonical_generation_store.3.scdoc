@@ -127,7 +127,8 @@ transaction coordinator or a separate receipt authority.
 
 # SEE ALSO
 
-*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_store*(3),
+*libpkgstate*(3), *pkgstate_authority*(7), *pkgstate_model*(3),
+*pkgstate_publication*(3), *pkgstate_store*(3),
 *pkgstate_legacy_text_store*(3), *pkgstate-check*(1),
 *pkgstate-generation*(5), *flock*(2),
 *fsync*(2), *renameat*(2)

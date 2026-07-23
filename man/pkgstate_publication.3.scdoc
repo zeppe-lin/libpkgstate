@@ -1,0 +1,156 @@
+PKGSTATE_PUBLICATION(3)
+
+# NAME
+
+pkgstate_publication - immutable requests, compare-and-publish, and receipts
+
+# SYNOPSIS
+
+```
+#include <libpkgstate/publication_request.h>
+#include <libpkgstate/publication_receipt.h>
+#include <libpkgstate/canonical_store.h>
+
+pkgstate::state_publication_request request =
+    pkgstate::state_publication_request::make(
+        expected_snapshot, deltas, transaction_evidence);
+
+pkgstate::state_publication_receipt receipt =
+    store.compare_and_publish(request);
+```
+
+# PUBLICATION REQUEST
+
+A *state_publication_request* describes one immutable installed-state
+transition from one exact expected snapshot.
+
+Each *package_state_delta* is one of:
+
+*install*
+	Require package absence and add one complete canonical installed package.
+
+*replace*
+	Require one exact old installed-package identity and replace it with one
+	complete canonical installed package.
+
+*remove*
+	Require one exact old installed-package identity and make the package
+	absent.
+
+Every delta carries one caller-authoritative *operation_plan_identity* and one
+*application_evidence_identity*. A request containing more than one package
+delta also requires *transaction_evidence_identity*.
+
+Construction normalizes deltas by canonical package name and rejects:
+
+- an empty request;
+- duplicate package names;
+- installation over an existing package;
+- replacement or removal of an absent or different package;
+- replacement that preserves the same installed-package identity;
+- a proposed package from another target binding;
+- application evidence not retained by proposed installed control; and
+- inconsistent transaction evidence.
+
+The request identity is computed by *libpkgstate*. Request construction
+does not lock, read, or mutate storage.
+
+# COMPARE-AND-PUBLISH
+
+*canonical_store::compare_and_publish()* owns the stale-state algorithm and is
+non-virtual.
+
+It performs one lock-scoped sequence:
+
+1. call the backend's *begin_publication()*;
+2. obtain actual durable state under the exclusive publication lock;
+3. validate the request target binding;
+4. compare actual and expected snapshot identities;
+5. return *stale_expected_state* without invoking publication when they differ;
+6. derive the only snapshot permitted by the request deltas;
+7. call the backend publication primitive exactly once; and
+8. construct a typed receipt from backend facts.
+
+A backend receives the derived resulting snapshot. It must not reinterpret the
+request, select another result, or report stale state itself.
+
+# BACKEND RESULT
+
+*state_publication_backend_result* constrains ordinary backend outcomes after
+the actual prior snapshot has been established.
+
+The backend may report:
+
+*published*
+	The requested snapshot is selected and durability is confirmed.
+
+*request_rejected*
+	The request was rejected before crossing a publication boundary.
+
+*failed_before_publication*
+	Publication failed before any state-selection boundary was crossed.
+
+*published_but_durability_unconfirmed*
+	The requested snapshot became visible, but durability confirmation failed.
+
+*indeterminate*
+	The publication attempt crossed a boundary and requires authoritative
+	reread. The backend states whether the requested result was established.
+
+The backend result cannot report a stale expected snapshot. Staleness belongs
+to the non-virtual compare-and-publish loop.
+
+# RECEIPT
+
+A *state_publication_receipt* records:
+
+- request identity;
+- expected prior snapshot identity;
+- actual prior snapshot identity;
+- target and store binding;
+- storage-format identifier;
+- typed publication outcome;
+- typed durability outcome;
+- actual state-storage atomicity boundary;
+- resulting snapshot identity when established; and
+- normalized subordinate publication evidence.
+
+Receipt construction validates the shape of each outcome. In particular:
+
+- stale receipts require actual prior state to differ from expected state;
+- rejected and prepublication-failure receipts record no publication boundary;
+- published receipts require the exact request-derived result;
+- publication outcomes crossing storage require a non-*none* atomicity
+  boundary; and
+- an indeterminate receipt may cite only the request-derived result.
+
+The receipt identity is computed by *libpkgstate*. Constructing a receipt does
+not acquire a lock, publish state, or confirm durability.
+
+# OUTCOME HANDLING
+
+Expected semantic outcomes are values, not exceptions. A caller switches on
+*state_publication_outcome* and *state_publication_durability*.
+
+Exceptions remain appropriate when locking, corruption, parsing, or I/O failure
+prevents the library from constructing a truthful structured result.
+
+After *published_but_durability_unconfirmed* or *indeterminate*, the
+caller must reread authoritative state before choosing recovery. It must
+not assume either the old or requested snapshot is current unless the
+receipt establishes it.
+
+# ATOMICITY
+
+The recorded atomicity boundary concerns state storage only. Current boundaries
+include complete-state object replacement and immutable-generation selection.
+
+A publication receipt does not prove atomicity with payload staging, filesystem
+mutation, rejected-object handling, package scripts, or maintenance actions.
+Those operations belong to the complete package transaction coordinator.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_authority*(7), *pkgstate_model*(3),
+*pkgstate_store*(3), *pkgstate_canonical_generation_store*(3),
+*pkgstate-generation*(5)

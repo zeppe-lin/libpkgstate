@@ -124,7 +124,8 @@ hashed to invent target, store, root-view, backend, or publication authority.
 
 # SEE ALSO
 
-*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_store*(3),
+*libpkgstate*(3), *pkgstate_authority*(7), *pkgstate_model*(3),
+*pkgstate_publication*(3), *pkgstate_store*(3),
 *pkgstate_canonical_generation_store*(3),
 *pkgstate_legacy_compatibility*(3), *pkgstate_legacy_text_store*(3),
 *pkgstate-generation*(5), *pkgstate-db*(5), *pkginfo*(1)

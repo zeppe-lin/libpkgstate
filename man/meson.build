@@ -5,7 +5,9 @@ scdoc = find_program('scdoc', required: get_option('man_pages'))
 if scdoc.found()
   manual_pages = [
     ['libpkgstate.3', '3'],
+    ['pkgstate_authority.7', '7'],
     ['pkgstate_model.3', '3'],
+    ['pkgstate_publication.3', '3'],
     ['pkgstate_store.3', '3'],
     ['pkgstate_canonical_generation_store.3', '3'],
     ['pkgstate_legacy_compatibility.3', '3'],

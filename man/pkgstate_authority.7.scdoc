@@ -1,0 +1,166 @@
+PKGSTATE_AUTHORITY(7)
+
+# NAME
+
+pkgstate_authority - installed-state authority and dependency boundaries
+
+# DESCRIPTION
+
+*libpkgstate* owns durable installed-state truth. It records what one completed
+package transaction declared installed after archive inspection, policy, and
+application have finished.
+
+The authoritative graph is:
+
+```
+package_release
+      |
+      v
+installed_control
+      |
+      +------------------+
+      |                  |
+      v                  v
+state_target_binding   ownership manifest
+      |                  |
+      +--------+---------+
+               v
+       installed_package
+               |
+               v
+            snapshot
+```
+
+Every canonical identity is computed by *libpkgstate* from the complete
+value in its domain.
+Callers provide facts and referenced external identities. They do not assign
+installed-package, ownership-inventory, snapshot, request, or receipt
+identities.
+
+# AUTHORITY CLASSES
+
+Canonical state contains three authority classes.
+
+*State-owned facts*
+	Package release, installed control, target binding, installed ownership,
+	installed-package identity, ownership-inventory identity, and installed-
+	snapshot identity.
+
+*Caller-authoritative references*
+	Accepted operation-plan identity, completed application-evidence identity,
+	and optional transaction-evidence identity. The library validates and
+	retains these references but does not reinterpret their source domains.
+
+*Backend-authoritative facts*
+	The actual prior snapshot observed under lock, storage-format identifier,
+	publication outcome, durability outcome, atomicity boundary, resulting
+	snapshot when established, and subordinate storage evidence.
+
+A pathname is a locator. It is not a target, store, root-view, backend, or
+publication-domain identity.
+
+# CANONICAL AND COMPATIBILITY STATE
+
+Canonical *snapshot* is complete installed truth for one
+*state_target_binding*. Every package contains canonical release, installed
+control, target binding, and ownership.
+
+The historical database cannot represent that object. A *legacy_snapshot*
+retains package names, opaque version lines, and directory or non-directory
+ownership. It has separate observation identities and a fixed completeness
+profile.
+
+Reading legacy state is not migration. Compatibility observations do not gain
+canonical installed identities, target binding, control, or application
+history merely because they were parsed successfully.
+
+# DEPENDENCY DIRECTION
+
+The core library does not depend on planner or application libraries.
+
+```
+libpkgstate      libpkgplan      libpkgapply
+      \             |              /
+       \            |             /
+        +------ adapter or pkgman -+
+```
+
+The optional *libpkgstate-plan* adapter projects a canonical snapshot into
+planner vocabulary. It accepts no *legacy_snapshot* and does not invent
+filesystem metadata or a complete target-system context.
+
+An application adapter may construct publication requests from completed
+application evidence. It must not publish intended plan outcomes before
+application has established them.
+
+# PUBLICATION AUTHORITY
+
+Canonical publication is compare-and-publish:
+
+1. construct an immutable request from one expected snapshot;
+2. acquire the backend publication lock;
+3. reread complete durable state under that lock;
+4. compare the actual and expected snapshot identities;
+5. return a stale receipt without publication when they differ;
+6. derive the only request-permitted resulting snapshot;
+7. ask the backend to publish that exact snapshot; and
+8. return a typed receipt.
+
+The backend cannot silently rebase an old request onto newer state. The caller
+cannot supply an arbitrary complete replacement snapshot.
+
+A state receipt proves only the recorded state-publication outcome. It does not
+prove that package-owned filesystem changes and state publication were globally
+atomic.
+
+# STORAGE AUTHORITY
+
+The canonical generation backend stores immutable content-addressed snapshots.
+Only the _current_ selector chooses authoritative state. The backend validates
+binding, selected generation, snapshot identity, ownership identity, canonical
+re-encoding, modes, and link counts before returning state.
+
+The historical text backend remains separate and byte-compatible. Its lock and
+publication semantics do not upgrade the represented facts into canonical
+truth.
+
+# MIGRATION AUTHORITY
+
+Legacy import is explicit. The caller supplies every unavailable canonical fact
+and evidence reference. The opaque legacy version line is not split by
+convention, and current source, archive, candidate, configuration, or live
+filesystem state is not treated as historical truth.
+
+Import requires an empty canonical destination. It publishes no merge and does
+not overwrite existing canonical state.
+
+# DIAGNOSTICS
+
+*pkgstate-check*(1) reports state-owned identities, counts, and completeness.
+Canonical mode requires the caller's exact target-binding components and opens
+only an existing generation store. Compatibility mode reports one exact legacy
+observation.
+
+Diagnostic output is presentation. It must not be parsed as a replacement
+state-authority protocol and cannot be converted back into canonical authority.
+
+# FORBIDDEN SHORTCUTS
+
+The following are invalid:
+
+- deriving installed ownership by copying an archive manifest;
+- parsing an opaque legacy version line into release coordinates;
+- substituting current candidate control for historical installed control;
+- hashing a pathname to invent target identity;
+- treating exclusive locking alone as stale-state protection;
+- silently rebasing a request after another publication;
+- assigning canonical installed identities outside *libpkgstate*; or
+- treating a state receipt as proof of global filesystem transaction atomicity.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_publication*(3),
+*pkgstate_store*(3), *pkgstate_canonical_generation_store*(3),
+*pkgstate_legacy_compatibility*(3), *pkgstate_legacy_import*(3),
+*pkgstate_plan_adapter*(3), *pkgstate-generation*(5),
+*pkgstate-check*(1)

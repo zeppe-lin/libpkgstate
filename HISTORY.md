@@ -96,3 +96,17 @@ expanding `pkginfo` compatibility output:
 * legacy mode reports retained, derived, and unavailable fact classes;
 * output includes state-owned identities and normalized ownership counts; and
 * diagnostics never initialize, repair, import, publish, or begin a write.
+
+Canonical manual architecture
+-----------------------------
+
+The canonical reconstruction gained two cross-cutting manual entry points:
+
+* `pkgstate_authority(7)` defines the installed-state authority graph,
+  compatibility boundary, dependency direction, and forbidden shortcuts; and
+* `pkgstate_publication(3)` defines immutable requests, the non-overridable
+  compare-and-publish loop, backend outcomes, receipts, and state-only
+  atomicity.
+
+The narrower model, store, backend, compatibility, import, adapter, format, and
+diagnostic pages remain normative for their own interfaces.

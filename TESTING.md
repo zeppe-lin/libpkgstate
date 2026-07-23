@@ -137,6 +137,8 @@ The documentation contract test checks:
 
 * presence of every documented manual source;
 * page names and sections;
+* authority-graph and dependency-direction coverage;
+* request, stale-state, receipt, and atomicity coverage;
 * `pkginfo(1)` option, dispatch, ordering, and status coverage;
 * the explicit absence and migration boundary of `pkginfo -f`;
 * state-versus-filesystem transaction warnings;
