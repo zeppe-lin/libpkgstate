@@ -50,6 +50,20 @@ public:
   canonical_generation_store(std::filesystem::path root,
                              state_target_binding target_binding);
 
+  /*!
+   * \brief Open and validate an existing store without initializing it.
+   * \param root Complete pathname of an existing canonical store directory.
+   * \param target_binding Durable target-state binding expected by the caller.
+   * \throws store_error when the path is absent, incomplete, corrupt, locked,
+   *         or bound to another target.
+   *
+   * This factory performs no directory creation, metadata publication,
+   * generation selection, or recovery completion.
+   */
+  [[nodiscard]] static canonical_generation_store
+  open_existing(std::filesystem::path root,
+                state_target_binding target_binding);
+
   canonical_generation_store(const canonical_generation_store&) = delete;
   canonical_generation_store&
   operator=(const canonical_generation_store&) = delete;
@@ -70,7 +84,14 @@ protected:
   begin_publication() const override;
 
 private:
+  struct existing_store_tag final {};
+
+  canonical_generation_store(std::filesystem::path root,
+                             state_target_binding target_binding,
+                             existing_store_tag);
+
   void initialize();
+  void validate_existing() const;
 
   std::filesystem::path root_;
   state_target_binding target_binding_;

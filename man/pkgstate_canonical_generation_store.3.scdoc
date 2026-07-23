@@ -10,6 +10,10 @@ pkgstate_canonical_generation_store - immutable generation state backend
 #include <libpkgstate/canonical_generation_store.h>
 
 pkgstate::canonical_generation_store store(path, target_binding);
+
+auto existing =
+    pkgstate::canonical_generation_store::open_existing(
+        path, target_binding);
 ```
 
 # DESCRIPTION
@@ -21,6 +25,12 @@ therefore uses the non-virtual stale-safe *compare_and_publish()* algorithm.
 Construction creates the store directory when necessary, creates the generation
 container, and durably records exactly one *state_target_binding*. Opening the
 same directory with another binding raises *store_error*.
+
+*open_existing()* is the read-only opening path. It requires a complete
+existing layout, validates it under a non-blocking shared lock, and performs no
+directory creation, metadata publication, generation selection, or interrupted-
+initialization completion. It is suitable for diagnostic frontends that must
+not repair or initialize state.
 
 The backend never reads, imports, enriches, or rewrites the historical
 _/var/lib/pkg/db_ compatibility database.
@@ -118,5 +128,6 @@ transaction coordinator or a separate receipt authority.
 # SEE ALSO
 
 *libpkgstate*(3), *pkgstate_model*(3), *pkgstate_store*(3),
-*pkgstate_legacy_text_store*(3), *pkgstate-generation*(5), *flock*(2),
+*pkgstate_legacy_text_store*(3), *pkgstate-check*(1),
+*pkgstate-generation*(5), *flock*(2),
 *fsync*(2), *renameat*(2)

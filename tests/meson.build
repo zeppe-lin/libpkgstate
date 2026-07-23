@@ -283,5 +283,34 @@ if get_option('tests').allowed()
         pkginfo_tool,
       ],
     )
+
+    pkgstate_check_fixture = executable(
+      'pkgstate-check-fixture',
+      'pkgstate_check_fixture.cpp',
+      dependencies: libpkgstate_dep,
+    )
+
+    test(
+      'exercise read-only state diagnostics',
+      sh,
+      args: [
+        join_paths(meson.current_source_dir(), 'pkgstate_check_cli_test.sh'),
+        pkgstate_check_tool,
+        pkgstate_check_fixture,
+      ],
+    )
+
+    test(
+      'verify pkgstate-check manual contract',
+      sh,
+      args: [
+        join_paths(
+          meson.current_source_dir(),
+          'pkgstate_check_manual_test.sh',
+        ),
+        meson.project_source_root(),
+        pkgstate_check_tool,
+      ],
+    )
   endif
 endif

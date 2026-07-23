@@ -45,6 +45,7 @@ check_page \
 check_page man/pkgstate-db.5.scdoc PKGSTATE-DB\(5\)
 check_page man/pkgstate-generation.5.scdoc PKGSTATE-GENERATION\(5\)
 check_page man/pkginfo.1.scdoc PKGINFO\(1\)
+check_page man/pkgstate-check.1.scdoc PKGSTATE-CHECK\(1\)
 
 grep -F 'A package-state transaction is not a filesystem transaction.' \
   "$source_root/man/pkgstate_store.3.scdoc" >/dev/null ||
@@ -74,6 +75,22 @@ grep -F '*immutable_generation_selection*.' \
 grep -F 'does not maintain a' \
   "$source_root/man/pkgstate_canonical_generation_store.3.scdoc" >/dev/null ||
   fail "generation backend manual omits receipt-journal boundary"
+
+grep -F '*open_existing()* is the read-only opening path.' \
+  "$source_root/man/pkgstate_canonical_generation_store.3.scdoc" >/dev/null ||
+  fail "generation backend manual omits non-initializing open"
+
+grep -F 'The command is read-only.' \
+  "$source_root/man/pkgstate-check.1.scdoc" >/dev/null ||
+  fail "diagnostic manual omits read-only boundary"
+
+grep -F 'never invokes the' \
+  "$source_root/man/pkgstate-check.1.scdoc" >/dev/null ||
+  fail "diagnostic manual omits non-initializing canonical path"
+
+grep -F 'It does not parse opaque' \
+  "$source_root/man/pkgstate-check.1.scdoc" >/dev/null ||
+  fail "diagnostic manual permits legacy reconstruction"
 
 grep -F 'non-blocking' \
   "$source_root/man/pkgstate_legacy_text_store.3.scdoc" >/dev/null ||

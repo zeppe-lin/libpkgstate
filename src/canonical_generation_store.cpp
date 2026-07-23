@@ -798,6 +798,26 @@ canonical_generation_store::canonical_generation_store(
   initialize();
 }
 
+canonical_generation_store
+canonical_generation_store::open_existing(
+    std::filesystem::path root,
+    state_target_binding target_binding)
+{
+  return canonical_generation_store(
+      std::move(root),
+      std::move(target_binding),
+      existing_store_tag{});
+}
+
+canonical_generation_store::canonical_generation_store(
+    std::filesystem::path root,
+    state_target_binding target_binding,
+    existing_store_tag)
+    : root_(std::move(root)), target_binding_(std::move(target_binding))
+{
+  validate_existing();
+}
+
 const std::filesystem::path&
 canonical_generation_store::root_path() const noexcept
 {
@@ -823,6 +843,19 @@ canonical_generation_store::begin_publication() const
 {
   return std::make_unique<generation_publication_transaction>(
       root_, target_binding_);
+}
+
+void
+canonical_generation_store::validate_existing() const
+{
+  if (root_.empty())
+    throw store_error("canonical generation store path is empty");
+
+  unique_fd root = open_directory(root_);
+  lock_directory(root.get(),
+                 LOCK_SH,
+                 "acquire canonical existing-store validation lock");
+  static_cast<void>(read_snapshot_locked(root.get(), target_binding_));
 }
 
 void

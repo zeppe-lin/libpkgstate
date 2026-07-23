@@ -105,6 +105,19 @@ Black-box `pkginfo(1)` tests cover:
 * standard-output versus standard-error separation; and
 * statuses 0, 1, and 2.
 
+Black-box `pkgstate-check(1)` tests cover:
+
+* canonical binding and snapshot diagnostics;
+* canonical control-completeness counts;
+* compatibility observation and fact-availability diagnostics;
+* shared-ownership counts;
+* rejection of a mismatched canonical target binding;
+* refusal to initialize absent or incomplete canonical storage;
+* unchanged canonical and compatibility file contents;
+* all-or-nothing standard output on failure;
+* help and version output; and
+* statuses 0, 1, and 2.
+
 Public-header tests
 -------------------
 
@@ -128,8 +141,9 @@ The documentation contract test checks:
 * the explicit absence and migration boundary of `pkginfo -f`;
 * state-versus-filesystem transaction warnings;
 * compatibility database record grammar;
-* locking and backup documentation; and
-* consistency between `pkginfo --help` and the manual page.
+* locking and backup documentation;
+* consistency between `pkginfo --help` and the manual page; and
+* the read-only and completeness contracts of `pkgstate-check(1)`.
 
 Build matrix
 ------------

@@ -39,4 +39,15 @@ if scdoc.found()
     install: get_option('install_tools'),
     install_dir: get_option('mandir') / 'man1',
   )
+
+  custom_target(
+    'pkgstate-check.1',
+    input: 'pkgstate-check.1.scdoc',
+    output: 'pkgstate-check.1',
+    command: [scdoc],
+    feed: true,
+    capture: true,
+    install: get_option('install_tools'),
+    install_dir: get_option('mandir') / 'man1',
+  )
 endif

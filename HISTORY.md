@@ -83,3 +83,16 @@ backend:
 * explicit separation between current-state authority and receipt journaling.
 
 The historical `/var/lib/pkg/db` backend remains byte-compatible and separate.
+
+Read-only diagnostics
+---------------------
+
+The canonical reconstruction added a separate diagnostic frontend without
+expanding `pkginfo` compatibility output:
+
+* `pkgstate-check(1)` validates canonical or compatibility state;
+* canonical mode requires the caller's exact target-binding components;
+* existing canonical storage opens through a non-initializing shared-lock path;
+* legacy mode reports retained, derived, and unavailable fact classes;
+* output includes state-owned identities and normalized ownership counts; and
+* diagnostics never initialize, repair, import, publish, or begin a write.

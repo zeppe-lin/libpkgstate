@@ -208,6 +208,11 @@ main()
 
   const pkgstate::snapshot initial = pkgstate::snapshot::make(target, {});
   CHECK(store.read().identity() == initial.identity());
+
+  pkgstate::canonical_generation_store existing =
+      pkgstate::canonical_generation_store::open_existing(root, target);
+  CHECK(existing.read().identity() == initial.identity());
+  CHECK(existing.target_binding() == target);
   CHECK(read_text(root / "current") == initial.identity().string() + "\n");
   CHECK(generation_count(root) == 1);
 
@@ -397,6 +402,35 @@ main()
       static_cast<void>(corrupted);
     });
     CHECK(!std::filesystem::exists(missing_selector_root / "current"));
+  }
+
+  {
+    temp_directory absent_temporary;
+    const std::filesystem::path absent_root =
+        absent_temporary.path() / "absent-state";
+    check_throws<pkgstate::store_error>([&] {
+      static_cast<void>(
+          pkgstate::canonical_generation_store::open_existing(
+              absent_root, target));
+    });
+    CHECK(!std::filesystem::exists(absent_root));
+  }
+
+  {
+    temp_directory incomplete_temporary;
+    const std::filesystem::path incomplete_root =
+        incomplete_temporary.path() / "state";
+    std::filesystem::create_directory(incomplete_root);
+    write_text(incomplete_root / "marker", "unchanged\n");
+    check_throws<pkgstate::store_error>([&] {
+      static_cast<void>(
+          pkgstate::canonical_generation_store::open_existing(
+              incomplete_root, target));
+    });
+    CHECK(read_text(incomplete_root / "marker") == "unchanged\n");
+    CHECK(!std::filesystem::exists(incomplete_root / "binding"));
+    CHECK(!std::filesystem::exists(incomplete_root / "current"));
+    CHECK(!std::filesystem::exists(incomplete_root / "generations"));
   }
 
   {

@@ -1,0 +1,130 @@
+PKGSTATE-CHECK(1)
+
+# NAME
+
+pkgstate-check - validate package state without modifying it
+
+# SYNOPSIS
+
+*pkgstate-check* *--canonical-store* _path_ \
+	*--managed-target* _identity_ \
+	*--state-store* _identity_ \
+	*--root-view* _identity_ \
+	*--state-backend* _identity_ \
+	*--publication-domain* _identity_
+
+*pkgstate-check* *--legacy-database* _path_
+
+*pkgstate-check* {*-V* | *-h*}
+
+# DESCRIPTION
+
+*pkgstate-check* validates and summarizes one durable package-state source.
+Exactly one diagnostic mode is required.
+
+The command is read-only. It does not initialize storage, finish interrupted
+initialization, select a generation, publish state, import compatibility data,
+repair records, or begin a compatibility write transaction.
+
+Successful output is deterministic line-oriented _key=value_ data. Storage and
+model failures are diagnostics on standard error and do not produce a partial
+success report.
+
+# MODES
+
+*-c*, *--canonical-store*=_path_
+	Open an existing immutable-generation canonical store and validate its
+	binding, selected generation, complete snapshot, ownership identity, and
+	state-owned identities.
+
+	The path must already contain a complete canonical store. This mode uses
+	*canonical_generation_store::open_existing()* and never invokes the
+	initializing constructor.
+
+*-l*, *--legacy-database*=_path_
+	Read the historical line-oriented package database as one explicitly
+	incomplete *legacy_snapshot* observation.
+
+	The report preserves known retained facts, derived observation identities,
+	and historically unavailable canonical facts. It does not parse opaque
+	version lines or perform migration.
+
+# CANONICAL TARGET BINDING
+
+Canonical diagnostics require all five component identities expected by the
+caller. Each identity uses canonical _v1:sha256:_ representation.
+
+*--managed-target*=_identity_
+	Managed package-target identity.
+
+*--state-store*=_identity_
+	Durable installed-state store identity.
+
+*--root-view*=_identity_
+	Logical target root-view identity.
+
+*--state-backend*=_identity_
+	Installed-state backend identity.
+
+*--publication-domain*=_identity_
+	Publication and locking-domain identity.
+
+The tool reconstructs the expected *state_target_binding*. A stored binding
+mismatch is a failure; the tool does not adopt or rewrite the stored value.
+
+Binding options are invalid with *--legacy-database*.
+
+# OUTPUT
+
+Every successful report begins with:
+
+```
+mode=canonical|legacy
+status=valid
+```
+
+Canonical reports include:
+
+- the quoted store pathname and storage format;
+- target-binding and component identities;
+- installed-snapshot and ownership-inventory identities;
+- package, ownership-claim, owned-path, and shared-path counts; and
+- counts of installed-control groups by historical completeness state.
+
+Legacy reports include:
+
+- the quoted database pathname;
+- the exact legacy snapshot observation identity;
+- package, ownership-claim, owned-path, and shared-path counts; and
+- package- and snapshot-level fact availability.
+
+A quoted pathname is presentation only. It is not an identity and is never
+hashed to invent target, store, root-view, backend, or publication authority.
+
+# OTHER OPTIONS
+
+*-V*, *--version*
+	Print the program and library version and exit.
+
+*-h*, *--help*
+	Print command help and exit.
+
+# EXIT STATUS
+
+*0*
+	The selected state source is valid and a complete diagnostic report was
+	written.
+
+*1*
+	Storage is absent, locked, malformed, corrupt, bound to another target, or
+	otherwise could not be validated.
+
+*2*
+	Command-line usage is invalid.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_store*(3),
+*pkgstate_canonical_generation_store*(3),
+*pkgstate_legacy_compatibility*(3), *pkgstate_legacy_text_store*(3),
+*pkgstate-generation*(5), *pkgstate-db*(5), *pkginfo*(1)

@@ -11,4 +11,14 @@ if get_option('tools').allowed()
     dependencies: [libpkgstate_dep, libpkgimage_dep],
     install: get_option('install_tools'),
   )
+
+  pkgstate_check_tool = executable(
+    'pkgstate-check',
+    'pkgstate_check.cpp',
+    cpp_args: [
+      '-DPKGSTATE_VERSION="' + meson.project_version() + '"',
+    ],
+    dependencies: libpkgstate_dep,
+    install: get_option('install_tools'),
+  )
 endif
