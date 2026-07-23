@@ -21,27 +21,57 @@ The suite must establish:
 * independent public-header usability; and
 * documentation consistency.
 
-Model tests
------------
+Canonical model tests
+---------------------
 
-Model tests cover:
+Canonical model tests cover:
 
-* valid and invalid package identities;
-* path canonicalization delegated to `libpkgimage`;
-* arbitrary input ordering;
-* sorted installed manifests;
-* duplicate manifest paths;
-* empty manifests;
-* sorted package snapshots;
-* duplicate package names;
-* exact package lookup;
-* exact ownership lookup; and
-* multiple owners in deterministic order.
+* strict algorithm-qualified digest parsing and domain separation;
+* state-owned package-path normalization and conformance vectors against
+  `libpkgimage` without a core dependency;
+* package release, installed-control, and target-binding identity vectors;
+* known-empty versus historically unavailable control groups;
+* complete installed-package construction and identity recomputation;
+* snapshot target consistency, canonical package order, and duplicate rejection;
+* ownership-inventory and snapshot identity vectors;
+* exact package lookup, exact ownership lookup, and deterministic shared owners;
+* immutable publication requests, normalized deltas, and evidence constraints;
+* typed receipt outcome, durability, atomicity, and result invariants; and
+* permutation and change-sensitivity checks for every canonical identity.
+
+Compatibility and migration model tests
+---------------------------------------
+
+Compatibility and migration tests cover:
+
+* fixed retained, derived, and historically unavailable fact profiles;
+* known-empty legacy manifests;
+* package and snapshot observation identities;
+* explicit release decomposition and unavailable-fact decisions;
+* exact source-observation and migration-evidence binding;
+* dry-run validated receipts;
+* fresh-destination import and stale-destination refusal; and
+* preservation of legacy source provenance in canonical installed control.
 
 Storage tests
 -------------
 
-Compatibility-format tests cover:
+Canonical generation tests cover:
+
+* empty initialization and interrupted-initialization recovery;
+* binding and snapshot fixed storage vectors;
+* complete control and ownership round trips;
+* immutable generation and selector permissions;
+* selector authority and orphan-generation exclusion;
+* exact decode, identity recomputation, and canonical re-encoding;
+* stale compare-and-publish without backend mutation;
+* install, replacement, removal, and generation reuse;
+* published, durability-unconfirmed, and indeterminate outcomes;
+* shared and exclusive lock interoperability;
+* corruption, hard-link, writable-object, and binding-mismatch rejection; and
+* non-initializing `open_existing()` behavior.
+
+Compatibility-format and transaction tests cover:
 
 * complete records;
 * empty manifests;
@@ -52,36 +82,24 @@ Compatibility-format tests cover:
 * duplicate package names;
 * duplicate owned paths;
 * unreadable or absent storage; and
-* deterministic round trips.
-
-Transaction tests cover:
-
-* initial state capture;
-* package insertion;
-* package replacement;
-* package erasure;
-* invalid erase names;
-* uncommitted destruction;
-* one successful commit;
-* rejection of post-commit mutation;
-* mode `0444`;
-* backup replacement;
+* deterministic byte-compatible round trips;
+* package insertion, replacement, and erasure;
+* invalid erase names and transaction lifecycle rejection;
+* uncommitted destruction, mode `0444`, and backup replacement;
 * same-directory publication; and
 * rereading the committed snapshot.
 
 Locking tests
 -------------
 
-The compatibility backend uses non-blocking advisory directory locks.
+Locking and publication tests cover:
 
-Tests cover:
-
-* concurrent shared readers;
-* writer exclusion;
-* reader exclusion while a writer is open;
-* lock release on transaction destruction;
-* lock release after commit; and
-* interoperability with processes using the same directory-lock contract.
+* concurrent compatibility readers and writer exclusion;
+* canonical shared readers and exclusive publication exclusion;
+* comparison and authoritative reread under one publication lock;
+* refusal to invoke backend publication for stale state;
+* lock release on destruction, failure, and successful publication; and
+* interoperability with external processes using the documented lock domains.
 
 Reference-tool tests
 --------------------
@@ -117,6 +135,19 @@ Black-box `pkgstate-check(1)` tests cover:
 * all-or-nothing standard output on failure;
 * help and version output; and
 * statuses 0, 1, and 2.
+
+Planner-adapter tests
+---------------------
+
+The optional adapter tests cover:
+
+* verbatim transfer through matching strong identity domains;
+* canonical path reparsing and complete ownership projection;
+* package, claim, and shared-owner ordering;
+* target-binding mismatch rejection;
+* absent filesystem metadata remaining absent;
+* no `legacy_snapshot` projection path; and
+* separate core and adapter pkg-config dependency closure.
 
 Public-header tests
 -------------------

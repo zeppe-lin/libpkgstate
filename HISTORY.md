@@ -66,6 +66,35 @@ changing the installed-state library boundary:
   transition gate; and
 * the public libpkgstate ABI and soversion remain unchanged.
 
+0.4.0
+-----
+
+The fourth release establishes canonical durable installed-state authority:
+
+* state-owned canonical package paths and algorithm-qualified identity domains;
+* structured package releases, installed control, and target-state bindings;
+* complete installed packages, ownership inventories, and identified snapshots;
+* immutable publication requests, typed receipts, and non-overridable
+  compare-and-publish;
+* the lossless immutable-generation canonical backend;
+* explicitly incomplete legacy observations with separate identities;
+* explicit receipt-bound import into a fresh canonical destination;
+* the optional non-contaminating `libpkgstate-plan` adapter;
+* read-only `pkgstate-check(1)` diagnostics;
+* cross-cutting authority and publication manuals; and
+* GCC/Clang shared, static, release, sanitizer, installed-consumer, and manual
+  qualification.
+
+The canonical C++ interface replaces the compatibility-shaped public state
+model released in 0.3.0.
+The core soversion advances from 0 to 1.
+The planner adapter begins at soversion 0 as its first released ABI.
+
+The historical `/var/lib/pkg/db` grammar and serialized bytes remain compatible.
+Canonical digest representation remains `v1:sha256`, and immutable-generation
+storage remains format version 1. Those representation versions are independent
+of the project release and shared-library SONAME.
+
 Canonical generation storage
 ----------------------------
 

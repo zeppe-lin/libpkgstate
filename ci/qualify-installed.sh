@@ -60,13 +60,13 @@ unset PKG_CONFIG_SYSROOT_DIR
 runtime_path=$install_prefix/lib:$dependency_prefix/lib
 
 version=$(pkg-config --modversion libpkgstate)
-[ "$version" = 0.3.0 ] || {
-  echo "installed libpkgstate version is '$version', expected '0.3.0'" >&2
+[ "$version" = 0.4.0 ] || {
+  echo "installed libpkgstate version is '$version', expected '0.4.0'" >&2
   exit 1
 }
 adapter_version=$(pkg-config --modversion libpkgstate-plan)
-[ "$adapter_version" = 0.3.0 ] || {
-  echo "installed adapter version is '$adapter_version', expected '0.3.0'" >&2
+[ "$adapter_version" = 0.4.0 ] || {
+  echo "installed adapter version is '$adapter_version', expected '0.4.0'" >&2
   exit 1
 }
 
@@ -77,7 +77,7 @@ if {
   echo 'core libpkgstate metadata is contaminated by image or planner dependencies' >&2
   exit 1
 fi
-pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgstate = 0.3.0' >/dev/null || {
+pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgstate = 0.4.0' >/dev/null || {
   echo 'adapter metadata omits exact libpkgstate dependency' >&2
   exit 1
 }
@@ -168,10 +168,10 @@ grep -F 'mode=legacy' "$temporary/legacy-report" >/dev/null
 grep -F 'packages=1' "$temporary/legacy-report" >/dev/null
 LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   "$install_prefix/bin/pkginfo" --version |
-  grep -E '^pkginfo \(libpkgstate\) 0\.3\.0$' >/dev/null
+  grep -E '^pkginfo \(libpkgstate\) 0\.4\.0$' >/dev/null
 LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   "$install_prefix/bin/pkgstate-check" --version |
-  grep -E '^pkgstate-check \(libpkgstate\) 0\.3\.0$' >/dev/null
+  grep -E '^pkgstate-check \(libpkgstate\) 0\.4\.0$' >/dev/null
 
 if [ -s "$build_dir/man/libpkgstate.3" ]; then
   for page in \
@@ -201,6 +201,16 @@ case $link_mode in
     }
     [ -n "$adapter_library" ] || {
       echo 'installed shared planner adapter library is absent' >&2
+      exit 1
+    }
+    readelf -d "$core_library" |
+      grep -E 'SONAME.*\[libpkgstate\.so\.1\]' >/dev/null || {
+      echo 'shared core SONAME is not libpkgstate.so.1' >&2
+      exit 1
+    }
+    readelf -d "$adapter_library" |
+      grep -E 'SONAME.*\[libpkgstate-plan\.so\.0\]' >/dev/null || {
+      echo 'shared adapter SONAME is not libpkgstate-plan.so.0' >&2
       exit 1
     }
     readelf -d "$core_library" | grep -q 'libcrypto\.so\.' || {

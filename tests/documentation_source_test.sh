@@ -233,6 +233,22 @@ grep -F 'An empty retained manifest is known empty' \
   "$source_root/DESIGN.md" >/dev/null ||
   fail "design collapses known-empty legacy ownership into unavailable"
 
+grep -F '`pkgstate-check(1)` is the separate non-mutating' \
+  "$source_root/DESIGN.md" >/dev/null ||
+  fail "design still treats state diagnostics as future work"
+
+grep -F 'The 0.4.0 authority reconstruction completed' \
+  "$source_root/DESIGN.md" >/dev/null ||
+  fail "design implementation ledger is not current"
+
+grep -F 'state-owned package-path normalization' \
+  "$source_root/TESTING.md" >/dev/null ||
+  fail "testing contract delegates state paths to libpkgimage"
+
+grep -F '`pkgstate-check(1)` validates an existing canonical' \
+  "$source_root/README.md" >/dev/null ||
+  fail "README omits read-only state diagnostics"
+
 for document in DESIGN.md STORAGE.md MIGRATION.md TESTING.md HISTORY.md
 do
   test -s "$source_root/$document" || fail "missing or empty $document"
@@ -242,7 +258,9 @@ done
 
 for page in \
   'libpkgstate(3)' \
+  'pkgstate_authority(7)' \
   'pkgstate_model(3)' \
+  'pkgstate_publication(3)' \
   'pkgstate_store(3)' \
   'pkgstate_canonical_generation_store(3)' \
   'pkgstate_legacy_compatibility(3)' \
@@ -251,7 +269,8 @@ for page in \
   'pkgstate_legacy_text_store(3)' \
   'pkgstate-db(5)' \
   'pkgstate-generation(5)' \
-  'pkginfo(1)'
+  'pkginfo(1)' \
+  'pkgstate-check(1)'
 do
   grep -F "$page" "$source_root/README.md" >/dev/null ||
     fail "README omits $page"

@@ -23,12 +23,13 @@ state-publication request
 state-publication receipt
 ```
 
-The implementation currently exposes canonical package releases, immutable
+The 0.4.0 implementation exposes canonical package releases, immutable
 installed control, durable target-state bindings, complete canonical installed
-packages, identified immutable snapshots, publication requests, typed
-publication receipts, and the immutable-generation canonical backend. Canonical
-package records, ownership inventories, snapshots, requests, and receipts
-compute their own state-domain identities.
+packages, identified immutable snapshots, publication requests and receipts,
+the immutable-generation backend, explicit legacy completeness and import,
+the optional planner adapter, and non-mutating state diagnostics. Canonical
+package records, ownership inventories, snapshots, requests, receipts, and
+legacy import records compute their own state-domain identities.
 
 The historical `/var/lib/pkg/db` backend uses explicitly separate
 `legacy_installed_package` and `legacy_snapshot` values.  Those compatibility
@@ -952,9 +953,26 @@ The inherited `pkginfo -f` footprint command is not part of this composition.
 Footprint generation and comparison belong to the build layer.  `pkgman`
 remains the supported package-management integration layer.
 
-Canonical state diagnostics should use a separate non-mutating frontend or
-explicit new modes.  Existing `pkginfo -i`, `-l`, and `-o` output must not gain
-identity or completeness fields accidentally during migration.
+State diagnostics
+-----------------
+
+`pkgstate-check(1)` is the separate non-mutating diagnostic frontend. Existing
+`pkginfo -i`, `-l`, and `-o` output therefore remains compatibility-oriented and
+does not acquire identity or completeness fields accidentally.
+
+Canonical diagnostics require one existing store pathname and all five expected
+target-binding component identities. They use
+`canonical_generation_store::open_existing()`, validate under a non-blocking
+shared lock, and perform no initialization, recovery completion, generation
+selection, or publication.
+
+Compatibility diagnostics read one `legacy_snapshot`, report its exact
+observation identity and fixed fact-availability profile, and do not interpret
+opaque version lines or invoke migration.
+
+Diagnostic output is deterministic presentation, not a new authority protocol.
+Consumers needing authoritative values use the typed library API instead of
+parsing command output.
 
 Determinism
 -----------
@@ -971,7 +989,8 @@ The following are deterministic:
 * installed snapshot identity;
 * publication request and receipt identity;
 * compatibility database serialization; and
-* existing `pkginfo(1)` line order.
+* existing `pkginfo(1)` line order;
+* `pkgstate-check(1)` report order.
 
 Canonical state constructors accept values in arbitrary caller order where the
 semantic object is unordered, normalize them, reject duplicates or
@@ -1049,20 +1068,24 @@ The following designs violate the authority model:
 13. Treating a receipt as proof of filesystem/state global atomicity.
 14. Reconstructing historical runtime or lifecycle facts from current source.
 
-Implementation gates
---------------------
+Implementation status
+---------------------
 
-The canonical implementation may proceed only in dependency order:
+The 0.4.0 authority reconstruction completed the dependency-ordered core:
 
-1. freeze identity domains and canonical records;
-2. add structured package release and installed control;
-3. add state target binding and complete immutable snapshots;
-4. add publication requests and typed receipts;
-5. implement compare-and-publish; [implemented]
-6. add a lossless canonical backend;
-7. adapt legacy state as explicitly incomplete;
-8. add explicit migration; [implemented]
-9. add optional planner and application adapters. [planner implemented]
+1. identity domains and canonical records are frozen at representation version
+   `v1:sha256`;
+2. package release and installed control are structured durable values;
+3. target binding and complete immutable snapshots are implemented;
+4. publication requests and typed receipts are implemented;
+5. stale-safe non-overridable compare-and-publish is implemented;
+6. the lossless immutable-generation backend is implemented;
+7. legacy state is represented as explicitly incomplete observations;
+8. explicit receipt-bound import into a fresh canonical destination is
+   implemented; and
+9. the optional planner adapter is implemented without contaminating either
+   core library.
 
-A compatibility frontend may preserve old commands and storage formats during
-this transition.  Compatibility skin must not become the canonical ontology.
+An application adapter remains a separate higher-layer integration. It is not
+required for the 0.4.0 state authority and must not move application semantics
+into the core library.

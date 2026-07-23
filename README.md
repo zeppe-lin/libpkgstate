@@ -20,7 +20,8 @@ It provides:
 * explicitly incomplete compatibility records and snapshots;
 * explicit receipt-bound import into a fresh canonical store;
 * an optional non-contaminating projection adapter for `libpkgplan`;
-* compatibility write transactions for the historical database; and
+* non-mutating diagnostics for canonical and compatibility state;
+* compatibility write transactions for the historical database;
 * an original compatibility backend for `/var/lib/pkg/db`.
 
 The central distinction is:
@@ -48,8 +49,10 @@ the exact incomplete facts that were read.
 The `libpkgstate` library does not inspect package archives, apply installation
 policy, mutate the installed filesystem, stage rejected objects, run maintenance
 actions, or coordinate a complete package transaction.  The optional `pkginfo`
-reference frontend composes compatibility-state queries with `libpkgimage`
-archive inspection without moving either authority into the other library.
+frontend composes compatibility-state queries with `libpkgimage` archive
+inspection.  The separate `pkgstate-check` frontend validates canonical or
+compatibility state without moving, repairing, importing, or publishing either
+authority.
 
 The implementation is original Zeppe-Lin code.  It is not derived from CRUX
 `pkgutils` or from the former CRUX-derived `libpkgcore`.
@@ -227,8 +230,11 @@ Manual pages
 The installed manual suite is:
 
 * `libpkgstate(3)` — library overview and boundaries;
+* `pkgstate_authority(7)` — authority graph and dependency direction;
 * `pkgstate_model(3)` — canonical installed facts, snapshots, and publication
   requests;
+* `pkgstate_publication(3)` — compare-and-publish requests, outcomes, and
+  receipts;
 * `pkgstate_store(3)` — canonical and compatibility store interfaces;
 * `pkgstate_canonical_generation_store(3)` — immutable-generation backend;
 * `pkgstate_legacy_compatibility(3)` — incomplete facts and observation
@@ -237,10 +243,12 @@ The installed manual suite is:
 * `pkgstate_plan_adapter(3)` — optional projection into `libpkgplan`;
 * `pkgstate_legacy_text_store(3)` — compatibility backend;
 * `pkgstate-db(5)` — line-oriented compatibility database format;
-* `pkgstate-generation(5)` — canonical generation storage format; and
-* `pkginfo(1)` — optional reference inspector.
+* `pkgstate-generation(5)` — canonical generation storage format;
+* `pkginfo(1)` — optional compatibility and archive inspector; and
+* `pkgstate-check(1)` — optional read-only state diagnostics.
 
-`pkginfo(1)` is installed only when `-Dinstall_tools=true` is selected.
+The reference commands are installed only when `-Dinstall_tools=true` is
+selected.
 
 Requirements
 ------------
@@ -343,6 +351,36 @@ The reference tool does not implement the inherited `pkginfo -f` footprint
 command.  Existing `pkgmk` deployments that call `pkginfo -f` must retain the
 old frontend until the build layer provides that command.  `pkgman` remains the
 package-management integration unit.
+
+Read-only state diagnostics
+---------------------------
+
+`pkgstate-check(1)` validates an existing canonical generation store or one
+historical compatibility database without changing either source:
+
+```sh
+build/tools/pkgstate-check --legacy-database /var/lib/pkg/db
+
+build/tools/pkgstate-check \
+  --canonical-store /var/lib/pkg/state \
+  --managed-target v1:sha256:<digest> \
+  --state-store v1:sha256:<digest> \
+  --root-view v1:sha256:<digest> \
+  --state-backend v1:sha256:<digest> \
+  --publication-domain v1:sha256:<digest>
+```
+
+Canonical mode requires the caller's exact target-binding components and opens
+only a complete existing store through
+`canonical_generation_store::open_existing()`.  It never initializes storage
+or completes interrupted initialization.  Compatibility mode reports the exact
+legacy observation identity and fixed retained, derived, and historically
+unavailable fact classes without parsing opaque version lines or importing
+state.
+
+Successful output is deterministic `key=value` presentation.  It is not a new
+state-authority protocol and must not be parsed as a replacement for the typed
+library API.
 
 Using the library
 -----------------
