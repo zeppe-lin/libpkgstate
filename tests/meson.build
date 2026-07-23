@@ -230,6 +230,18 @@ if get_option('tests').allowed()
   )
 
   test(
+    'verify CI qualification source contracts',
+    sh,
+    args: [
+      join_paths(
+        meson.current_source_dir(),
+        'ci_qualification_source_test.sh',
+      ),
+      meson.project_source_root(),
+    ],
+  )
+
+  test(
     'verify pkg-config dependency metadata',
     sh,
     args: [

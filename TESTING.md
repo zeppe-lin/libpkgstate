@@ -150,15 +150,41 @@ The documentation contract test checks:
 Build matrix
 ------------
 
-CI runs:
+CI qualifies the canonical and compatibility paths through one forge-neutral
+script surface under `ci/`. The normal matrix runs:
 
-* shared library and shared dependencies;
-* static library and static dependencies;
+* GCC and Clang;
+* separate shared and static dependency stacks;
+* the optional `libpkgstate-plan` adapter;
+* `pkginfo(1)` compatibility and archive composition;
+* `pkgstate-check(1)` canonical and legacy diagnostics;
 * warnings as errors;
 * the complete test suite;
-* scdoc manual generation;
-* Doxygen with warnings as errors; and
-* staged installation.
+* installed public-header isolation;
+* installed pkg-config consumers; and
+* linkage-closure checks that keep `libpkgimage` and `libpkgplan` out of the
+  core library.
+
+The GCC shared leg additionally generates and lints every manual with `mandoc`
+and builds the Doxygen reference with warnings as errors. Separate jobs qualify
+an optimized `NDEBUG` build and GCC/Clang address and undefined-behavior
+sanitizers.
+
+The workflow pins the released `libpkgimage` 0.3.0 and `libpkgplan` 0.1.0
+commits, builds them into an isolated prefix, and configures `libpkgstate` with
+`--wrap-mode=nofallback`. This prevents an unrelated host installation or
+implicit fallback from changing the tested authority graph.
+
+Run the same entry points locally after placing those dependency sources at
+`subprojects/libpkgimage` and `subprojects/libpkgplan`:
+
+```sh
+CC=gcc CXX=g++ \
+  ./ci/configure-and-test.sh build-ci shared \
+    --buildtype=debug -Dman_pages=enabled
+./ci/lint-manpages.sh build-ci
+CXX=g++ ./ci/qualify-installed.sh build-ci shared
+```
 
 A release should not proceed while any contract test is disabled merely to
 obtain a green build.
