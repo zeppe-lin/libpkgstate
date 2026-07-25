@@ -24,6 +24,7 @@ enum class projection_error_code {
   target_binding_mismatch, //!< Caller target projection does not match state.
   identity_translation,    //!< Identity wire representation was incompatible.
   path_translation,        //!< Canonical path vocabularies were incompatible.
+  control_translation,     //!< Historical control vocabulary was incompatible.
 };
 
 /*! \brief Failure to project canonical state into planner-owned fact types. */
