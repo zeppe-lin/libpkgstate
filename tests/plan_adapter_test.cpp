@@ -31,15 +31,62 @@ pkgstate::state_target_binding binding(unsigned char store_byte)
       id<pkgstate::publication_domain_identity>(0x05));
 }
 
-pkgstate::installed_control control(const pkgstate::package_release& release)
+pkgstate::installed_control alpha_control(
+    const pkgstate::package_release& release)
 {
+  pkgstate::installed_control_completeness completeness;
+  completeness.runtime_dependencies =
+      pkgstate::installed_control_fact_state::recorded_at_installation;
+  completeness.removal_lifecycle =
+      pkgstate::installed_control_fact_state::recorded_in_compatibility_storage;
+  completeness.target_profile =
+      pkgstate::installed_control_fact_state::supplied_by_migration;
+  completeness.provenance =
+      pkgstate::installed_control_fact_state::recorded_at_installation;
+
   return pkgstate::installed_control::make(
       release,
-      {},
-      {},
-      {},
-      {},
-      {});
+      completeness,
+      {
+          pkgstate::runtime_dependency_declaration::make("libc >= 2.39"),
+          pkgstate::runtime_dependency_declaration::make("zlib >= 1.3"),
+      },
+      {
+          pkgstate::removal_lifecycle_declaration::make(
+              pkgstate::removal_lifecycle_phase::post_remove,
+              "application/x-sh",
+              "echo post\n"),
+          pkgstate::removal_lifecycle_declaration::make(
+              pkgstate::removal_lifecycle_phase::pre_remove,
+              "application/x-sh",
+              std::string("echo pre\0tail", 13)),
+      },
+      {
+          pkgstate::target_profile_fact::make("abi", "gnu"),
+          pkgstate::target_profile_fact::make("arch", "x86_64"),
+      },
+      {
+          pkgstate::control_provenance::make(
+              pkgstate::control_provenance_kind::candidate_control,
+              id<pkgstate::installed_control_identity>(0x91).string()),
+      });
+}
+
+pkgstate::installed_control beta_control(
+    const pkgstate::package_release& release)
+{
+  pkgstate::installed_control_completeness completeness;
+  completeness.runtime_dependencies =
+      pkgstate::installed_control_fact_state::historically_unavailable;
+  completeness.removal_lifecycle =
+      pkgstate::installed_control_fact_state::recorded_at_installation;
+  completeness.target_profile =
+      pkgstate::installed_control_fact_state::historically_unavailable;
+  completeness.provenance =
+      pkgstate::installed_control_fact_state::historically_unavailable;
+
+  return pkgstate::installed_control::make(
+      release, completeness, {}, {}, {}, {});
 }
 
 pkgstate::owned_entry entry(const char* path,
@@ -58,7 +105,7 @@ pkgstate::snapshot state()
 
   const auto alpha = pkgstate::installed_package::make(
       alpha_release,
-      control(alpha_release),
+      alpha_control(alpha_release),
       target,
       {
           entry("usr/bin/alpha", pkgstate::owned_entry_type::non_directory),
@@ -66,7 +113,7 @@ pkgstate::snapshot state()
       });
   const auto beta = pkgstate::installed_package::make(
       beta_release,
-      control(beta_release),
+      beta_control(beta_release),
       target,
       {
           entry("usr/bin/beta", pkgstate::owned_entry_type::non_directory),
@@ -120,7 +167,80 @@ main()
           state_package.release().version());
     CHECK(plan_package.release().release() ==
           state_package.release().release());
+
+    const auto& state_control = state_package.control();
+    const auto& plan_control = plan_package.control_projection();
+    const auto& state_completeness = state_control.completeness();
+    const auto& plan_completeness = plan_control.completeness();
+
+    CHECK(pkgplan::is_known(plan_completeness.runtime_dependencies) ==
+          pkgstate::is_known(state_completeness.runtime_dependencies));
+    CHECK(pkgplan::is_known(plan_completeness.removal_lifecycle) ==
+          pkgstate::is_known(state_completeness.removal_lifecycle));
+    CHECK(pkgplan::is_known(plan_completeness.target_profile) ==
+          pkgstate::is_known(state_completeness.target_profile));
+
+    CHECK(plan_control.runtime_dependencies().size() ==
+          state_control.runtime_dependencies().size());
+    for (std::size_t fact = 0;
+         fact < state_control.runtime_dependencies().size();
+         ++fact)
+    {
+      CHECK(plan_control.runtime_dependencies()[fact].expression() ==
+            state_control.runtime_dependencies()[fact].expression());
+    }
+
+    CHECK(plan_control.removal_lifecycle().size() ==
+          state_control.removal_lifecycle().size());
+    for (std::size_t fact = 0;
+         fact < state_control.removal_lifecycle().size();
+         ++fact)
+    {
+      const auto& state_declaration =
+          state_control.removal_lifecycle()[fact];
+      const auto& plan_declaration =
+          plan_control.removal_lifecycle()[fact];
+      CHECK(static_cast<unsigned>(plan_declaration.phase()) ==
+            static_cast<unsigned>(state_declaration.phase()));
+      CHECK(plan_declaration.format() == state_declaration.format());
+      CHECK(plan_declaration.material() == state_declaration.material());
+    }
+
+    CHECK(plan_control.target_profile().size() ==
+          state_control.target_profile().size());
+    for (std::size_t fact = 0;
+         fact < state_control.target_profile().size();
+         ++fact)
+    {
+      CHECK(plan_control.target_profile()[fact].name() ==
+            state_control.target_profile()[fact].name());
+      CHECK(plan_control.target_profile()[fact].value() ==
+            state_control.target_profile()[fact].value());
+    }
   }
+
+  const auto& alpha_state_control = source.packages()[0].control();
+  const auto& alpha_plan_control =
+      projected.packages()[0].control_projection();
+  CHECK(alpha_state_control.provenance().size() == 1);
+  CHECK(alpha_plan_control.completeness().runtime_dependencies ==
+        pkgplan::control_fact_availability::known);
+  CHECK(alpha_plan_control.completeness().removal_lifecycle ==
+        pkgplan::control_fact_availability::known);
+  CHECK(alpha_plan_control.completeness().target_profile ==
+        pkgplan::control_fact_availability::known);
+
+  const auto& beta_plan_control =
+      projected.packages()[1].control_projection();
+  CHECK(beta_plan_control.completeness().runtime_dependencies ==
+        pkgplan::control_fact_availability::historically_unavailable);
+  CHECK(beta_plan_control.completeness().removal_lifecycle ==
+        pkgplan::control_fact_availability::known);
+  CHECK(beta_plan_control.completeness().target_profile ==
+        pkgplan::control_fact_availability::historically_unavailable);
+  CHECK(beta_plan_control.runtime_dependencies().empty());
+  CHECK(beta_plan_control.removal_lifecycle().empty());
+  CHECK(beta_plan_control.target_profile().empty());
 
   CHECK(projected.ownership().identity().string() ==
         source.ownership_identity().string());
