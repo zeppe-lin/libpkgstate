@@ -245,7 +245,7 @@ grep -F '`pkgstate-check(1)` is the separate non-mutating' \
   "$source_root/DESIGN.md" >/dev/null ||
   fail "design still treats state diagnostics as future work"
 
-grep -F 'The 0.4.0 authority reconstruction completed' \
+grep -F 'The 0.5.0 authority implementation retains' \
   "$source_root/DESIGN.md" >/dev/null ||
   fail "design implementation ledger is not current"
 

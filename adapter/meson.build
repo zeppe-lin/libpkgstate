@@ -11,7 +11,7 @@ libpkgstate_plan = library(
   dependencies: [libpkgstate_dep, libpkgplan_dep],
   install: true,
   version: meson.project_version(),
-  soversion: '0',
+  soversion: '1',
 )
 
 libpkgstate_plan_dep = declare_dependency(

@@ -66,6 +66,30 @@ changing the installed-state library boundary:
   transition gate; and
 * the public libpkgstate ABI and soversion remain unchanged.
 
+0.5.0
+-----
+
+The fifth release updates the optional planner adapter for `libpkgplan` 0.2.0:
+
+* every projected installed-package fact now carries complete planner-relevant
+  historical control;
+* runtime dependency declarations, removal lifecycle declarations, and
+  target-profile facts are copied without interpretation;
+* installation, compatibility-storage, and migration origins remain state
+  history while mapping to planner `known`;
+* historically unavailable groups remain explicitly unavailable and empty;
+* state-only control provenance is not counterfeited into planner vocabulary;
+* the exact installed-control identity continues to name the complete durable
+  record, including provenance;
+* adapter and installed-consumer qualification require `libpkgplan` 0.2.0; and
+* CI pins the released `libpkgplan` 0.2.0 commit.
+
+The core `libpkgstate` ABI and soversion remain at generation 1. The planner
+adapter soversion advances from 0 to 1 because its public API exposes
+`pkgplan::installed_package_fact`, whose layout changed in `libpkgplan` 0.2.0.
+Canonical state identities, generation storage format version 1, and the
+historical compatibility database grammar are unchanged.
+
 0.4.0
 -----
 

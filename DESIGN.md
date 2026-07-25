@@ -23,7 +23,7 @@ state-publication request
 state-publication receipt
 ```
 
-The 0.4.0 implementation exposes canonical package releases, immutable
+The 0.5.0 implementation exposes canonical package releases, immutable
 installed control, durable target-state bindings, complete canonical installed
 packages, identified immutable snapshots, publication requests and receipts,
 the immutable-generation backend, explicit legacy completeness and import,
@@ -1080,7 +1080,7 @@ The following designs violate the authority model:
 Implementation status
 ---------------------
 
-The 0.4.0 authority reconstruction completed the dependency-ordered core:
+The 0.5.0 authority implementation retains the dependency-ordered core:
 
 1. identity domains and canonical records are frozen at representation version
    `v1:sha256`;
@@ -1096,5 +1096,5 @@ The 0.4.0 authority reconstruction completed the dependency-ordered core:
    core library.
 
 An application adapter remains a separate higher-layer integration. It is not
-required for the 0.4.0 state authority and must not move application semantics
+required for the 0.5.0 state authority and must not move application semantics
 into the core library.

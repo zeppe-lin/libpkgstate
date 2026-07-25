@@ -11,17 +11,17 @@ fail()
   exit 1
 }
 
-grep -F "version: '0.4.0'" "$root/meson.build" >/dev/null ||
-  fail 'Meson project version is not 0.4.0'
+grep -F "version: '0.5.0'" "$root/meson.build" >/dev/null ||
+  fail 'Meson project version is not 0.5.0'
 
-grep -F 'PROJECT_NUMBER         = 0.4.0' "$root/Doxyfile" >/dev/null ||
-  fail 'Doxygen project version is not 0.4.0'
+grep -F 'PROJECT_NUMBER         = 0.5.0' "$root/Doxyfile" >/dev/null ||
+  fail 'Doxygen project version is not 0.5.0'
 
 grep -F "soversion: '1'" "$root/src/meson.build" >/dev/null ||
   fail 'core libpkgstate soversion is not 1'
 
-grep -F "soversion: '0'" "$root/adapter/meson.build" >/dev/null ||
-  fail 'planner adapter soversion is not 0'
+grep -F "soversion: '1'" "$root/adapter/meson.build" >/dev/null ||
+  fail 'planner adapter soversion is not 1'
 
 grep -F "'libcrypto'" "$root/meson.build" >/dev/null ||
   fail 'Meson metadata omits the canonical digest backend'
@@ -55,13 +55,13 @@ grep -F "'libpkgstate = ' + meson.project_version()" \
   "$root/adapter/meson.build" >/dev/null ||
   fail 'planner adapter metadata omits exact core version'
 
-grep -F '0.4.0' "$root/HISTORY.md" >/dev/null ||
-  fail 'history omits release 0.4.0'
+grep -F '0.5.0' "$root/HISTORY.md" >/dev/null ||
+  fail 'history omits release 0.5.0'
 
 grep -F 'core soversion advances from 0 to 1' \
   "$root/HISTORY.md" >/dev/null ||
   fail 'history omits the core ABI break'
 
-grep -F 'planner adapter begins at soversion 0' \
+grep -F 'adapter soversion advances from 0 to 1' \
   "$root/HISTORY.md" >/dev/null ||
   fail 'history omits the adapter ABI decision'
