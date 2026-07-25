@@ -81,7 +81,7 @@ pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgstate = 0.4.0' >/d
   echo 'adapter metadata omits exact libpkgstate dependency' >&2
   exit 1
 }
-pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgplan >= 0.1.0' >/dev/null || {
+pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgplan >= 0.2.0' >/dev/null || {
   echo 'adapter metadata omits libpkgplan dependency floor' >&2
   exit 1
 }

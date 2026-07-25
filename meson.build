@@ -39,7 +39,7 @@ libcrypto_dep = dependency(
 
 libpkgplan_dep = dependency(
   'libpkgplan',
-  version: '>=0.1.0',
+  version: '>=0.2.0',
   required: get_option('planner_adapter'),
   static: want_static,
   fallback: ['libpkgplan', 'libpkgplan_dep'],

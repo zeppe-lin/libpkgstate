@@ -36,6 +36,6 @@ pkgconf.generate(
   subdirs: '.',
   requires: [
     'libpkgstate = ' + meson.project_version(),
-    'libpkgplan >= 0.1.0',
+    'libpkgplan >= 0.2.0',
   ],
 )

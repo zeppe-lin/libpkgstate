@@ -30,7 +30,7 @@ done
 
 for pin in \
   e1f6dfd8cc4bfeb2f8da44345d8ec6368281c6e0 \
-  a5dfd231aee8ed39175a5a366173a50b7bd3374a
+  57a10b166450dd0396d4d461d1d38352073a5a1e
 do
   grep -F "$pin" "$workflow" >/dev/null ||
     fail "workflow omits dependency pin $pin"

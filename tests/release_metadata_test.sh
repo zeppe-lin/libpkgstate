@@ -36,8 +36,8 @@ grep -F "version: '>=0.3.0'" "$root/meson.build" >/dev/null ||
 grep -F "required: get_option('tools')" "$root/meson.build" >/dev/null ||
   fail 'libpkgimage is not scoped to the optional tools feature'
 
-grep -F "version: '>=0.1.0'" "$root/meson.build" >/dev/null ||
-  fail 'Meson dependency floor does not require libpkgplan 0.1.0'
+grep -F "version: '>=0.2.0'" "$root/meson.build" >/dev/null ||
+  fail 'Meson dependency floor does not require libpkgplan 0.2.0'
 
 grep -F "required: get_option('planner_adapter')" \
   "$root/meson.build" >/dev/null ||
