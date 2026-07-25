@@ -142,6 +142,10 @@ Planner-adapter tests
 The optional adapter tests cover:
 
 * verbatim transfer through matching strong identity domains;
+* complete runtime, removal-lifecycle, and target-profile projection;
+* collapse of all known state origins to planner `known`;
+* preservation of historically unavailable control groups;
+* deliberate omission of state-only provenance from planner control;
 * canonical path reparsing and complete ownership projection;
 * package, claim, and shared-owner ordering;
 * target-binding mismatch rejection;
@@ -201,7 +205,7 @@ and builds the Doxygen reference with warnings as errors. Separate jobs qualify
 an optimized `NDEBUG` build and GCC/Clang address and undefined-behavior
 sanitizers.
 
-The workflow pins the released `libpkgimage` 0.3.0 and `libpkgplan` 0.1.0
+The workflow pins the released `libpkgimage` 0.3.0 and `libpkgplan` 0.2.0
 commits, builds them into an isolated prefix, and configures `libpkgstate` with
 `--wrap-mode=nofallback`. This prevents an unrelated host installation or
 implicit fallback from changing the tested authority graph.

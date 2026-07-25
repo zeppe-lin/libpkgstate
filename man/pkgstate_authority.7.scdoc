@@ -86,8 +86,10 @@ libpkgstate      libpkgplan      libpkgapply
 ```
 
 The optional *libpkgstate-plan* adapter projects a canonical snapshot into
-planner vocabulary. It accepts no *legacy_snapshot* and does not invent
-filesystem metadata or a complete target-system context.
+planner vocabulary, including planner-relevant historical control and its
+known-versus-unavailable status. It leaves state-only provenance in state
+authority, accepts no *legacy_snapshot*, and does not invent filesystem metadata
+or a complete target-system context.
 
 An application adapter may construct publication requests from completed
 application evidence. It must not publish intended plan outcomes before

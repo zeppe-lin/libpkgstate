@@ -164,8 +164,12 @@ backend publication primitive. Reading `legacy_text_store` alone is not
 migration.
 
 The optional `libpkgstate-plan` adapter projects one complete canonical
-`snapshot` into planner-owned installed-package and ownership facts. It copies
-only canonical algorithm-qualified identities and normalized package paths. The
+`snapshot` into planner-owned installed-package, historical-control, and
+ownership facts. It copies canonical algorithm-qualified identities, reparses
+normalized package paths, and converts runtime declarations, removal lifecycle
+declarations, target-profile facts, and per-group historical availability into
+`libpkgplan` vocabulary. State provenance remains state-owned; the exact
+installed-control identity still names the complete durable control record. The
 caller supplies a complete `target_system_context_identity` together with its
 durable `state_target_binding` projection; the adapter refuses a snapshot whose
 binding differs. The adapter accepts no `legacy_snapshot`, invents no target
@@ -268,7 +272,7 @@ frontend requires:
 
 The optional planner adapter requires:
 
-* `libpkgplan` 0.1.0 or later when `-Dplanner_adapter=enabled` is selected.
+* `libpkgplan` 0.2.0 or later when `-Dplanner_adapter=enabled` is selected.
 
 Optional documentation dependencies:
 

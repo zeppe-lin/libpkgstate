@@ -905,12 +905,21 @@ libpkgstate      libpkgplan
 ```
 
 The optional `libpkgstate-plan` adapter depends on both libraries while the
-core `libpkgstate` library remains independent of `libpkgplan`.  It copies the
+core `libpkgstate` library remains independent of `libpkgplan`. It copies the
 canonical algorithm-qualified representation from package-release,
 installed-control, installed-package, ownership-inventory, and installed-
-snapshot identities into the matching planner domains.  It reparses package
-paths through planner vocabulary and emits a complete path-to-owner claim set.
-It accepts only canonical `snapshot`; no overload accepts `legacy_snapshot`.
+snapshot identities into the matching planner domains. It also projects the
+planner-relevant historical control carried by every canonical installed
+package: runtime dependency declarations, removal lifecycle declarations,
+target-profile facts, and the known-versus-historically-unavailable state of
+each group. The three state origins for known facts remain state history; all
+map to planner `known`. State control provenance has no planner-control axis and
+is not counterfeit-translated. The copied installed-control identity continues
+to name the complete durable record, including provenance.
+
+The adapter reparses package paths through planner vocabulary and emits a
+complete path-to-owner claim set. It accepts only canonical `snapshot`; no
+overload accepts `legacy_snapshot`.
 
 The adapter does not derive a complete target-system-context identity from a
 state snapshot.  The caller supplies the composed planner target identity and

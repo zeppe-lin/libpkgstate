@@ -31,7 +31,8 @@ canonical installed authority.
 The projection contains:
 
 - one caller-authoritative *target_system_context_identity*;
-- one *installed_package_fact* for every canonical installed package; and
+- one *installed_package_fact* for every canonical installed package, including
+  complete planner-relevant historical control; and
 - one complete *installed_ownership_inventory*.
 
 Package facts remain in snapshot package-name order. Ownership claims are
@@ -51,6 +52,32 @@ or reinterpret:
 
 A representation rejected by planner vocabulary raises
 *projection_error_code::identity_translation*.
+
+# HISTORICAL CONTROL
+
+For every canonical installed package, the adapter projects:
+
+- runtime dependency declarations;
+- pre-remove and post-remove lifecycle declarations with exact format and
+  material bytes;
+- target-profile facts; and
+- the known-versus-historically-unavailable state of those three groups.
+
+The state origins *recorded_at_installation*,
+*recorded_in_compatibility_storage*, and *supplied_by_migration* all mean that
+the exact group is historically known. They map to planner *known* without
+pretending those origins are equivalent state history.
+*historically_unavailable* maps to the corresponding planner state and remains
+empty.
+
+State control provenance is deliberately not copied into planner control because
+*libpkgplan* exposes no provenance fact group there. The separately copied
+*installed_control_identity* still names the complete durable state record,
+including its provenance. The adapter neither drops that identity nor invents a
+planner-owned provenance vocabulary.
+
+A planner control constructor rejection raises
+*projection_error_code::control_translation*.
 
 # TARGET CONTEXT
 
@@ -89,6 +116,9 @@ relation from which the claim set was projected.
 
 *projection_error_code::path_translation*
 	Planner path vocabulary rejected a canonical state path.
+
+*projection_error_code::control_translation*
+	Planner historical-control vocabulary rejected canonical state facts.
 
 # BUILD
 

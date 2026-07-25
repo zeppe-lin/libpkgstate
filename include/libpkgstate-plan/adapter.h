@@ -70,9 +70,10 @@ private:
 /*!
  * \brief Planner-owned fact projection of one complete canonical snapshot.
  *
- * Package facts remain in snapshot package-name order.  Ownership claims are
- * normalized by libpkgplan.  The adapter supplies no filesystem metadata that
- * canonical installed state does not represent in planner vocabulary.
+ * Package facts remain in snapshot package-name order and carry complete
+ * planner-relevant historical control. Ownership claims are normalized by
+ * libpkgplan. The adapter supplies no filesystem metadata that canonical
+ * installed state does not represent in planner vocabulary.
  */
 class installed_state_projection final {
 public:
@@ -107,7 +108,8 @@ private:
  *
  * The function accepts only pkgstate::snapshot, never legacy_snapshot.  It
  * verifies the caller's durable target projection before copying canonical
- * identity representations into the matching planner domains.
+ * identity representations and projecting planner-relevant historical control
+ * into the matching planner domains.
  *
  * \throws projection_error when the target or vocabularies disagree.
  */

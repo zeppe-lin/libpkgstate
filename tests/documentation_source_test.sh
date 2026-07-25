@@ -229,6 +229,14 @@ grep -F 'does not invent partial filesystem metadata' \
   "$source_root/man/pkgstate_plan_adapter.3.scdoc" >/dev/null ||
   fail "planner adapter manual permits invented object metadata"
 
+grep -F 'runtime dependency declarations' \
+  "$source_root/man/pkgstate_plan_adapter.3.scdoc" >/dev/null ||
+  fail "planner adapter manual omits historical control projection"
+
+grep -F 'State control provenance is deliberately not copied' \
+  "$source_root/man/pkgstate_plan_adapter.3.scdoc" >/dev/null ||
+  fail "planner adapter manual counterfeits state provenance"
+
 grep -F 'An empty retained manifest is known empty' \
   "$source_root/DESIGN.md" >/dev/null ||
   fail "design collapses known-empty legacy ownership into unavailable"
