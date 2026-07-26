@@ -6,7 +6,7 @@ pkgstate_store - canonical installed-state storage interface
 
 # SYNOPSIS
 
-#include <libpkgstate/canonical_store.h>
+*#include <libpkgstate/canonical_store.h>*
 
 # DESCRIPTION
 

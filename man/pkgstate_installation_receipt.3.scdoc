@@ -6,7 +6,7 @@ pkgstate_installation_receipt - complete native installation admission record
 
 # SYNOPSIS
 
-#include <libpkgstate/installation_receipt.h>
+*#include <libpkgstate/installation_receipt.h>*
 
 # DESCRIPTION
 

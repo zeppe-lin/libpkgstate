@@ -6,7 +6,7 @@ pkgstate_apply_adapter - admit completed application as native installed state
 
 # SYNOPSIS
 
-#include <libpkgstate-apply/adapter.h>
+*#include <libpkgstate-apply/adapter.h>*
 
 # DESCRIPTION
 

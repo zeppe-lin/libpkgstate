@@ -6,7 +6,7 @@ libpkgstate - native installed-package state authority
 
 # SYNOPSIS
 
-#include <libpkgstate/libpkgstate.h>
+*#include <libpkgstate/libpkgstate.h>*
 
 # DESCRIPTION
 

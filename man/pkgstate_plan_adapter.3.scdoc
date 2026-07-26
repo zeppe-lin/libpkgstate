@@ -6,7 +6,7 @@ pkgstate_plan_adapter - project native installed state into libpkgplan facts
 
 # SYNOPSIS
 
-#include <libpkgstate-plan/adapter.h>
+*#include <libpkgstate-plan/adapter.h>*
 
 # DESCRIPTION
 

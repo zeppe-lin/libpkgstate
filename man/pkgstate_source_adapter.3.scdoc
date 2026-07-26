@@ -6,7 +6,7 @@ pkgstate_source_adapter - retain sealed libpkgsource authority in installed stat
 
 # SYNOPSIS
 
-#include <libpkgstate-source/adapter.h>
+*#include <libpkgstate-source/adapter.h>*
 
 # DESCRIPTION
 

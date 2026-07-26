@@ -6,7 +6,12 @@ pkgstate-check - validate and summarize native installed state
 
 # SYNOPSIS
 
-*pkgstate-check* *--canonical-store* _path_ *--managed-target* _identity_ *--state-store* _identity_ *--root-view* _identity_ *--state-backend* _identity_ *--publication-domain* _identity_
+*pkgstate-check* *--canonical-store* _path_ \
+               *--managed-target* _identity_ \
+               *--state-store* _identity_ \
+               *--root-view* _identity_ \
+               *--state-backend* _identity_ \
+               *--publication-domain* _identity_
 
 *pkgstate-check* {*-V* | *-h*}
 

@@ -19,11 +19,9 @@ and operation shape. It is immutable and performs no storage I/O.
 *canonical_store::compare_and_publish()* owns the stale-state check. Under the
 backend publication boundary it reads the actual prior snapshot and:
 
-1. returns *stale_expected_state* without invoking publication when the expected
-   snapshot differs;
-2. derives the resulting snapshot from request deltas when the expectation is
-   current; and
-3. asks the backend to publish that exact result.
+. returns *stale_expected_state* without invoking publication when the expected snapshot differs;
+. derives the resulting snapshot from request deltas when the expectation is current; and
+. asks the backend to publish that exact result.
 
 The backend cannot silently rebase an old request or accept a caller-authored
 replacement snapshot.
