@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include <libpkgapply/incoming_package.h>
 #include <libpkgapply/object_fact.h>
 #include <libpkgapply/path_consequence.h>
 #include <libpkgapply/request.h>
@@ -183,19 +184,6 @@ planner_regular(std::uint8_t content)
       plan_identity<pkgplan::filesystem_regular_content_identity>(content));
 }
 
-pkgplan::candidate_control_projection
-incoming_control()
-{
-  return pkgplan::candidate_control_projection(
-      {pkgplan::runtime_dependency_declaration::make("libc")},
-      {pkgplan::removal_lifecycle_declaration::make(
-          pkgplan::removal_lifecycle_phase::pre_remove,
-          "text/x-posix-shell",
-          "prepare-new-remove")},
-      {pkgplan::target_profile_fact::make(
-          "pkgsource.target-architectures", "x86_64")});
-}
-
 pkgplan::installed_control_projection
 planner_control(const pkgstate::installed_control& source)
 {
@@ -276,8 +264,8 @@ byte_digest(std::uint8_t byte)
   return result;
 }
 
-pkgstate::build_adapter::build_authority
-build_authority(const char* version, std::uint8_t content)
+pkgapply::incoming_package_authority
+incoming_authority(const char* version, std::uint8_t content)
 {
   const pkgsource::source_snapshot source = source_snapshot(version);
   const pkgbuild::build_request request = pkgbuild::build_request::seal(
@@ -291,36 +279,29 @@ build_authority(const char* version, std::uint8_t content)
           pkgbuild::payload_time{10, 0},
           pkgbuild::sha256_digest(byte_digest(content))),
   });
-  const pkgimage::inspected_package_image image = incoming_image(content);
+  pkgimage::inspected_package_image image = incoming_image(content);
   const pkgbuild::sealed_artifact artifact = pkgbuild::sealed_artifact::make(
       pkgbuild::artifact_encoding::package_tar_v1,
       pkgbuild::artifact_compression::none, 4,
       pkgbuild::sha256_digest(
           byte_digest(static_cast<std::uint8_t>(content + 30))));
-  const pkgbuild::build_result result = pkgbuild::build_result::succeeded(
+  pkgbuild::build_result result = pkgbuild::build_result::succeeded(
       request, payload, artifact,
       pkgbuild::execution_evidence_identity::from_sha256(
           byte_digest(static_cast<std::uint8_t>(content + 60))));
+  return pkgapply::incoming_package_authority::admit(
+      std::move(result), std::move(image));
+}
+
+pkgstate::build_adapter::build_authority
+state_build_authority(const pkgapply::incoming_package_authority& incoming)
+{
+  const pkgbuild::build_request& request = incoming.build().request();
   return pkgstate::build_adapter::project_build(
       pkgstate::source_adapter::project_source(
-          source, pkgsource::architecture_reference("x86_64"),
-          pkgsource::architecture_reference("x86_64")),
-      result, image);
-}
-
-pkgstate::apply_adapter::incoming_installation_authority
-install_authority()
-{
-  return pkgstate::apply_adapter::incoming_installation_authority::install(
-      build_authority("1.0", 1),
-      pkgstate::installation_reason::explicit_request());
-}
-
-pkgstate::apply_adapter::incoming_installation_authority
-replacement_authority()
-{
-  return pkgstate::apply_adapter::incoming_installation_authority::replacement(
-      build_authority("2.0", 3));
+          request.source(), request.architectures().build(),
+          request.architectures().target()),
+      incoming.build(), incoming.image());
 }
 
 pkgplan::package_policy_snapshot
@@ -347,28 +328,21 @@ struct planner_context final {
 
 pkgplan::installation_plan
 installation_plan(const pkgstate::snapshot& expected,
-                  const planner_context& context)
+                  const planner_context& context,
+                  const pkgapply::incoming_package_authority& incoming)
 {
   const pkgplan::package_path path = pkgplan::package_path::parse("tool");
-  const pkgstate::package_source_record source = state_source("1.0", 70);
-  const pkgplan::package_release release(
-      translate_identity<pkgplan::package_release_identity>(
-          source.release().identity()),
-      "tool", "1.0", "1");
-  pkgimage::inspected_package_image image = incoming_image(1);
-  const auto archive = image.receipt().archive_digest();
+  const pkgplan::package_release& release = incoming.candidate().release();
+  const auto archive = incoming.image().receipt().archive_digest();
 
   pkgplan::installation_request request(
-      pkgplan::candidate_package_fact(
-          plan_identity<pkgplan::candidate_control_identity>(71),
-          release,
-          incoming_control()),
+      incoming.candidate(),
       pkgplan::artifact_package_fact(
           translate_identity<pkgplan::artifact_identity>(archive),
           plan_identity<pkgplan::artifact_manifest_identity>(73),
           release),
       archive,
-      std::move(image),
+      incoming.image(),
       translate_identity<pkgplan::installed_state_snapshot_identity>(
           expected.identity()),
       pkgplan::installed_ownership_inventory(
@@ -437,30 +411,23 @@ pkgplan::upgrade_plan
 upgrade_plan(const pkgstate::snapshot& expected,
              const pkgstate::installed_package& installed,
              const planner_context& context,
+             const pkgapply::incoming_package_authority& incoming,
              std::optional<pkgplan::installed_control_identity>
                  control_override = std::nullopt)
 {
   const pkgplan::package_path path = pkgplan::package_path::parse("tool");
-  const pkgstate::package_source_record source = state_source("2.0", 74);
-  const pkgplan::package_release release(
-      translate_identity<pkgplan::package_release_identity>(
-          source.release().identity()),
-      "tool", "2.0", "1");
-  pkgimage::inspected_package_image image = incoming_image(3);
-  const auto archive = image.receipt().archive_digest();
+  const pkgplan::package_release& release = incoming.candidate().release();
+  const auto archive = incoming.image().receipt().archive_digest();
 
   pkgplan::upgrade_request request(
       planner_installed(expected, installed, control_override),
-      pkgplan::candidate_package_fact(
-          plan_identity<pkgplan::candidate_control_identity>(75),
-          release,
-          incoming_control()),
+      incoming.candidate(),
       pkgplan::artifact_package_fact(
           translate_identity<pkgplan::artifact_identity>(archive),
           plan_identity<pkgplan::artifact_manifest_identity>(77),
           release),
       archive,
-      std::move(image),
+      incoming.image(),
       translate_identity<pkgplan::installed_state_snapshot_identity>(
           expected.identity()),
       planner_ownership(expected, installed),
@@ -731,6 +698,7 @@ removal_consequence(const pkgplan::removal_path_decision& decision)
 struct installation_fixture final {
   pkgstate::snapshot expected;
   planner_context planner;
+  pkgapply::incoming_package_authority incoming;
   pkgplan::installation_plan plan;
   pkgapply::application_target_context target;
   pkgapply::installation_application_request request;
@@ -741,11 +709,12 @@ struct installation_fixture final {
                                 bool wrong_owners = false)
       : expected(pkgstate::snapshot::make(state_target(target_seed))),
         planner(),
-        plan(installation_plan(expected, planner)),
+        incoming(incoming_authority("1.0", 1)),
+        plan(installation_plan(expected, planner, incoming)),
         target(application_target(
             expected.target_binding(), planner, target_seed)),
         request(pkgapply::installation_application_request::make(
-            plan, target, execution_control())),
+            plan, incoming, target, execution_control())),
         projection(application_projection(
             expected, plan, 30, wrong_owners)),
         evidence(pkgapply::completed_application_evidence::installation(
@@ -764,6 +733,7 @@ struct upgrade_fixture final {
   pkgstate::installed_package old_package;
   pkgstate::snapshot expected;
   planner_context planner;
+  pkgapply::incoming_package_authority incoming;
   pkgplan::upgrade_plan plan;
   pkgapply::application_target_context target;
   pkgapply::upgrade_application_request request;
@@ -782,11 +752,12 @@ struct upgrade_fixture final {
               pkgstate::active_object_origin::incoming_payload)})),
         expected(pkgstate::snapshot::make(target_binding, {old_package})),
         planner(),
+        incoming(incoming_authority("2.0", 3)),
         plan(upgrade_plan(
-            expected, old_package, planner, control_override)),
+            expected, old_package, planner, incoming, control_override)),
         target(application_target(target_binding, planner)),
         request(pkgapply::upgrade_application_request::make(
-            plan, target, execution_control())),
+            plan, incoming, target, execution_control())),
         projection(application_projection(expected, plan)),
         evidence(pkgapply::completed_application_evidence::upgrade(
             request,
@@ -844,9 +815,9 @@ check_installation()
       pkgstate::apply_adapter::project_completed_application(
           fixture.expected,
           fixture.projection,
-          pkgapply::package_application_request(fixture.request),
+          fixture.request,
           fixture.evidence,
-          install_authority());
+          pkgstate::installation_reason::explicit_request());
 
   CHECK(publication.expected_snapshot() == fixture.expected.identity());
   CHECK(publication.target_binding() == fixture.expected.target_binding());
@@ -885,8 +856,8 @@ check_installation()
         "libc");
   CHECK(control.reason().kind() ==
         pkgstate::installation_reason_kind::explicit_request);
-  const auto authority = install_authority();
-  CHECK(control.build() == authority.build());
+  const auto authority = state_build_authority(fixture.request.incoming());
+  CHECK(control.build() == authority.provenance());
   CHECK(control.build().artifact_content().string() ==
         fixture.plan.publication().artifact().string());
   CHECK(installed.receipt().operation_plan().string() ==
@@ -898,25 +869,11 @@ check_installation()
       pkgstate::apply_adapter::project_completed_application(
           fixture.expected,
           fixture.projection,
-          pkgapply::package_application_request(fixture.request),
+          fixture.request,
           fixture.evidence,
-          install_authority());
+          pkgstate::installation_reason::explicit_request());
   CHECK(repeated.identity() == publication.identity());
 
-  try
-  {
-    (void)pkgstate::apply_adapter::project_completed_application(
-        fixture.expected, fixture.projection,
-        pkgapply::package_application_request(fixture.request),
-        fixture.evidence);
-    CHECK(false);
-  }
-  catch (const pkgstate::apply_adapter::projection_error& error)
-  {
-    CHECK(error.code() ==
-          pkgstate::apply_adapter::projection_error_code::
-              incoming_authority_mismatch);
-  }
 }
 
 void
@@ -935,8 +892,8 @@ check_directory_classification()
       pkgstate::apply_adapter::project_completed_application(
           fixture.expected,
           fixture.projection,
-          pkgapply::package_application_request(fixture.request),
-          evidence, install_authority());
+          fixture.request,
+          evidence, pkgstate::installation_reason::explicit_request());
   CHECK(publication.deltas().front().proposed_package().has_value());
   CHECK(publication.deltas().front().proposed_package()->manifest().front().kind() ==
         pkgstate::owned_object_kind::directory);
@@ -950,8 +907,8 @@ check_upgrade()
       pkgstate::apply_adapter::project_completed_application(
           fixture.expected,
           fixture.projection,
-          pkgapply::package_application_request(fixture.request),
-          fixture.evidence, replacement_authority());
+          fixture.request,
+          fixture.evidence);
   CHECK(publication.deltas().size() == 1);
   const pkgstate::package_state_delta& delta = publication.deltas().front();
   CHECK(delta.kind() == pkgstate::package_state_delta_kind::replace);
@@ -972,7 +929,7 @@ check_removal()
       pkgstate::apply_adapter::project_completed_application(
           fixture.expected,
           fixture.projection,
-          pkgapply::package_application_request(fixture.request),
+          fixture.request,
           fixture.evidence);
   CHECK(publication.deltas().size() == 1);
   const pkgstate::package_state_delta& delta = publication.deltas().front();
@@ -989,26 +946,20 @@ check_failures()
 
   try
   {
-    static_cast<void>(
-        pkgstate::apply_adapter::project_completed_application(
-            fixture.expected,
-            fixture.projection,
-            pkgapply::package_application_request(fixture.request),
-            fixture.evidence,
-            pkgstate::apply_adapter::incoming_installation_authority::install(
-                build_authority("1.0", 2),
-                pkgstate::installation_reason::explicit_request())));
+    static_cast<void>(pkgapply::installation_application_request::make(
+        fixture.plan, incoming_authority("1.0", 2), fixture.target,
+        execution_control()));
     CHECK(false);
   }
-  catch (const pkgstate::apply_adapter::projection_error& error)
+  catch (const pkgapply::incoming_package_error& error)
   {
     CHECK(error.code() ==
-          pkgstate::apply_adapter::projection_error_code::
-              incoming_authority_mismatch);
+          pkgapply::incoming_package_error_code::plan_binding);
   }
 
   const auto different_control = pkgapply::installation_application_request::make(
       fixture.plan,
+      fixture.incoming,
       fixture.target,
       execution_control(
           pkgapply::application_durability_requirement::visibility_only));
@@ -1018,8 +969,9 @@ check_failures()
         pkgstate::apply_adapter::project_completed_application(
             fixture.expected,
             fixture.projection,
-            pkgapply::package_application_request(different_control),
-            fixture.evidence, install_authority()));
+            different_control,
+            fixture.evidence,
+            pkgstate::installation_reason::explicit_request()));
     CHECK(false);
   }
   catch (const pkgstate::apply_adapter::projection_error& error)
@@ -1037,8 +989,9 @@ check_failures()
         pkgstate::apply_adapter::project_completed_application(
             fixture.expected,
             other_projection,
-            pkgapply::package_application_request(fixture.request),
-            fixture.evidence, install_authority()));
+            fixture.request,
+            fixture.evidence,
+            pkgstate::installation_reason::explicit_request()));
     CHECK(false);
   }
   catch (const pkgstate::apply_adapter::projection_error& error)
@@ -1055,8 +1008,9 @@ check_failures()
         pkgstate::apply_adapter::project_completed_application(
             wrong_owners.expected,
             wrong_owners.projection,
-            pkgapply::package_application_request(wrong_owners.request),
-            wrong_owners.evidence, install_authority()));
+            wrong_owners.request,
+            wrong_owners.evidence,
+            pkgstate::installation_reason::explicit_request()));
     CHECK(false);
   }
   catch (const pkgstate::apply_adapter::projection_error& error)
@@ -1074,8 +1028,9 @@ check_failures()
         pkgstate::apply_adapter::project_completed_application(
             other_state,
             fixture.projection,
-            pkgapply::package_application_request(fixture.request),
-            fixture.evidence, install_authority()));
+            fixture.request,
+            fixture.evidence,
+            pkgstate::installation_reason::explicit_request()));
     CHECK(false);
   }
   catch (const pkgstate::apply_adapter::projection_error& error)
@@ -1105,8 +1060,9 @@ check_failures()
         pkgstate::apply_adapter::project_completed_application(
             fixture.expected,
             incomplete_projection,
-            pkgapply::package_application_request(fixture.request),
-            incomplete_evidence, install_authority()));
+            fixture.request,
+            incomplete_evidence,
+            pkgstate::installation_reason::explicit_request()));
     CHECK(false);
   }
   catch (const pkgstate::apply_adapter::projection_error& error)
@@ -1130,7 +1086,7 @@ check_failures()
       apply_identity<pkgapply::journal_namespace_identity>(107),
       apply_identity<pkgapply::execution_capability_profile_identity>(108));
   const auto foreign_request = pkgapply::installation_application_request::make(
-      fixture.plan, foreign_target, execution_control());
+      fixture.plan, fixture.incoming, foreign_target, execution_control());
   const auto foreign_evidence =
       pkgapply::completed_application_evidence::installation(
           foreign_request,
@@ -1145,8 +1101,9 @@ check_failures()
         pkgstate::apply_adapter::project_completed_application(
             fixture.expected,
             fixture.projection,
-            pkgapply::package_application_request(foreign_request),
-            foreign_evidence, install_authority()));
+            foreign_request,
+            foreign_evidence,
+            pkgstate::installation_reason::explicit_request()));
     CHECK(false);
   }
   catch (const pkgstate::apply_adapter::projection_error& error)
@@ -1164,8 +1121,8 @@ check_failures()
         pkgstate::apply_adapter::project_completed_application(
             wrong_control.expected,
             wrong_control.projection,
-            pkgapply::package_application_request(wrong_control.request),
-            wrong_control.evidence, replacement_authority()));
+            wrong_control.request,
+            wrong_control.evidence));
     CHECK(false);
   }
   catch (const pkgstate::apply_adapter::projection_error& error)

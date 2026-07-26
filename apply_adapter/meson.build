@@ -8,7 +8,12 @@ libpkgstate_apply = library(
   'apply_adapter.cpp',
   cpp_args: ['-D_FILE_OFFSET_BITS=64'],
   include_directories: apply_adapter_inc,
-  dependencies: [libpkgstate_dep, libpkgstate_build_dep, libpkgapply_dep],
+  dependencies: [
+    libpkgstate_dep,
+    libpkgstate_source_dep,
+    libpkgstate_build_dep,
+    libpkgapply_dep,
+  ],
   install: true,
   version: meson.project_version(),
   soversion: '2',
@@ -17,7 +22,12 @@ libpkgstate_apply = library(
 libpkgstate_apply_dep = declare_dependency(
   link_with: libpkgstate_apply,
   include_directories: apply_adapter_inc,
-  dependencies: [libpkgstate_dep, libpkgstate_build_dep, libpkgapply_dep],
+  dependencies: [
+    libpkgstate_dep,
+    libpkgstate_source_dep,
+    libpkgstate_build_dep,
+    libpkgapply_dep,
+  ],
   compile_args: ['-D_FILE_OFFSET_BITS=64'],
 )
 
@@ -36,7 +46,8 @@ pkgconf.generate(
   subdirs: '.',
   requires: [
     'libpkgstate >= 2.0.0',
+    'libpkgstate-source >= 2.0.0',
     'libpkgstate-build >= 2.0.0',
-    'libpkgapply >= 0.1.0',
+    'libpkgapply >= 1.0.0',
   ],
 )

@@ -14,6 +14,8 @@
 #include <libpkgplan/install.h>
 #include <libpkgplan/remove.h>
 #include <libpkgplan/upgrade.h>
+#include <libpkgstate-build/adapter.h>
+#include <libpkgstate-source/adapter.h>
 #include <libpkgstate/installation_receipt.h>
 #include <libpkgstate/installed_package.h>
 #include <libpkgstate/owned_entry.h>
@@ -542,14 +544,14 @@ installed_package construct_installed_package(
     const snapshot& expected_state,
     const Publication& publication,
     const pkgapply::completed_application_evidence& evidence,
-    const incoming_installation_authority& incoming,
+    const build_adapter::build_authority& incoming,
     installation_reason reason)
 {
   validate_incoming_release(incoming.source(), publication.release(),
                             publication.installed_control());
 
   if (publication.artifact().string() !=
-      incoming.build().artifact_content().string())
+      incoming.provenance().artifact_content().string())
   {
     throw projection_error(
         projection_error_code::incoming_authority_mismatch,
@@ -557,7 +559,7 @@ installed_package construct_installed_package(
   }
 
   installed_control control = installed_control::make(
-      incoming.source(), std::move(reason), incoming.build());
+      incoming.source(), std::move(reason), incoming.provenance());
   std::vector<owned_entry> manifest =
       translate_manifest(publication.installed_manifest(), evidence);
 
@@ -579,19 +581,35 @@ installed_package construct_installed_package(
   }
 }
 
+build_adapter::build_authority admit_incoming_build(
+    const pkgapply::incoming_package_authority& incoming)
+{
+  try
+  {
+    const pkgbuild::build_request& request = incoming.build().request();
+    package_source_record source = source_adapter::project_source(
+        request.source(), request.architectures().build(),
+        request.architectures().target());
+    return build_adapter::project_build(
+        source, incoming.build(), incoming.image());
+  }
+  catch (const std::exception& error)
+  {
+    throw projection_error(
+        projection_error_code::incoming_authority_mismatch,
+        std::string("cannot admit request-bound source/build authority: ") +
+            error.what());
+  }
+}
+
 state_publication_request construct_installation(
     const snapshot& expected_state,
     const pkgapply::installation_application_request& request,
     const pkgapply::completed_application_evidence& evidence,
-    const incoming_installation_authority& incoming)
+    installation_reason reason)
 {
-  if (incoming.kind() != incoming_authority_kind::initial_install ||
-      !incoming.reason())
-  {
-    throw projection_error(
-        projection_error_code::incoming_authority_mismatch,
-        "installation requires initial-install authority and reason");
-  }
+  build_adapter::build_authority incoming =
+      admit_incoming_build(request.incoming());
 
   const auto& publication = request.plan().publication();
   if (expected_state.find_package(publication.release().name()) != nullptr)
@@ -601,7 +619,7 @@ state_publication_request construct_installation(
   }
 
   installed_package proposed = construct_installed_package(
-      expected_state, publication, evidence, incoming, *incoming.reason());
+      expected_state, publication, evidence, incoming, std::move(reason));
   package_state_delta delta = package_state_delta::install(
       std::move(proposed),
       translate_identity<operation_plan_identity>(request.plan().identity()),
@@ -612,16 +630,10 @@ state_publication_request construct_installation(
 state_publication_request construct_upgrade(
     const snapshot& expected_state,
     const pkgapply::upgrade_application_request& request,
-    const pkgapply::completed_application_evidence& evidence,
-    const incoming_installation_authority& incoming)
+    const pkgapply::completed_application_evidence& evidence)
 {
-  if (incoming.kind() != incoming_authority_kind::replacement ||
-      incoming.reason())
-  {
-    throw projection_error(
-        projection_error_code::incoming_authority_mismatch,
-        "upgrade requires replacement authority without a new reason");
-  }
+  build_adapter::build_authority incoming =
+      admit_incoming_build(request.incoming());
 
   const auto& plan = request.plan();
   const auto& publication = plan.publication();
@@ -666,88 +678,19 @@ projection_error::projection_error(projection_error_code code,
 }
 projection_error_code projection_error::code() const noexcept { return code_; }
 
-incoming_installation_authority incoming_installation_authority::install(
-    build_adapter::build_authority build,
-    installation_reason reason)
-{
-  return incoming_installation_authority(
-      incoming_authority_kind::initial_install, std::move(build),
-      std::move(reason));
-}
-
-incoming_installation_authority incoming_installation_authority::replacement(
-    build_adapter::build_authority build)
-{
-  return incoming_installation_authority(
-      incoming_authority_kind::replacement, std::move(build), std::nullopt);
-}
-
-incoming_installation_authority::incoming_installation_authority(
-    incoming_authority_kind kind,
-    build_adapter::build_authority build,
-    std::optional<installation_reason> reason)
-    : kind_(kind), build_(std::move(build)), reason_(std::move(reason))
-{
-  if ((kind_ == incoming_authority_kind::initial_install) != reason_.has_value())
-    throw std::invalid_argument("incoming authority reason shape is invalid");
-}
-
-incoming_authority_kind incoming_installation_authority::kind() const noexcept
-{
-  return kind_;
-}
-
-const package_source_record& incoming_installation_authority::source() const noexcept
-{
-  return build_.source();
-}
-
-const build_provenance& incoming_installation_authority::build() const noexcept
-{
-  return build_.provenance();
-}
-
-const std::optional<installation_reason>& incoming_installation_authority::reason() const noexcept
-{
-  return reason_;
-}
-
 state_publication_request project_completed_application(
     const snapshot& expected_state,
     const pkgapply::lease_bound_state_projection& application_state,
-    const pkgapply::package_application_request& request,
+    const pkgapply::installation_application_request& request,
     const pkgapply::completed_application_evidence& evidence,
-    std::optional<incoming_installation_authority> incoming)
+    installation_reason reason)
 {
-  validate_common(expected_state, application_state, request, evidence);
-
+  const pkgapply::package_application_request envelope(request);
+  validate_common(expected_state, application_state, envelope, evidence);
   try
   {
-    if (const auto* install = request.installation())
-    {
-      if (!incoming)
-        throw projection_error(
-            projection_error_code::incoming_authority_mismatch,
-            "installation requires incoming source and build authority");
-      return construct_installation(expected_state, *install, evidence,
-                                    *incoming);
-    }
-    if (const auto* upgrade = request.upgrade())
-    {
-      if (!incoming)
-        throw projection_error(
-            projection_error_code::incoming_authority_mismatch,
-            "upgrade requires incoming source and build authority");
-      return construct_upgrade(expected_state, *upgrade, evidence, *incoming);
-    }
-    if (const auto* removal = request.removal())
-    {
-      if (incoming)
-        throw projection_error(
-            projection_error_code::incoming_authority_mismatch,
-            "removal must not carry incoming authority");
-      return construct_removal(expected_state, *removal, evidence);
-    }
+    return construct_installation(
+        expected_state, request, evidence, std::move(reason));
   }
   catch (const projection_error&)
   {
@@ -757,12 +700,59 @@ state_publication_request project_completed_application(
   {
     throw projection_error(
         projection_error_code::publication_construction,
-        std::string("state rejected application publication projection: ") +
+        std::string("state rejected installation publication projection: ") +
             error.what());
   }
+}
 
-  throw projection_error(projection_error_code::operation_binding_mismatch,
-                         "application request has no supported operation body");
+state_publication_request project_completed_application(
+    const snapshot& expected_state,
+    const pkgapply::lease_bound_state_projection& application_state,
+    const pkgapply::upgrade_application_request& request,
+    const pkgapply::completed_application_evidence& evidence)
+{
+  const pkgapply::package_application_request envelope(request);
+  validate_common(expected_state, application_state, envelope, evidence);
+  try
+  {
+    return construct_upgrade(expected_state, request, evidence);
+  }
+  catch (const projection_error&)
+  {
+    throw;
+  }
+  catch (const std::exception& error)
+  {
+    throw projection_error(
+        projection_error_code::publication_construction,
+        std::string("state rejected upgrade publication projection: ") +
+            error.what());
+  }
+}
+
+state_publication_request project_completed_application(
+    const snapshot& expected_state,
+    const pkgapply::lease_bound_state_projection& application_state,
+    const pkgapply::removal_application_request& request,
+    const pkgapply::completed_application_evidence& evidence)
+{
+  const pkgapply::package_application_request envelope(request);
+  validate_common(expected_state, application_state, envelope, evidence);
+  try
+  {
+    return construct_removal(expected_state, request, evidence);
+  }
+  catch (const projection_error&)
+  {
+    throw;
+  }
+  catch (const std::exception& error)
+  {
+    throw projection_error(
+        projection_error_code::publication_construction,
+        std::string("state rejected removal publication projection: ") +
+            error.what());
+  }
 }
 
 } // namespace pkgstate::apply_adapter

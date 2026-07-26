@@ -43,22 +43,38 @@ setup()
 configure_dependency()
 {
   src=$1 out=$2
+  shift 2
   setup "$src" "$out" \
     --wrap-mode=nofallback --fatal-meson-warnings \
     --prefix="$dependency_prefix" --libdir=lib \
     -Ddefault_library="$link_mode" -Dlink_mode="$link_mode" \
-    -Dtests=disabled -Dman_pages=disabled -Dwerror=true
+    -Dtests=disabled -Dman_pages=disabled -Dwerror=true "$@"
   meson compile -C "$out"
   meson install -C "$out"
 }
-configure_dependency "$pkgsource_source" "$build_path/libpkgsource"
-configure_dependency "$image_source" "$build_path/libpkgimage"
-configure_dependency "$build_source" "$build_path/libpkgbuild"
 export PKG_CONFIG_PATH=$dependency_prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
 unset PKG_CONFIG_SYSROOT_DIR
 export LD_LIBRARY_PATH=$dependency_prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-configure_dependency "$plan_source" "$build_path/libpkgplan"
+configure_dependency "$image_source" "$build_path/libpkgimage"
+configure_dependency "$plan_source" "$build_path/libpkgplan" -Dreference_tools=disabled
+configure_dependency "$pkgsource_source" "$build_path/libpkgsource" -Dplanner_adapter=enabled
+configure_dependency "$build_source" "$build_path/libpkgbuild" -Dplanner_adapter=disabled
 configure_dependency "$apply_source" "$build_path/libpkgapply"
+for requirement in \
+  'libpkgimage:0.3.0' \
+  'libpkgplan:0.2.0' \
+  'libpkgsource:1.0.0' \
+  'libpkgsource-plan:1.0.0' \
+  'libpkgbuild:1.0.0' \
+  'libpkgapply:1.0.0'
+do
+  module=${requirement%:*} expected=${requirement#*:}
+  actual=$(pkg-config --modversion "$module")
+  [ "$actual" = "$expected" ] || {
+    echo "$module version is '$actual', expected '$expected'" >&2
+    exit 1
+  }
+done
 set -- \
   --wrap-mode=nofallback --fatal-meson-warnings \
   --prefix="$install_prefix" --libdir=lib \

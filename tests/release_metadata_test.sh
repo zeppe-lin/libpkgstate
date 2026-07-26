@@ -17,7 +17,7 @@ grep -F "soversion: '2'" "$root/apply_adapter/meson.build" >/dev/null || fail 'a
 grep -F "version: '>=1.0.0'" "$root/meson.build" >/dev/null || fail 'libpkgsource/libpkgbuild floor is missing'
 grep -F "version: '>=0.3.0'" "$root/meson.build" >/dev/null || fail 'libpkgimage floor is missing'
 grep -F "version: '>=0.2.0'" "$root/meson.build" >/dev/null || fail 'libpkgplan floor is missing'
-grep -F "version: '>=0.1.0'" "$root/meson.build" >/dev/null || fail 'libpkgapply floor is missing'
+grep -F "version: '>=1.0.0'" "$root/meson.build" >/dev/null || fail 'native libpkgapply floor is missing'
 grep -F "get_option('build_adapter').enabled()" "$root/meson.build" >/dev/null || fail 'build adapter dependency scope is missing'
 if grep -E 'libpkg(source|build|image|plan|apply)' "$root/src/meson.build" >/dev/null; then
   fail 'core metadata references an optional authority library'
