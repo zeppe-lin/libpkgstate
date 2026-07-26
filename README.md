@@ -1,7 +1,8 @@
 # libpkgstate
 
 `libpkgstate` is the native installed-package state authority for Zeppe-Lin.
-Version 1 is intentionally incompatible with the former CRUX-shaped model.
+Version 2 is intentionally incompatible with the 1.0.0 build-provenance and
+generation-storage contracts.
 
 The library records complete immutable installed truth:
 
@@ -10,7 +11,7 @@ The library records complete immutable installed truth:
 - package metadata, runtime requirements, lifecycle programs, and
   action-specific lifecycle requirements;
 - declared and selected build/target architectures;
-- installation reason and complete build provenance;
+- installation reason and complete source-bound native build provenance;
 - completed ownership with mode, owner, size, timestamp, content, link, device,
   hard-link, retained-object, and rejected-object evidence;
 - installation receipts and installed packages;
@@ -29,7 +30,10 @@ libpkgsource sealed snapshot
         v
 libpkgstate-source -> package_source_record
         |
-resolved build and artifact identities
+libpkgbuild successful result + exact libpkgimage inspection
+        |
+        v
+libpkgstate-build -> build_authority
         |
 completed libpkgapply evidence + accepted libpkgplan operation
         |
@@ -42,16 +46,22 @@ canonical_store -> immutable state generation
 
 `libpkgstate-plan` provides the reverse projection needed by the current
 operation planner. It exposes only planner-owned runtime/removal/target facts;
-it does not flatten state-specific provenance into planner control.
+it does not flatten state-specific source, build, or application provenance into
+planner control.
 
 ## Native model
 
 A `package_source_record` is the durable projection of one sealed source
 snapshot. It retains source identities rather than recomputing them.
 
-An `installed_control` adds one typed installation reason and build provenance:
-candidate control, resolved build-input set, build result, artifact, and artifact
-manifest.
+A `build_authority` is admitted only from a complete successful native build
+result whose exact artifact bytes and normalized payload have been independently
+verified. Its `build_provenance` retains source material, materialized input,
+environment, build-policy, request, result, payload, artifact, execution, image,
+and inspection identities.
+
+An `installed_control` binds one source record, one typed installation reason,
+and build provenance that names that same source record.
 
 An `installation_receipt` binds installed control to one target, one completed
 ownership manifest, one operation plan, and one application-evidence identity.
@@ -70,14 +80,15 @@ request or accept a caller-authored replacement state.
 
 `canonical_generation_store` persists complete immutable generations and
 atomically selects one current generation. The native storage identifier is
-`libpkgstate-generation-v2`.
+`libpkgstate-generation-v3`.
 
 ## Migration boundary
 
 The authoritative library contains no historical database parser, compatibility
-snapshot, mutable old-format transaction, or import entry point. Migration from
-`/var/lib/pkg/db` will be implemented later as a separate program that must
-supply every native fact the old format did not retain.
+snapshot, mutable old-format transaction, or import entry point. It also does
+not reinterpret generation-v1 or generation-v2 bytes as generation-v3.
+Migration belongs to a separate program that must supply every native fact an
+older format did not retain.
 
 ## Build
 
@@ -86,6 +97,7 @@ meson setup build \
   -Ddefault_library=shared \
   -Dlink_mode=shared \
   -Dsource_adapter=enabled \
+  -Dbuild_adapter=enabled \
   -Dplanner_adapter=enabled \
   -Dapplication_adapter=enabled
 meson compile -C build
@@ -102,6 +114,7 @@ The normative contracts are documented in:
 - `pkgstate_authority(7)`;
 - `pkgstate_model(3)`;
 - `pkgstate_installation_receipt(3)`;
+- `pkgstate_build_adapter(3)`;
 - `pkgstate_publication(3)`;
 - `pkgstate_canonical_generation_store(3)`; and
 - `pkgstate-generation(5)`.

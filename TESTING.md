@@ -4,12 +4,14 @@ The repository test suite covers:
 
 - identity wire format and domain separation;
 - package/profile/architecture normalization;
-- source record, installed control, ownership, and receipt invariants;
+- source record, source-bound build provenance, installed control, ownership,
+  and receipt invariants;
+- exact build-result, artifact-byte, image-inspection, and payload admission;
 - deterministic snapshot and ownership identities;
 - publication request and receipt validation;
 - stale-safe immutable generation publication and recovery;
-- source, planner, and application adapter contracts against their exact public
-  APIs;
+- source, build, planner, and application adapter contracts against their exact
+  public APIs;
 - public header independence;
 - generated pkg-config metadata;
 - read-only diagnostic behavior;
@@ -23,6 +25,7 @@ meson setup build \
   -Ddefault_library=shared \
   -Dlink_mode=shared \
   -Dsource_adapter=enabled \
+  -Dbuild_adapter=enabled \
   -Dplanner_adapter=enabled \
   -Dapplication_adapter=enabled \
   -Dtools=enabled \

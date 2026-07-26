@@ -23,3 +23,10 @@ if grep -E 'libpkg(source|build|image|plan|apply)' "$root/src/meson.build" >/dev
   fail 'core metadata references an optional authority library'
 fi
 grep -F 'requires_private: [libcrypto_dep]' "$root/src/meson.build" >/dev/null || fail 'core private crypto closure is missing'
+grep -F '2.0.0' "$root/HISTORY.md" >/dev/null || fail 'history omits 2.0.0'
+grep -F 'libpkgstate-generation-v3' "$root/HISTORY.md" >/dev/null || fail 'history omits storage reset'
+grep -F 'core `libpkgstate` advances to soversion 3' "$root/HISTORY.md" >/dev/null || fail 'history omits core ABI'
+grep -F '`libpkgstate-build` begins at soversion 1' "$root/HISTORY.md" >/dev/null || fail 'history omits build adapter ABI'
+grep -F '`libpkgstate-apply` advances to soversion 2' "$root/HISTORY.md" >/dev/null || fail 'history omits apply ABI'
+grep -F 'This release contains no in-place migration path.' "$root/HISTORY.md" >/dev/null || fail 'history omits migration boundary'
+grep -F 'Do not point a 2.0.0 writer at an existing' "$root/MIGRATION.md" >/dev/null || fail 'migration guide omits old-store rejection'
