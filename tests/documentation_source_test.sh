@@ -33,7 +33,8 @@ for contract in \
   'The receipt is not reconstructed from a package filename' \
   'The authoritative library contains no old-format parser' \
   'Upgrade preserves the prior installed reason.' \
-  'The YAML document is not authority at this boundary.'
+  'The YAML document is not authority at this boundary.' \
+  'Native publication begins with a fresh state target.'
 do
   printf '%s\n' "$corpus" | grep -F "$contract" >/dev/null ||
     fail "documentation omits: $contract"

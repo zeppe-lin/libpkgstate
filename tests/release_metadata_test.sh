@@ -24,3 +24,5 @@ grep -F 'libpkgstate-generation-v2' "$root/HISTORY.md" >/dev/null || fail 'histo
 grep -F 'core `libpkgstate` advances to soversion 2' "$root/HISTORY.md" >/dev/null || fail 'history omits core ABI'
 grep -F '`libpkgstate-plan` advances to soversion 2' "$root/HISTORY.md" >/dev/null || fail 'history omits planner ABI'
 grep -F '`libpkgstate-apply` advances to soversion 1' "$root/HISTORY.md" >/dev/null || fail 'history omits apply ABI'
+grep -F 'This release contains no in-place migration path.' "$root/HISTORY.md" >/dev/null || fail 'history omits migration boundary'
+grep -F 'Do not point a 1.0.0 writer at an existing' "$root/MIGRATION.md" >/dev/null || fail 'migration guide omits old-store rejection'
