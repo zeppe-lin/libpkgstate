@@ -31,7 +31,7 @@ pkgconf.generate(
   description: 'Projection from sealed package-source authority into libpkgstate',
   subdirs: '.',
   requires: [
-    'libpkgstate >= 1.0.0',
+    'libpkgstate >= 2.0.0',
     'libpkgsource >= 1.0.0',
   ],
 )

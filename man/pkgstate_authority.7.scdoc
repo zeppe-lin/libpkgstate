@@ -13,17 +13,25 @@ filename, installed path, or current source tree.
 
 # BUILD AUTHORITY
 
-The build layer owns the resolved build-input set, build result, package
-artifact, and artifact manifest. State records those identities through
-*build_provenance*. It does not inspect a build directory to reconstruct them.
+*libpkgbuild* owns the sealed build request, verified source materials,
+materialized package inputs, policies, result, payload manifest, exact artifact
+bytes, artifact binding, and execution evidence. *libpkgimage* independently
+owns normalized archive inspection. *libpkgstate-build* admits build authority
+only when source projection, exact artifact digest, inspection receipt, and every
+ordered payload field agree.
+
+State retains those identities through *build_provenance*. It does not inspect a
+build directory or accept planner candidate facts as substitutes.
 
 # APPLICATION AUTHORITY
 
 *libpkgapply* owns completed target effects and durable application evidence.
 The application adapter validates the accepted plan, expected state, target,
-ownership projection, and completed path consequences. It cannot invent source
-or build authority, so install and upgrade projection additionally require an
-*incoming_installation_authority* supplied by the orchestrator.
+ownership projection, and completed path consequences. Install and upgrade
+projection require an *incoming_installation_authority* containing the exact
+*build_authority* produced by *libpkgstate-build*. It verifies the accepted plan
+against the admitted artifact-content identity and never reconstructs build
+provenance from planner facts.
 
 # STATE AUTHORITY
 
@@ -58,4 +66,5 @@ contains no old-format parser, compatibility store, or import entry point.
 
 # SEE ALSO
 
-*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_publication*(3)
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_build_adapter*(3),
+*pkgstate_publication*(3)

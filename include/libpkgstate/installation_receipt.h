@@ -17,7 +17,7 @@
 
 namespace pkgstate {
 
-inline constexpr std::uint16_t installation_receipt_schema_version = 1;
+inline constexpr std::uint16_t installation_receipt_schema_version = 2;
 
 class installation_receipt final {
 public:

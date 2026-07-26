@@ -40,8 +40,11 @@ Installation reason is exactly one of:
 *system_policy*
 	A named system policy caused installation.
 
-Build provenance retains candidate control, build-input set, build result,
-artifact, and artifact-manifest identities.
+Build provenance retains typed identities for the exact source record, build
+request, verified source-material set, materialized build-input set, environment
+policy, build policy, successful build result, payload manifest, sealed artifact,
+exact artifact content, artifact binding, execution evidence, normalized artifact
+image, and image-inspection receipt.
 
 # OWNERSHIP
 
@@ -74,8 +77,9 @@ domain.
 # INVARIANTS
 
 - Package, profile, and architecture references are normalized identifiers.
-- Every installed package has complete source, build, target, application, and
-  ownership evidence.
+- Every installed package has complete source, verified build, target, application,
+  and ownership evidence.
+- Build provenance names the same exact source record retained by installed control.
 - Runtime and lifecycle requirements are typed exact package references.
 - Lifecycle requirements are bound to one lifecycle action.
 - Package release identity remains source-owned.

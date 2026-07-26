@@ -19,6 +19,7 @@ check_page man/pkgstate_publication.3.scdoc 'PKGSTATE_PUBLICATION(3)'
 check_page man/pkgstate_store.3.scdoc 'PKGSTATE_STORE(3)'
 check_page man/pkgstate_canonical_generation_store.3.scdoc 'PKGSTATE_CANONICAL_GENERATION_STORE(3)'
 check_page man/pkgstate_source_adapter.3.scdoc 'PKGSTATE_SOURCE_ADAPTER(3)'
+check_page man/pkgstate_build_adapter.3.scdoc 'PKGSTATE_BUILD_ADAPTER(3)'
 check_page man/pkgstate_plan_adapter.3.scdoc 'PKGSTATE_PLAN_ADAPTER(3)'
 check_page man/pkgstate_apply_adapter.3.scdoc 'PKGSTATE_APPLY_ADAPTER(3)'
 check_page man/pkgstate-generation.5.scdoc 'PKGSTATE-GENERATION(5)'
@@ -34,6 +35,8 @@ for contract in \
   'The authoritative library contains no old-format parser' \
   'Upgrade preserves the prior installed reason.' \
   'The YAML document is not authority at this boundary.' \
+  'Build authority is admitted only after exact artifact inspection.' \
+  'Application admission never reconstructs build provenance from planner facts.' \
   'Native publication begins with a fresh state target.'
 do
   printf '%s\n' "$corpus" | grep -F "$contract" >/dev/null ||

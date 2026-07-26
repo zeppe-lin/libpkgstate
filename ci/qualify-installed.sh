@@ -17,22 +17,26 @@ trap 'chmod -R u+w "$temporary" 2>/dev/null || :; rm -rf "$temporary"' EXIT HUP 
 export PKG_CONFIG_PATH=$install_prefix/lib/pkgconfig:$dependency_prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
 unset PKG_CONFIG_SYSROOT_DIR
 runtime_path=$install_prefix/lib:$dependency_prefix/lib
-for module in libpkgstate libpkgstate-source libpkgstate-plan libpkgstate-apply; do
+for module in libpkgstate libpkgstate-source libpkgstate-build libpkgstate-plan libpkgstate-apply; do
   version=$(pkg-config --modversion "$module")
-  [ "$version" = 1.0.0 ] || { echo "$module version is '$version', expected 1.0.0" >&2; exit 1; }
+  [ "$version" = 2.0.0 ] || { echo "$module version is '$version', expected 2.0.0" >&2; exit 1; }
 done
 if { pkg-config --print-requires libpkgstate; pkg-config --print-requires-private libpkgstate; } |
-  grep -E '(^|[[:space:]])libpkg(source|image|plan|apply)([[:space:]]|$)' >/dev/null; then
+  grep -E '(^|[[:space:]])libpkg(source|build|image|plan|apply)([[:space:]]|$)' >/dev/null; then
   echo 'core libpkgstate metadata is contaminated by external authority dependencies' >&2
   exit 1
 fi
 pkg-config --print-requires libpkgstate-source | grep -F 'libpkgsource >= 1.0.0' >/dev/null
+pkg-config --print-requires libpkgstate-build | grep -F 'libpkgbuild >= 1.0.0' >/dev/null
+pkg-config --print-requires libpkgstate-build | grep -F 'libpkgimage >= 0.3.0' >/dev/null
 pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgplan >= 0.2.0' >/dev/null
+pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate-build >= 2.0.0' >/dev/null
 pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgapply >= 0.1.0' >/dev/null
 cxx=${CXX:-c++}
 for pair in \
   core:libpkgstate \
   source:libpkgstate-source \
+  build:libpkgstate-build \
   plan:libpkgstate-plan \
   apply:libpkgstate-apply
 do
@@ -53,7 +57,7 @@ for header in "$install_prefix"/include/libpkgstate/*.h; do
   "$cxx" -std=c++17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
     $(pkg-config --cflags libpkgstate) "$unit"
 done
-for module in source plan apply; do
+for module in source build plan apply; do
   unit=$temporary/$module.cpp
   printf '#include <libpkgstate-%s/adapter.h>\n' "$module" >"$unit"
   # shellcheck disable=SC2046
@@ -61,7 +65,7 @@ for module in source plan apply; do
     $(pkg-config --cflags "libpkgstate-$module") "$unit"
 done
 canonical_store=$temporary/canonical
-for consumer in core source plan apply; do
+for consumer in core source build plan apply; do
   if [ "$consumer" = core ]; then
     LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
       "$temporary/$consumer-consumer" "$canonical_store"
@@ -82,11 +86,11 @@ LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   --managed-target "$(identity 1)" --state-store "$(identity 2)" \
   --root-view "$(identity 3)" --state-backend "$(identity 4)" \
   --publication-domain "$(identity 5)" >"$temporary/report"
-grep -F 'storage-format=libpkgstate-generation-v2' "$temporary/report" >/dev/null
+grep -F 'storage-format=libpkgstate-generation-v3' "$temporary/report" >/dev/null
 grep -F 'packages=0' "$temporary/report" >/dev/null
 LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   "$install_prefix/bin/pkgstate-check" --version |
-  grep -E '^pkgstate-check \(libpkgstate\) 1\.0\.0$' >/dev/null
+  grep -E '^pkgstate-check \(libpkgstate\) 2\.0\.0$' >/dev/null
 if [ -s "$build_dir/man/libpkgstate.3" ]; then
   for page in \
     man1/pkgstate-check.1 \
@@ -94,6 +98,7 @@ if [ -s "$build_dir/man/libpkgstate.3" ]; then
     man3/pkgstate_model.3 \
     man3/pkgstate_installation_receipt.3 \
     man3/pkgstate_source_adapter.3 \
+    man3/pkgstate_build_adapter.3 \
     man3/pkgstate_plan_adapter.3 \
     man3/pkgstate_apply_adapter.3 \
     man7/pkgstate_authority.7
@@ -104,10 +109,11 @@ fi
 case $link_mode in
   shared)
     for spec in \
-      'pkgstate:2' \
+      'pkgstate:3' \
       'pkgstate-source:1' \
+      'pkgstate-build:1' \
       'pkgstate-plan:2' \
-      'pkgstate-apply:1'
+      'pkgstate-apply:2'
     do
       name=${spec%:*} soname=${spec#*:}
       library=$(find "$install_prefix/lib" -maxdepth 1 -type f -name "lib$name.so.*" -print | sort | head -n 1)
@@ -117,13 +123,13 @@ case $link_mode in
       }
     done
     core=$(find "$install_prefix/lib" -maxdepth 1 -type f -name 'libpkgstate.so.*' -print | sort | head -n 1)
-    if readelf -d "$core" | grep -E 'libpkg(source|image|plan|apply)\.so\.' >/dev/null; then
+    if readelf -d "$core" | grep -E 'libpkg(source|build|image|plan|apply)\.so\.' >/dev/null; then
       echo 'shared core is contaminated by external authority linkage' >&2
       exit 1
     fi
     ;;
   static)
-    for name in pkgstate pkgstate-source pkgstate-plan pkgstate-apply; do
+    for name in pkgstate pkgstate-source pkgstate-build pkgstate-plan pkgstate-apply; do
       [ -f "$install_prefix/lib/lib$name.a" ] || { echo "installed static lib$name is absent" >&2; exit 1; }
       pkg-config --static --libs "lib$name" >/dev/null
     done

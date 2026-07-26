@@ -113,14 +113,24 @@ inline pkgstate::installed_control control(
     pkgstate::installation_reason reason =
         pkgstate::installation_reason::explicit_request())
 {
+  pkgstate::package_source_record source_record = source(std::move(name), seed);
   return pkgstate::installed_control::make(
-      source(std::move(name), seed), std::move(reason),
+      source_record, std::move(reason),
       pkgstate::build_provenance(
-          identity<pkgstate::candidate_control_identity>(seed + 4),
-          identity<pkgstate::build_input_set_identity>(seed + 5),
-          identity<pkgstate::build_result_identity>(seed + 6),
-          identity<pkgstate::artifact_identity>(seed + 7),
-          identity<pkgstate::artifact_manifest_identity>(seed + 8)));
+          source_record.identity(),
+          identity<pkgstate::build_request_identity>(seed + 4),
+          identity<pkgstate::source_material_set_identity>(seed + 5),
+          identity<pkgstate::build_input_set_identity>(seed + 6),
+          identity<pkgstate::environment_policy_identity>(seed + 7),
+          identity<pkgstate::build_policy_identity>(seed + 8),
+          identity<pkgstate::build_result_identity>(seed + 9),
+          identity<pkgstate::payload_manifest_identity>(seed + 10),
+          identity<pkgstate::build_artifact_identity>(seed + 11),
+          identity<pkgstate::artifact_content_identity>(seed + 12),
+          identity<pkgstate::artifact_binding_identity>(seed + 13),
+          identity<pkgstate::execution_evidence_identity>(seed + 14),
+          identity<pkgstate::artifact_image_identity>(seed + 15),
+          identity<pkgstate::artifact_inspection_identity>(seed + 16)));
 }
 
 inline pkgstate::installation_receipt receipt(
@@ -138,13 +148,13 @@ inline pkgstate::installation_receipt receipt(
       pkgstate::active_object_origin::retained_existing,
       pkgstate::rejected_object_reference(
           pkgstate::rejected_object_side::incoming,
-          identity<pkgstate::rejected_object_identity>(seed + 9))));
+          identity<pkgstate::rejected_object_identity>(seed + 17))));
 
   return pkgstate::installation_receipt::make(
       control(std::move(name), seed), std::move(binding),
       std::move(manifest),
-      identity<pkgstate::operation_plan_identity>(seed + 10),
-      identity<pkgstate::application_evidence_identity>(seed + 11));
+      identity<pkgstate::operation_plan_identity>(seed + 18),
+      identity<pkgstate::application_evidence_identity>(seed + 19));
 }
 
 inline pkgstate::installed_package package(

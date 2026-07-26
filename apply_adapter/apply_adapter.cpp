@@ -548,14 +548,16 @@ installed_package construct_installed_package(
   validate_incoming_release(incoming.source(), publication.release(),
                             publication.installed_control());
 
-  build_provenance build(
-      translate_identity<candidate_control_identity>(publication.candidate()),
-      incoming.build_inputs(), incoming.build_result(),
-      translate_identity<artifact_identity>(publication.artifact()),
-      translate_identity<artifact_manifest_identity>(
-          publication.artifact_manifest()));
+  if (publication.artifact().string() !=
+      incoming.build().artifact_content().string())
+  {
+    throw projection_error(
+        projection_error_code::incoming_authority_mismatch,
+        "accepted plan artifact differs from admitted build bytes");
+  }
+
   installed_control control = installed_control::make(
-      incoming.source(), std::move(reason), std::move(build));
+      incoming.source(), std::move(reason), incoming.build());
   std::vector<owned_entry> manifest =
       translate_manifest(publication.installed_manifest(), evidence);
 
@@ -665,30 +667,26 @@ projection_error::projection_error(projection_error_code code,
 projection_error_code projection_error::code() const noexcept { return code_; }
 
 incoming_installation_authority incoming_installation_authority::install(
-    package_source_record source, installation_reason reason,
-    build_input_set_identity build_inputs, build_result_identity build_result)
+    build_adapter::build_authority build,
+    installation_reason reason)
 {
   return incoming_installation_authority(
-      incoming_authority_kind::initial_install, std::move(source),
-      std::move(reason), std::move(build_inputs), std::move(build_result));
+      incoming_authority_kind::initial_install, std::move(build),
+      std::move(reason));
 }
 
 incoming_installation_authority incoming_installation_authority::replacement(
-    package_source_record source, build_input_set_identity build_inputs,
-    build_result_identity build_result)
+    build_adapter::build_authority build)
 {
   return incoming_installation_authority(
-      incoming_authority_kind::replacement, std::move(source), std::nullopt,
-      std::move(build_inputs), std::move(build_result));
+      incoming_authority_kind::replacement, std::move(build), std::nullopt);
 }
 
 incoming_installation_authority::incoming_installation_authority(
-    incoming_authority_kind kind, package_source_record source,
-    std::optional<installation_reason> reason,
-    build_input_set_identity build_inputs, build_result_identity build_result)
-    : kind_(kind), source_(std::move(source)), reason_(std::move(reason)),
-      build_inputs_(std::move(build_inputs)),
-      build_result_(std::move(build_result))
+    incoming_authority_kind kind,
+    build_adapter::build_authority build,
+    std::optional<installation_reason> reason)
+    : kind_(kind), build_(std::move(build)), reason_(std::move(reason))
 {
   if ((kind_ == incoming_authority_kind::initial_install) != reason_.has_value())
     throw std::invalid_argument("incoming authority reason shape is invalid");
@@ -698,21 +696,20 @@ incoming_authority_kind incoming_installation_authority::kind() const noexcept
 {
   return kind_;
 }
+
 const package_source_record& incoming_installation_authority::source() const noexcept
 {
-  return source_;
+  return build_.source();
 }
+
+const build_provenance& incoming_installation_authority::build() const noexcept
+{
+  return build_.provenance();
+}
+
 const std::optional<installation_reason>& incoming_installation_authority::reason() const noexcept
 {
   return reason_;
-}
-const build_input_set_identity& incoming_installation_authority::build_inputs() const noexcept
-{
-  return build_inputs_;
-}
-const build_result_identity& incoming_installation_authority::build_result() const noexcept
-{
-  return build_result_;
 }
 
 state_publication_request project_completed_application(

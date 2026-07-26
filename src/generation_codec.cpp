@@ -450,11 +450,20 @@ void encode_control(writer& output, const installed_control& control)
   if (reason.policy()) output.bytes(*reason.policy());
 
   const build_provenance& build = control.build();
-  output.digest(build.candidate_control());
+  output.digest(build.source_record());
+  output.digest(build.request());
+  output.digest(build.source_materials());
   output.digest(build.build_inputs());
+  output.digest(build.environment_policy());
+  output.digest(build.build_policy());
   output.digest(build.build_result());
+  output.digest(build.payload_manifest());
   output.digest(build.artifact());
-  output.digest(build.artifact_manifest());
+  output.digest(build.artifact_content());
+  output.digest(build.artifact_binding());
+  output.digest(build.execution_evidence());
+  output.digest(build.artifact_image());
+  output.digest(build.artifact_inspection());
 }
 
 installed_control decode_control(reader& input)
@@ -496,21 +505,41 @@ installed_control decode_control(reader& input)
       throw store_error("invalid installation reason value");
   }
 
-  candidate_control_identity candidate =
-      read_digest<candidate_control_identity>(input, "candidate control identity");
+  package_source_record_identity source_record =
+      read_digest<package_source_record_identity>(input, "build source record identity");
+  build_request_identity request =
+      read_digest<build_request_identity>(input, "build request identity");
+  source_material_set_identity source_materials =
+      read_digest<source_material_set_identity>(input, "source material set identity");
   build_input_set_identity build_inputs =
-      read_digest<build_input_set_identity>(input, "build input identity");
+      read_digest<build_input_set_identity>(input, "build input set identity");
+  environment_policy_identity environment_policy =
+      read_digest<environment_policy_identity>(input, "environment policy identity");
+  build_policy_identity build_policy =
+      read_digest<build_policy_identity>(input, "build policy identity");
   build_result_identity build_result =
       read_digest<build_result_identity>(input, "build result identity");
-  artifact_identity artifact =
-      read_digest<artifact_identity>(input, "artifact identity");
-  artifact_manifest_identity artifact_manifest =
-      read_digest<artifact_manifest_identity>(
-          input, "artifact manifest identity");
+  payload_manifest_identity payload_manifest =
+      read_digest<payload_manifest_identity>(input, "payload manifest identity");
+  build_artifact_identity artifact =
+      read_digest<build_artifact_identity>(input, "build artifact identity");
+  artifact_content_identity artifact_content =
+      read_digest<artifact_content_identity>(input, "artifact content identity");
+  artifact_binding_identity artifact_binding =
+      read_digest<artifact_binding_identity>(input, "artifact binding identity");
+  execution_evidence_identity execution_evidence =
+      read_digest<execution_evidence_identity>(input, "execution evidence identity");
+  artifact_image_identity artifact_image =
+      read_digest<artifact_image_identity>(input, "artifact image identity");
+  artifact_inspection_identity artifact_inspection =
+      read_digest<artifact_inspection_identity>(input, "artifact inspection identity");
   build_provenance build(
-      std::move(candidate), std::move(build_inputs),
-      std::move(build_result), std::move(artifact),
-      std::move(artifact_manifest));
+      std::move(source_record), std::move(request), std::move(source_materials),
+      std::move(build_inputs), std::move(environment_policy),
+      std::move(build_policy), std::move(build_result),
+      std::move(payload_manifest), std::move(artifact),
+      std::move(artifact_content), std::move(artifact_binding), std::move(execution_evidence),
+      std::move(artifact_image), std::move(artifact_inspection));
   return installed_control::make(std::move(source), std::move(reason), std::move(build));
 }
 

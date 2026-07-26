@@ -26,7 +26,7 @@ void round_trips_owned_and_referenced_identities()
   TEST_EQ(owned.bytes().size(), pkgstate::sha256_digest_size);
   TEST_EQ(pkgstate::installed_package_identity::parse(owned.string()), owned);
   TEST_EQ(pkgstate::installed_package_identity::canonical_domain(),
-          "pkgstate/installed-package/2");
+          "pkgstate/installed-package/3");
 
   const auto referenced = identity<pkgstate::package_release_identity>(0x2b);
   TEST_EQ(pkgstate::package_release_identity::parse(referenced.string()),

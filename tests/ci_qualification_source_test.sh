@@ -20,6 +20,7 @@ for file in \
   "$source_root/ci/lint-manpages.sh" \
   "$source_root/ci/installed-core-consumer.cpp" \
   "$source_root/ci/installed-source-consumer.cpp" \
+  "$source_root/ci/installed-build-consumer.cpp" \
   "$source_root/ci/installed-plan-consumer.cpp" \
   "$source_root/ci/installed-apply-consumer.cpp"
 do
@@ -33,6 +34,7 @@ done
 for pin in \
   d9f6090beb65b1069ac49e02e010ceb2ea676ea5 \
   e1f6dfd8cc4bfeb2f8da44345d8ec6368281c6e0 \
+  4fbe346fb08459ca56b0096eb54505130ea17244 \
   57a10b166450dd0396d4d461d1d38352073a5a1e \
   05c5cf0ca752b57f668a1c59bb1c7e0a84ff3439
 do
@@ -58,6 +60,7 @@ done
 for contract in \
   '--wrap-mode=nofallback' \
   '-Dsource_adapter=enabled' \
+  '-Dbuild_adapter=enabled' \
   '-Dplanner_adapter=enabled' \
   '-Dapplication_adapter=enabled' \
   '-Dtools=enabled' \
@@ -76,6 +79,7 @@ grep -F 'pkgstate-check' "$source_root/ci/qualify-installed.sh" >/dev/null ||
 for page in \
   pkgstate_installation_receipt.3 \
   pkgstate_source_adapter.3 \
+  pkgstate_build_adapter.3 \
   pkgstate_plan_adapter.3 \
   pkgstate_apply_adapter.3
 do

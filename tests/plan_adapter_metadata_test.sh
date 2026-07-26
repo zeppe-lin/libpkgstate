@@ -32,8 +32,8 @@ test "$name" = libpkgstate-plan ||
 
 requires=$(sed -n 's/^Requires:[[:space:]]*//p' "$metadata" | tr '\n' ',')
 printf '%s\n' "$requires" |
-  grep -Eq '(^|,)[[:space:]]*libpkgstate[[:space:]]*>=[[:space:]]*1\.0\.0([[:space:]]*,|$)' ||
-  fail 'pkg-config metadata omits the libpkgstate 1.0.0 dependency floor'
+  grep -Eq '(^|,)[[:space:]]*libpkgstate[[:space:]]*>=[[:space:]]*2\.0\.0([[:space:]]*,|$)' ||
+  fail 'pkg-config metadata omits the libpkgstate 2.0.0 dependency floor'
 printf '%s\n' "$requires" |
   grep -Eq '(^|,)[[:space:]]*libpkgplan[[:space:]]*>=[[:space:]]*0\.2\.0([[:space:]]*,|$)' ||
   fail 'pkg-config metadata omits the libpkgplan dependency floor'

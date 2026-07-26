@@ -31,7 +31,7 @@ libpkgstate = library(
   dependencies: libcrypto_dep,
   install: true,
   version: meson.project_version(),
-  soversion: '2',
+  soversion: '3',
 )
 
 libpkgstate_dep = declare_dependency(

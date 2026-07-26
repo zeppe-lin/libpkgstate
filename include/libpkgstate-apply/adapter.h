@@ -14,6 +14,7 @@
 #include <libpkgapply/request.h>
 #include <libpkgapply/result.h>
 #include <libpkgapply/state_projection.h>
+#include <libpkgstate-build/adapter.h>
 #include <libpkgstate/installed_control.h>
 #include <libpkgstate/publication_request.h>
 #include <libpkgstate/snapshot.h>
@@ -59,35 +60,26 @@ enum class incoming_authority_kind : std::uint8_t {
 class incoming_installation_authority final {
 public:
   [[nodiscard]] static incoming_installation_authority install(
-      package_source_record source,
-      installation_reason reason,
-      build_input_set_identity build_inputs,
-      build_result_identity build_result);
+      build_adapter::build_authority build,
+      installation_reason reason);
 
   [[nodiscard]] static incoming_installation_authority replacement(
-      package_source_record source,
-      build_input_set_identity build_inputs,
-      build_result_identity build_result);
+      build_adapter::build_authority build);
 
   [[nodiscard]] incoming_authority_kind kind() const noexcept;
   [[nodiscard]] const package_source_record& source() const noexcept;
+  [[nodiscard]] const build_provenance& build() const noexcept;
   [[nodiscard]] const std::optional<installation_reason>& reason() const noexcept;
-  [[nodiscard]] const build_input_set_identity& build_inputs() const noexcept;
-  [[nodiscard]] const build_result_identity& build_result() const noexcept;
 
 private:
   incoming_installation_authority(
       incoming_authority_kind kind,
-      package_source_record source,
-      std::optional<installation_reason> reason,
-      build_input_set_identity build_inputs,
-      build_result_identity build_result);
+      build_adapter::build_authority build,
+      std::optional<installation_reason> reason);
 
   incoming_authority_kind kind_;
-  package_source_record source_;
+  build_adapter::build_authority build_;
   std::optional<installation_reason> reason_;
-  build_input_set_identity build_inputs_;
-  build_result_identity build_result_;
 };
 
 /*! \brief Construct one canonical publication request from completed application.

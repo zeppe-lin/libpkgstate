@@ -20,11 +20,11 @@
 namespace pkgstate {
 
 /*! \brief Current canonical generation storage-format version. */
-inline constexpr std::uint16_t canonical_generation_storage_version = 2;
+inline constexpr std::uint16_t canonical_generation_storage_version = 3;
 
 /*! \brief Receipt-visible canonical generation storage-format identifier. */
 inline constexpr std::string_view canonical_generation_storage_format =
-    "libpkgstate-generation-v2";
+    "libpkgstate-generation-v3";
 
 /*!
  * \brief Canonical backend using immutable generations and atomic selection.

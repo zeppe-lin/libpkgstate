@@ -10,6 +10,6 @@ metadata=$build_root/meson-private/libpkgstate-source.pc
   exit 1
 }
 grep -F 'Name: libpkgstate-source' "$metadata" >/dev/null
-grep -E 'Requires:.*libpkgstate[[:space:]]*>=[[:space:]]*1\.0\.0' "$metadata" >/dev/null
-grep -E 'Requires:.*libpkgsource[[:space:]]*>=[[:space:]]*1\.0\.0' "$metadata" >/dev/null
+grep -E 'Requires:.*libpkgstate[[:space:]]*>=[[:space:]]*2\.0\.0' "$metadata" >/dev/null
+grep -E 'Requires:.*libpkgsource[[:space:]]*>=[[:space:]]*2\.0\.0' "$metadata" >/dev/null
 grep -E 'Libs:.*-lpkgstate-source' "$metadata" >/dev/null

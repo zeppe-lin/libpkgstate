@@ -9,9 +9,9 @@
 int main()
 {
   using namespace pkgstate;
-  static_assert(canonical_generation_storage_version == 2);
+  static_assert(canonical_generation_storage_version == 3);
   TEST_EQ(canonical_generation_storage_format,
-          std::string_view("libpkgstate-generation-v2"));
+          std::string_view("libpkgstate-generation-v3"));
 
   temp_directory temporary;
   const std::filesystem::path root = temporary.path() / "state";

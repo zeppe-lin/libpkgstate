@@ -70,11 +70,20 @@ installed_control_identity identify(const package_source_record& source,
   record.append_bool(reason.policy().has_value());
   if (reason.policy())
     record.append_bytes(*reason.policy());
-  record.append_digest(build.candidate_control());
+  record.append_digest(build.source_record());
+  record.append_digest(build.request());
+  record.append_digest(build.source_materials());
   record.append_digest(build.build_inputs());
+  record.append_digest(build.environment_policy());
+  record.append_digest(build.build_policy());
   record.append_digest(build.build_result());
+  record.append_digest(build.payload_manifest());
   record.append_digest(build.artifact());
-  record.append_digest(build.artifact_manifest());
+  record.append_digest(build.artifact_content());
+  record.append_digest(build.artifact_binding());
+  record.append_digest(build.execution_evidence());
+  record.append_digest(build.artifact_image());
+  record.append_digest(build.artifact_inspection());
   return installed_control_identity::from_sha256(record.sha256());
 }
 
@@ -124,31 +133,61 @@ bool operator!=(const installation_reason& lhs, const installation_reason& rhs) 
 bool operator<(const installation_reason& lhs, const installation_reason& rhs) noexcept { return std::tie(lhs.kind_, lhs.issuer_package_, lhs.issuer_profile_, lhs.issuer_profile_identity_, lhs.policy_) < std::tie(rhs.kind_, rhs.issuer_package_, rhs.issuer_profile_, rhs.issuer_profile_identity_, rhs.policy_); }
 
 build_provenance::build_provenance(
-    candidate_control_identity candidate_control,
+    package_source_record_identity source_record,
+    build_request_identity request,
+    source_material_set_identity source_materials,
     build_input_set_identity build_inputs,
+    environment_policy_identity environment_policy,
+    build_policy_identity build_policy,
     build_result_identity build_result,
-    artifact_identity artifact,
-    artifact_manifest_identity artifact_manifest)
-    : candidate_control_(std::move(candidate_control)),
+    payload_manifest_identity payload_manifest,
+    build_artifact_identity artifact,
+    artifact_content_identity artifact_content,
+    artifact_binding_identity artifact_binding,
+    execution_evidence_identity execution_evidence,
+    artifact_image_identity artifact_image,
+    artifact_inspection_identity artifact_inspection)
+    : source_record_(std::move(source_record)),
+      request_(std::move(request)),
+      source_materials_(std::move(source_materials)),
       build_inputs_(std::move(build_inputs)),
-      build_result_(std::move(build_result)), artifact_(std::move(artifact)),
-      artifact_manifest_(std::move(artifact_manifest))
+      environment_policy_(std::move(environment_policy)),
+      build_policy_(std::move(build_policy)),
+      build_result_(std::move(build_result)),
+      payload_manifest_(std::move(payload_manifest)),
+      artifact_(std::move(artifact)),
+      artifact_content_(std::move(artifact_content)),
+      artifact_binding_(std::move(artifact_binding)),
+      execution_evidence_(std::move(execution_evidence)),
+      artifact_image_(std::move(artifact_image)),
+      artifact_inspection_(std::move(artifact_inspection))
 {
 }
-const candidate_control_identity& build_provenance::candidate_control() const noexcept { return candidate_control_; }
+const package_source_record_identity& build_provenance::source_record() const noexcept { return source_record_; }
+const build_request_identity& build_provenance::request() const noexcept { return request_; }
+const source_material_set_identity& build_provenance::source_materials() const noexcept { return source_materials_; }
 const build_input_set_identity& build_provenance::build_inputs() const noexcept { return build_inputs_; }
+const environment_policy_identity& build_provenance::environment_policy() const noexcept { return environment_policy_; }
+const build_policy_identity& build_provenance::build_policy() const noexcept { return build_policy_; }
 const build_result_identity& build_provenance::build_result() const noexcept { return build_result_; }
-const artifact_identity& build_provenance::artifact() const noexcept { return artifact_; }
-const artifact_manifest_identity& build_provenance::artifact_manifest() const noexcept { return artifact_manifest_; }
-bool operator==(const build_provenance& lhs, const build_provenance& rhs) noexcept { return std::tie(lhs.candidate_control_, lhs.build_inputs_, lhs.build_result_, lhs.artifact_, lhs.artifact_manifest_) == std::tie(rhs.candidate_control_, rhs.build_inputs_, rhs.build_result_, rhs.artifact_, rhs.artifact_manifest_); }
+const payload_manifest_identity& build_provenance::payload_manifest() const noexcept { return payload_manifest_; }
+const build_artifact_identity& build_provenance::artifact() const noexcept { return artifact_; }
+const artifact_content_identity& build_provenance::artifact_content() const noexcept { return artifact_content_; }
+const artifact_binding_identity& build_provenance::artifact_binding() const noexcept { return artifact_binding_; }
+const execution_evidence_identity& build_provenance::execution_evidence() const noexcept { return execution_evidence_; }
+const artifact_image_identity& build_provenance::artifact_image() const noexcept { return artifact_image_; }
+const artifact_inspection_identity& build_provenance::artifact_inspection() const noexcept { return artifact_inspection_; }
+bool operator==(const build_provenance& lhs, const build_provenance& rhs) noexcept { return std::tie(lhs.source_record_, lhs.request_, lhs.source_materials_, lhs.build_inputs_, lhs.environment_policy_, lhs.build_policy_, lhs.build_result_, lhs.payload_manifest_, lhs.artifact_, lhs.artifact_content_, lhs.artifact_binding_, lhs.execution_evidence_, lhs.artifact_image_, lhs.artifact_inspection_) == std::tie(rhs.source_record_, rhs.request_, rhs.source_materials_, rhs.build_inputs_, rhs.environment_policy_, rhs.build_policy_, rhs.build_result_, rhs.payload_manifest_, rhs.artifact_, rhs.artifact_content_, rhs.artifact_binding_, rhs.execution_evidence_, rhs.artifact_image_, rhs.artifact_inspection_); }
 bool operator!=(const build_provenance& lhs, const build_provenance& rhs) noexcept { return !(lhs == rhs); }
-bool operator<(const build_provenance& lhs, const build_provenance& rhs) noexcept { return std::tie(lhs.candidate_control_, lhs.build_inputs_, lhs.build_result_, lhs.artifact_, lhs.artifact_manifest_) < std::tie(rhs.candidate_control_, rhs.build_inputs_, rhs.build_result_, rhs.artifact_, rhs.artifact_manifest_); }
+bool operator<(const build_provenance& lhs, const build_provenance& rhs) noexcept { return std::tie(lhs.source_record_, lhs.request_, lhs.source_materials_, lhs.build_inputs_, lhs.environment_policy_, lhs.build_policy_, lhs.build_result_, lhs.payload_manifest_, lhs.artifact_, lhs.artifact_content_, lhs.artifact_binding_, lhs.execution_evidence_, lhs.artifact_image_, lhs.artifact_inspection_) < std::tie(rhs.source_record_, rhs.request_, rhs.source_materials_, rhs.build_inputs_, rhs.environment_policy_, rhs.build_policy_, rhs.build_result_, rhs.payload_manifest_, rhs.artifact_, rhs.artifact_content_, rhs.artifact_binding_, rhs.execution_evidence_, rhs.artifact_image_, rhs.artifact_inspection_); }
 
 installed_control installed_control::make(
     package_source_record source,
     installation_reason reason,
     build_provenance build)
 {
+  if (build.source_record() != source.identity())
+    throw state_error("build provenance does not bind the package source record");
   installed_control_identity identity = identify(source, reason, build);
   return installed_control(std::move(identity), std::move(source),
                            std::move(reason), std::move(build));

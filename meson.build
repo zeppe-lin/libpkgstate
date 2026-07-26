@@ -1,7 +1,7 @@
 project(
   'libpkgstate',
   'cpp',
-  version: '1.0.0',
+  version: '2.0.0',
   license: 'GPL-3.0-or-later',
   meson_version: '>=1.6.0',
   default_options: [
@@ -33,9 +33,35 @@ libcrypto_dep = dependency(
 libpkgsource_dep = dependency(
   'libpkgsource',
   version: '>=1.0.0',
-  required: get_option('source_adapter'),
+  required: get_option('source_adapter').enabled() or
+            get_option('build_adapter').enabled() or
+            get_option('application_adapter').enabled(),
   static: want_static,
   fallback: ['libpkgsource', 'libpkgsource_dep'],
+  default_options: [
+    'default_library=' + library_kind,
+    'link_mode=' + get_option('link_mode'),
+  ],
+)
+
+libpkgbuild_dep = dependency(
+  'libpkgbuild',
+  version: '>=1.0.0',
+  required: get_option('build_adapter').enabled() or get_option('application_adapter').enabled(),
+  static: want_static,
+  fallback: ['libpkgbuild', 'libpkgbuild_dep'],
+  default_options: [
+    'default_library=' + library_kind,
+    'link_mode=' + get_option('link_mode'),
+  ],
+)
+
+libpkgimage_dep = dependency(
+  'libpkgimage',
+  version: '>=0.3.0',
+  required: get_option('build_adapter').enabled() or get_option('application_adapter').enabled(),
+  static: want_static,
+  fallback: ['libpkgimage', 'libpkgimage_dep'],
   default_options: [
     'default_library=' + library_kind,
     'link_mode=' + get_option('link_mode'),
@@ -73,6 +99,9 @@ endif
 subdir('src')
 if libpkgsource_dep.found()
   subdir('source_adapter')
+endif
+if libpkgbuild_dep.found() and libpkgimage_dep.found() and libpkgsource_dep.found()
+  subdir('build_adapter')
 endif
 if libpkgplan_dep.found()
   subdir('adapter')

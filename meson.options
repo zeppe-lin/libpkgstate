@@ -41,6 +41,14 @@ option(
   description: 'Build the optional libpkgsource authority adapter',
 )
 
+
+option(
+  'build_adapter',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Build the optional libpkgbuild authority adapter',
+)
+
 option(
   'planner_adapter',
   type: 'feature',

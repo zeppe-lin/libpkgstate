@@ -44,10 +44,41 @@ int main()
   TEST_THROWS(pkgstate::state_error,
               pkgstate::installation_reason::system_policy("bad\npolicy"));
 
-  TEST_EQ(explicit_control.build().candidate_control(),
-          native_fixture::identity<pkgstate::candidate_control_identity>(24));
+  TEST_EQ(explicit_control.build().source_record(),
+          explicit_control.source().identity());
+  TEST_EQ(explicit_control.build().request(),
+          native_fixture::identity<pkgstate::build_request_identity>(24));
+  TEST_EQ(explicit_control.build().source_materials(),
+          native_fixture::identity<pkgstate::source_material_set_identity>(25));
   TEST_EQ(explicit_control.build().build_inputs(),
-          native_fixture::identity<pkgstate::build_input_set_identity>(25));
+          native_fixture::identity<pkgstate::build_input_set_identity>(26));
+  TEST_EQ(explicit_control.build().environment_policy(),
+          native_fixture::identity<pkgstate::environment_policy_identity>(27));
+  TEST_EQ(explicit_control.build().build_policy(),
+          native_fixture::identity<pkgstate::build_policy_identity>(28));
   TEST_EQ(explicit_control.build().build_result(),
-          native_fixture::identity<pkgstate::build_result_identity>(26));
+          native_fixture::identity<pkgstate::build_result_identity>(29));
+  TEST_EQ(explicit_control.build().payload_manifest(),
+          native_fixture::identity<pkgstate::payload_manifest_identity>(30));
+  TEST_EQ(explicit_control.build().artifact(),
+          native_fixture::identity<pkgstate::build_artifact_identity>(31));
+  TEST_EQ(explicit_control.build().artifact_content(),
+          native_fixture::identity<pkgstate::artifact_content_identity>(32));
+  TEST_EQ(explicit_control.build().artifact_binding(),
+          native_fixture::identity<pkgstate::artifact_binding_identity>(33));
+  TEST_EQ(explicit_control.build().execution_evidence(),
+          native_fixture::identity<pkgstate::execution_evidence_identity>(34));
+  TEST_EQ(explicit_control.build().artifact_image(),
+          native_fixture::identity<pkgstate::artifact_image_identity>(35));
+  TEST_EQ(explicit_control.build().artifact_inspection(),
+          native_fixture::identity<pkgstate::artifact_inspection_identity>(36));
+
+  pkgstate::package_source_record mismatched_source =
+      native_fixture::source("other", 70);
+  TEST_THROWS(
+      pkgstate::state_error,
+      pkgstate::installed_control::make(
+          mismatched_source,
+          pkgstate::installation_reason::explicit_request(),
+          explicit_control.build()));
 }

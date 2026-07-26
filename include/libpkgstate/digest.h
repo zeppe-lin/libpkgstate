@@ -165,13 +165,13 @@ private:
 PKGSTATE_STATE_DOMAIN(package_source_record_identity,
                       "pkgstate/package-source-record/1");
 PKGSTATE_STATE_DOMAIN(installed_control_identity,
-                      "pkgstate/installed-control/2");
+                      "pkgstate/installed-control/3");
 PKGSTATE_STATE_DOMAIN(installation_receipt_identity,
-                      "pkgstate/installation-receipt/1");
+                      "pkgstate/installation-receipt/2");
 PKGSTATE_STATE_DOMAIN(installed_package_identity,
-                      "pkgstate/installed-package/2");
+                      "pkgstate/installed-package/3");
 PKGSTATE_STATE_DOMAIN(ownership_inventory_identity,
-                      "pkgstate/ownership-inventory/2");
+                      "pkgstate/ownership-inventory/3");
 PKGSTATE_STATE_DOMAIN(managed_target_identity, "pkgstate/managed-target/1");
 PKGSTATE_STATE_DOMAIN(state_store_identity, "pkgstate/state-store/1");
 PKGSTATE_STATE_DOMAIN(root_view_identity, "pkgstate/root-view/1");
@@ -181,22 +181,30 @@ PKGSTATE_STATE_DOMAIN(publication_domain_identity,
 PKGSTATE_STATE_DOMAIN(state_target_binding_identity,
                       "pkgstate/target-binding/1");
 PKGSTATE_STATE_DOMAIN(installed_state_snapshot_identity,
-                      "pkgstate/installed-snapshot/2");
+                      "pkgstate/installed-snapshot/3");
 PKGSTATE_STATE_DOMAIN(state_publication_request_identity,
-                      "pkgstate/publication-request/2");
+                      "pkgstate/publication-request/3");
 PKGSTATE_STATE_DOMAIN(state_publication_receipt_identity,
-                      "pkgstate/publication-receipt/2");
+                      "pkgstate/publication-receipt/3");
 #undef PKGSTATE_STATE_DOMAIN
 
 struct package_release_reference_domain final {};
 struct source_profile_reference_domain final {};
 struct source_recipe_reference_domain final {};
 struct source_snapshot_reference_domain final {};
-struct candidate_control_reference_domain final {};
+struct build_request_reference_domain final {};
+struct source_material_set_reference_domain final {};
 struct build_input_set_reference_domain final {};
+struct environment_policy_reference_domain final {};
+struct build_policy_reference_domain final {};
 struct build_result_reference_domain final {};
-struct artifact_reference_domain final {};
-struct artifact_manifest_reference_domain final {};
+struct payload_manifest_reference_domain final {};
+struct build_artifact_reference_domain final {};
+struct artifact_content_reference_domain final {};
+struct artifact_binding_reference_domain final {};
+struct execution_evidence_reference_domain final {};
+struct artifact_image_reference_domain final {};
+struct artifact_inspection_reference_domain final {};
 struct installed_regular_content_reference_domain final {};
 struct operation_plan_reference_domain final {};
 struct application_evidence_reference_domain final {};
@@ -243,16 +251,32 @@ using source_recipe_identity =
     detail::referenced_digest<detail::source_recipe_reference_domain>;
 using source_snapshot_identity =
     detail::referenced_digest<detail::source_snapshot_reference_domain>;
-using candidate_control_identity =
-    detail::referenced_digest<detail::candidate_control_reference_domain>;
+using build_request_identity =
+    detail::referenced_digest<detail::build_request_reference_domain>;
+using source_material_set_identity =
+    detail::referenced_digest<detail::source_material_set_reference_domain>;
 using build_input_set_identity =
     detail::referenced_digest<detail::build_input_set_reference_domain>;
+using environment_policy_identity =
+    detail::referenced_digest<detail::environment_policy_reference_domain>;
+using build_policy_identity =
+    detail::referenced_digest<detail::build_policy_reference_domain>;
 using build_result_identity =
     detail::referenced_digest<detail::build_result_reference_domain>;
-using artifact_identity =
-    detail::referenced_digest<detail::artifact_reference_domain>;
-using artifact_manifest_identity =
-    detail::referenced_digest<detail::artifact_manifest_reference_domain>;
+using payload_manifest_identity =
+    detail::referenced_digest<detail::payload_manifest_reference_domain>;
+using build_artifact_identity =
+    detail::referenced_digest<detail::build_artifact_reference_domain>;
+using artifact_content_identity =
+    detail::referenced_digest<detail::artifact_content_reference_domain>;
+using artifact_binding_identity =
+    detail::referenced_digest<detail::artifact_binding_reference_domain>;
+using execution_evidence_identity =
+    detail::referenced_digest<detail::execution_evidence_reference_domain>;
+using artifact_image_identity =
+    detail::referenced_digest<detail::artifact_image_reference_domain>;
+using artifact_inspection_identity =
+    detail::referenced_digest<detail::artifact_inspection_reference_domain>;
 using installed_regular_content_identity =
     detail::referenced_digest<
         detail::installed_regular_content_reference_domain>;

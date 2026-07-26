@@ -35,7 +35,7 @@ pkgconf.generate(
   description: 'Projection of native libpkgstate authority into libpkgplan',
   subdirs: '.',
   requires: [
-    'libpkgstate >= 1.0.0',
+    'libpkgstate >= 2.0.0',
     'libpkgplan >= 0.2.0',
   ],
 )

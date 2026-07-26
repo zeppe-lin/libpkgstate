@@ -8,16 +8,16 @@ libpkgstate_apply = library(
   'apply_adapter.cpp',
   cpp_args: ['-D_FILE_OFFSET_BITS=64'],
   include_directories: apply_adapter_inc,
-  dependencies: [libpkgstate_dep, libpkgapply_dep],
+  dependencies: [libpkgstate_dep, libpkgstate_build_dep, libpkgapply_dep],
   install: true,
   version: meson.project_version(),
-  soversion: '1',
+  soversion: '2',
 )
 
 libpkgstate_apply_dep = declare_dependency(
   link_with: libpkgstate_apply,
   include_directories: apply_adapter_inc,
-  dependencies: [libpkgstate_dep, libpkgapply_dep],
+  dependencies: [libpkgstate_dep, libpkgstate_build_dep, libpkgapply_dep],
   compile_args: ['-D_FILE_OFFSET_BITS=64'],
 )
 
@@ -35,7 +35,8 @@ pkgconf.generate(
   description: 'Completed application to installed-state projection adapter',
   subdirs: '.',
   requires: [
-    'libpkgstate >= 1.0.0',
+    'libpkgstate >= 2.0.0',
+    'libpkgstate-build >= 2.0.0',
     'libpkgapply >= 0.1.0',
   ],
 )

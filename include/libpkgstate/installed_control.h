@@ -58,16 +58,37 @@ private:
 
 class build_provenance final {
 public:
-  build_provenance(candidate_control_identity candidate_control,
-                   build_input_set_identity build_inputs,
-                   build_result_identity build_result,
-                   artifact_identity artifact,
-                   artifact_manifest_identity artifact_manifest);
-  [[nodiscard]] const candidate_control_identity& candidate_control() const noexcept;
+  build_provenance(
+      package_source_record_identity source_record,
+      build_request_identity request,
+      source_material_set_identity source_materials,
+      build_input_set_identity build_inputs,
+      environment_policy_identity environment_policy,
+      build_policy_identity build_policy,
+      build_result_identity build_result,
+      payload_manifest_identity payload_manifest,
+      build_artifact_identity artifact,
+      artifact_content_identity artifact_content,
+      artifact_binding_identity artifact_binding,
+      execution_evidence_identity execution_evidence,
+      artifact_image_identity artifact_image,
+      artifact_inspection_identity artifact_inspection);
+
+  [[nodiscard]] const package_source_record_identity& source_record() const noexcept;
+  [[nodiscard]] const build_request_identity& request() const noexcept;
+  [[nodiscard]] const source_material_set_identity& source_materials() const noexcept;
   [[nodiscard]] const build_input_set_identity& build_inputs() const noexcept;
+  [[nodiscard]] const environment_policy_identity& environment_policy() const noexcept;
+  [[nodiscard]] const build_policy_identity& build_policy() const noexcept;
   [[nodiscard]] const build_result_identity& build_result() const noexcept;
-  [[nodiscard]] const artifact_identity& artifact() const noexcept;
-  [[nodiscard]] const artifact_manifest_identity& artifact_manifest() const noexcept;
+  [[nodiscard]] const payload_manifest_identity& payload_manifest() const noexcept;
+  [[nodiscard]] const build_artifact_identity& artifact() const noexcept;
+  [[nodiscard]] const artifact_content_identity& artifact_content() const noexcept;
+  [[nodiscard]] const artifact_binding_identity& artifact_binding() const noexcept;
+  [[nodiscard]] const execution_evidence_identity& execution_evidence() const noexcept;
+  [[nodiscard]] const artifact_image_identity& artifact_image() const noexcept;
+  [[nodiscard]] const artifact_inspection_identity& artifact_inspection() const noexcept;
+
   friend bool operator==(const build_provenance& lhs,
                          const build_provenance& rhs) noexcept;
   friend bool operator!=(const build_provenance& lhs,
@@ -75,11 +96,20 @@ public:
   friend bool operator<(const build_provenance& lhs,
                         const build_provenance& rhs) noexcept;
 private:
-  candidate_control_identity candidate_control_;
+  package_source_record_identity source_record_;
+  build_request_identity request_;
+  source_material_set_identity source_materials_;
   build_input_set_identity build_inputs_;
+  environment_policy_identity environment_policy_;
+  build_policy_identity build_policy_;
   build_result_identity build_result_;
-  artifact_identity artifact_;
-  artifact_manifest_identity artifact_manifest_;
+  payload_manifest_identity payload_manifest_;
+  build_artifact_identity artifact_;
+  artifact_content_identity artifact_content_;
+  artifact_binding_identity artifact_binding_;
+  execution_evidence_identity execution_evidence_;
+  artifact_image_identity artifact_image_;
+  artifact_inspection_identity artifact_inspection_;
 };
 
 class installed_control final {

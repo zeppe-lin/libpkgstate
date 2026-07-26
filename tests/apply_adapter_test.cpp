@@ -25,6 +25,8 @@
 #include <libpkgplan/remove.h>
 #include <libpkgplan/upgrade.h>
 #include <libpkgstate-apply/adapter.h>
+#include <libpkgstate-build/adapter.h>
+#include <libpkgstate-source/adapter.h>
 #include <libpkgstate/installed_control.h>
 #include <libpkgstate/installed_package.h>
 #include <libpkgstate/package_release.h>
@@ -85,36 +87,44 @@ state_target(std::uint8_t seed = 1)
       state_identity<pkgstate::publication_domain_identity>(seed + 4));
 }
 
+pkgsource::source_snapshot
+source_snapshot(const char* version,
+                const char* removal_program = "prepare-new-remove")
+{
+  using namespace pkgsource;
+  return seal_source(
+      source_origin("recipe.yml"), source_syntax::recipe_yaml_v1,
+      recipe_declaration(
+          package_release(package_reference("tool"), version, 1),
+          package_metadata("Tool", std::nullopt, std::nullopt,
+                           {"GPL-3.0-or-later"}),
+          {},
+          program(program_language::posix_shell,
+                  "install -m755 tool \"$PKG/tool\"\n"),
+          {requirement_declaration(
+              requirement_scope::run(),
+              requirement_subject(package_reference("libc")),
+              declaration_provenance(
+                  "recipe.yml", "requirements.run[0]", 10, 3))},
+          {lifecycle_program(
+              lifecycle_action::pre_remove,
+              program(program_language::posix_shell, removal_program))},
+          architecture_requirements(
+              {architecture_reference("x86_64")},
+              {architecture_reference("x86_64")}),
+          declaration_provenance("recipe.yml", "$", 1, 1)),
+      profile_catalog::seal({}));
+}
+
 pkgstate::package_source_record
-state_source(const char* version, std::uint8_t release_seed,
+state_source(const char* version, std::uint8_t,
              const char* removal_program = "prepare-new-remove")
 {
-  pkgstate::package_release release(
-      state_identity<pkgstate::package_release_identity>(release_seed),
-      pkgstate::package_reference("tool"), version, 1);
-  pkgstate::package_requirement runtime(
-      pkgstate::package_reference("libc"),
-      {pkgstate::requirement_origin(
-          pkgstate::declaration_provenance(
-              "recipe.yml", "requirements.run[0]", 10, 3))});
-  return pkgstate::package_source_record::make(
-      std::move(release),
-      pkgstate::package_metadata(
-          "Tool", std::nullopt, std::nullopt, {"GPL-3.0-or-later"}),
-      {std::move(runtime)},
-      {pkgstate::lifecycle_program(
-          pkgstate::lifecycle_action::pre_remove,
-          pkgstate::program(pkgstate::program_language::posix_shell,
-                            removal_program))},
-      {},
-      pkgstate::architecture_binding::make(
-          {pkgstate::architecture_reference("x86_64")},
-          {pkgstate::architecture_reference("x86_64")},
-          pkgstate::architecture_reference("x86_64"),
-          pkgstate::architecture_reference("x86_64")),
-      {},
-      state_identity<pkgstate::source_recipe_identity>(release_seed + 30),
-      state_identity<pkgstate::source_snapshot_identity>(release_seed + 31));
+  const pkgsource::source_snapshot source =
+      source_snapshot(version, removal_program);
+  return pkgstate::source_adapter::project_source(
+      source, pkgsource::architecture_reference("x86_64"),
+      pkgsource::architecture_reference("x86_64"));
 }
 
 pkgstate::installed_package
@@ -123,40 +133,32 @@ state_package(const pkgstate::state_target_binding& target,
               std::vector<pkgstate::owned_entry> manifest)
 {
   const std::uint8_t release_seed = 69;
+  pkgstate::package_source_record source =
+      state_source(version, release_seed, "finish-old-remove");
   pkgstate::installed_control control = pkgstate::installed_control::make(
-      state_source(version, release_seed, "finish-old-remove"),
+      source,
       pkgstate::installation_reason::runtime_dependency(
           pkgstate::package_reference("base-system")),
       pkgstate::build_provenance(
-          state_identity<pkgstate::candidate_control_identity>(91),
+          source.identity(),
+          state_identity<pkgstate::build_request_identity>(90),
+          state_identity<pkgstate::source_material_set_identity>(91),
           state_identity<pkgstate::build_input_set_identity>(92),
-          state_identity<pkgstate::build_result_identity>(93),
-          state_identity<pkgstate::artifact_identity>(94),
-          state_identity<pkgstate::artifact_manifest_identity>(95)));
+          state_identity<pkgstate::environment_policy_identity>(93),
+          state_identity<pkgstate::build_policy_identity>(94),
+          state_identity<pkgstate::build_result_identity>(95),
+          state_identity<pkgstate::payload_manifest_identity>(96),
+          state_identity<pkgstate::build_artifact_identity>(97),
+          state_identity<pkgstate::artifact_content_identity>(98),
+          state_identity<pkgstate::artifact_binding_identity>(99),
+          state_identity<pkgstate::execution_evidence_identity>(100),
+          state_identity<pkgstate::artifact_image_identity>(101),
+          state_identity<pkgstate::artifact_inspection_identity>(102)));
   return pkgstate::installed_package::make(
       pkgstate::installation_receipt::make(
           std::move(control), target, std::move(manifest),
           state_identity<pkgstate::operation_plan_identity>(96),
           state_identity<pkgstate::application_evidence_identity>(97)));
-}
-
-pkgstate::apply_adapter::incoming_installation_authority
-install_authority()
-{
-  return pkgstate::apply_adapter::incoming_installation_authority::install(
-      state_source("1.0", 70),
-      pkgstate::installation_reason::explicit_request(),
-      state_identity<pkgstate::build_input_set_identity>(121),
-      state_identity<pkgstate::build_result_identity>(122));
-}
-
-pkgstate::apply_adapter::incoming_installation_authority
-replacement_authority()
-{
-  return pkgstate::apply_adapter::incoming_installation_authority::replacement(
-      state_source("2.0", 74),
-      state_identity<pkgstate::build_input_set_identity>(123),
-      state_identity<pkgstate::build_result_identity>(124));
 }
 
 pkgstate::installed_object_metadata
@@ -241,6 +243,8 @@ incoming_image(std::uint8_t content)
   entry.uid = 0;
   entry.gid = 0;
   entry.size = 4;
+  entry.mtime = 10;
+  entry.mtime_nanoseconds = 0;
   pkgimage::sha256_digest_bytes content_bytes{};
   content_bytes.fill(content);
   entry.regular_content =
@@ -256,6 +260,67 @@ incoming_image(std::uint8_t content)
       image.size());
   return pkgimage::inspected_package_image(
       std::move(image), std::move(receipt));
+}
+
+std::string
+byte_digest(std::uint8_t byte)
+{
+  constexpr char hex[] = "0123456789abcdef";
+  std::string result;
+  result.reserve(64);
+  for (std::size_t index = 0; index < 32; ++index)
+  {
+    result.push_back(hex[(byte >> 4) & 0x0f]);
+    result.push_back(hex[byte & 0x0f]);
+  }
+  return result;
+}
+
+pkgstate::build_adapter::build_authority
+build_authority(const char* version, std::uint8_t content)
+{
+  const pkgsource::source_snapshot source = source_snapshot(version);
+  const pkgbuild::build_request request = pkgbuild::build_request::seal(
+      source, {}, {}, pkgsource::architecture_reference("x86_64"),
+      pkgsource::architecture_reference("x86_64"),
+      pkgbuild::build_policy::make(
+          pkgbuild::environment_policy::hermetic(1, 0022, 1700000000)));
+  const pkgbuild::payload_manifest payload = pkgbuild::payload_manifest::seal({
+      pkgbuild::payload_entry::regular(
+          pkgbuild::payload_path::parse("tool"), 0755, 0, 0, 4,
+          pkgbuild::payload_time{10, 0},
+          pkgbuild::sha256_digest(byte_digest(content))),
+  });
+  const pkgimage::inspected_package_image image = incoming_image(content);
+  const pkgbuild::sealed_artifact artifact = pkgbuild::sealed_artifact::make(
+      pkgbuild::artifact_encoding::package_tar_v1,
+      pkgbuild::artifact_compression::none, 4,
+      pkgbuild::sha256_digest(
+          byte_digest(static_cast<std::uint8_t>(content + 30))));
+  const pkgbuild::build_result result = pkgbuild::build_result::succeeded(
+      request, payload, artifact,
+      pkgbuild::execution_evidence_identity::from_sha256(
+          byte_digest(static_cast<std::uint8_t>(content + 60))));
+  return pkgstate::build_adapter::project_build(
+      pkgstate::source_adapter::project_source(
+          source, pkgsource::architecture_reference("x86_64"),
+          pkgsource::architecture_reference("x86_64")),
+      result, image);
+}
+
+pkgstate::apply_adapter::incoming_installation_authority
+install_authority()
+{
+  return pkgstate::apply_adapter::incoming_installation_authority::install(
+      build_authority("1.0", 1),
+      pkgstate::installation_reason::explicit_request());
+}
+
+pkgstate::apply_adapter::incoming_installation_authority
+replacement_authority()
+{
+  return pkgstate::apply_adapter::incoming_installation_authority::replacement(
+      build_authority("2.0", 3));
 }
 
 pkgplan::package_policy_snapshot
@@ -285,8 +350,10 @@ installation_plan(const pkgstate::snapshot& expected,
                   const planner_context& context)
 {
   const pkgplan::package_path path = pkgplan::package_path::parse("tool");
+  const pkgstate::package_source_record source = state_source("1.0", 70);
   const pkgplan::package_release release(
-      plan_identity<pkgplan::package_release_identity>(70),
+      translate_identity<pkgplan::package_release_identity>(
+          source.release().identity()),
       "tool", "1.0", "1");
   pkgimage::inspected_package_image image = incoming_image(1);
   const auto archive = image.receipt().archive_digest();
@@ -297,7 +364,7 @@ installation_plan(const pkgstate::snapshot& expected,
           release,
           incoming_control()),
       pkgplan::artifact_package_fact(
-          plan_identity<pkgplan::artifact_identity>(72),
+          translate_identity<pkgplan::artifact_identity>(archive),
           plan_identity<pkgplan::artifact_manifest_identity>(73),
           release),
       archive,
@@ -374,8 +441,10 @@ upgrade_plan(const pkgstate::snapshot& expected,
                  control_override = std::nullopt)
 {
   const pkgplan::package_path path = pkgplan::package_path::parse("tool");
+  const pkgstate::package_source_record source = state_source("2.0", 74);
   const pkgplan::package_release release(
-      plan_identity<pkgplan::package_release_identity>(74),
+      translate_identity<pkgplan::package_release_identity>(
+          source.release().identity()),
       "tool", "2.0", "1");
   pkgimage::inspected_package_image image = incoming_image(3);
   const auto archive = image.receipt().archive_digest();
@@ -387,7 +456,7 @@ upgrade_plan(const pkgstate::snapshot& expected,
           release,
           incoming_control()),
       pkgplan::artifact_package_fact(
-          plan_identity<pkgplan::artifact_identity>(76),
+          translate_identity<pkgplan::artifact_identity>(archive),
           plan_identity<pkgplan::artifact_manifest_identity>(77),
           release),
       archive,
@@ -816,12 +885,10 @@ check_installation()
         "libc");
   CHECK(control.reason().kind() ==
         pkgstate::installation_reason_kind::explicit_request);
-  CHECK(control.build().candidate_control().string() ==
-        fixture.plan.publication().candidate().string());
-  CHECK(control.build().artifact().string() ==
+  const auto authority = install_authority();
+  CHECK(control.build() == authority.build());
+  CHECK(control.build().artifact_content().string() ==
         fixture.plan.publication().artifact().string());
-  CHECK(control.build().artifact_manifest().string() ==
-        fixture.plan.publication().artifact_manifest().string());
   CHECK(installed.receipt().operation_plan().string() ==
         fixture.plan.identity().string());
   CHECK(installed.receipt().application_evidence().string() ==
@@ -919,6 +986,26 @@ void
 check_failures()
 {
   installation_fixture fixture;
+
+  try
+  {
+    static_cast<void>(
+        pkgstate::apply_adapter::project_completed_application(
+            fixture.expected,
+            fixture.projection,
+            pkgapply::package_application_request(fixture.request),
+            fixture.evidence,
+            pkgstate::apply_adapter::incoming_installation_authority::install(
+                build_authority("1.0", 2),
+                pkgstate::installation_reason::explicit_request())));
+    CHECK(false);
+  }
+  catch (const pkgstate::apply_adapter::projection_error& error)
+  {
+    CHECK(error.code() ==
+          pkgstate::apply_adapter::projection_error_code::
+              incoming_authority_mismatch);
+  }
 
   const auto different_control = pkgapply::installation_application_request::make(
       fixture.plan,

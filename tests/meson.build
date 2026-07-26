@@ -60,6 +60,34 @@ if get_option('tests').allowed()
     )
   endif
 
+  if libpkgbuild_dep.found() and libpkgimage_dep.found()
+    build_adapter_test = executable(
+      'build-adapter-test',
+      'build_adapter_test.cpp',
+      dependencies: libpkgstate_build_dep,
+    )
+    test('retain verified libpkgbuild authority', build_adapter_test)
+
+    build_adapter_header_test = executable(
+      'build-adapter-public-header-test',
+      'public_header_test.cpp',
+      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-build/adapter.h"'],
+      dependencies: libpkgstate_build_dep,
+    )
+    test('compile public header libpkgstate-build/adapter.h',
+         build_adapter_header_test)
+
+    test(
+      'verify build adapter pkg-config metadata',
+      sh,
+      args: [
+        join_paths(meson.current_source_dir(),
+                   'build_adapter_metadata_test.sh'),
+        meson.project_build_root(),
+      ],
+    )
+  endif
+
   if libpkgplan_dep.found()
     plan_adapter_test = executable(
       'plan-adapter-test',
