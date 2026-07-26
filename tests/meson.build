@@ -88,6 +88,34 @@ if get_option('tests').allowed()
     )
   endif
 
+  if libpkgapply_dep.found()
+    apply_adapter_test = executable(
+      'apply-adapter-test',
+      'apply_adapter_test.cpp',
+      dependencies: libpkgstate_apply_dep,
+    )
+    test('admit completed application as native state', apply_adapter_test)
+
+    apply_adapter_header_test = executable(
+      'apply-adapter-public-header-test',
+      'public_header_test.cpp',
+      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-apply/adapter.h"'],
+      dependencies: libpkgstate_apply_dep,
+    )
+    test('compile public header libpkgstate-apply/adapter.h',
+         apply_adapter_header_test)
+
+    test(
+      'verify application adapter pkg-config metadata',
+      sh,
+      args: [
+        join_paths(meson.current_source_dir(),
+                   'apply_adapter_metadata_test.sh'),
+        meson.project_build_root(),
+      ],
+    )
+  endif
+
   public_headers = [
     ['libpkgstate', 'libpkgstate/libpkgstate.h'],
     ['error', 'libpkgstate/error.h'],

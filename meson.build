@@ -54,6 +54,18 @@ libpkgplan_dep = dependency(
   ],
 )
 
+libpkgapply_dep = dependency(
+  'libpkgapply',
+  version: '>=0.1.0',
+  required: get_option('application_adapter'),
+  static: want_static,
+  fallback: ['libpkgapply', 'libpkgapply_dep'],
+  default_options: [
+    'default_library=' + library_kind,
+    'link_mode=' + get_option('link_mode'),
+  ],
+)
+
 if get_option('install_tools') and get_option('tools').disabled()
   error('install_tools requires tools to be enabled')
 endif
@@ -64,6 +76,9 @@ if libpkgsource_dep.found()
 endif
 if libpkgplan_dep.found()
   subdir('adapter')
+endif
+if libpkgapply_dep.found()
+  subdir('apply_adapter')
 endif
 subdir('tools')
 subdir('tests')
