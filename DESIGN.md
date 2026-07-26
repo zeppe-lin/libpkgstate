@@ -898,10 +898,12 @@ representations may be wire-compatible without sharing planner-owned C++ types.
 The dependency direction is:
 
 ```text
-libpkgstate      libpkgplan
-      \            /
-       \          /
-        adapter or pkgman
+libpkgstate      libpkgplan      libpkgapply
+      \            /                 /
+       \          /                 /
+        libpkgstate-plan   libpkgstate-apply
+                 \           /
+                  orchestrator
 ```
 
 The optional `libpkgstate-plan` adapter depends on both libraries while the
@@ -933,10 +935,50 @@ with object kind.  The adapter therefore does not invent partial object metadata
 Ownership claims carry no `recorded_object`; the copied ownership identity still
 names the exact richer durable state relation.
 
-A future application adapter may translate completed application evidence into
-a state-publication request.  It does not grant `libpkgstate` authority over
-application semantics, and it does not grant the application layer authority
-to assign canonical installed identities.
+The optional `libpkgstate-apply` adapter is the destination-owned translation
+from completed physical application authority into canonical installed-state
+publication intent.  The core state library remains independent of
+`libpkgapply`.
+
+One projection consumes all four exact authorities required at the seam:
+
+* the canonical `snapshot` expected by state publication;
+* the complete `lease_bound_state_projection` admitted under the application
+  lease;
+* the accepted operation-specific `package_application_request`; and
+* the matching `completed_application_evidence`.
+
+The adapter verifies that request, operation kind, plan, target, execution
+control, and lease-bound state-projection identities match exactly.  It then
+checks that the application projection names the canonical expected snapshot
+and ownership inventory, is complete, and reports the exact state owners for
+every operated path.  The application target's managed-target and root-view
+references must match the durable target binding of the canonical snapshot.
+These checks establish correspondence; they do not make state authoritative for
+application execution or make application authoritative for state identity.
+
+For installation and upgrade, the planner's publication intent remains the
+authority for the resulting release, selected incoming control, artifact
+provenance, and complete ownership manifest.  Completed application evidence
+must contain one publication-eligible, present final observation for every
+owned path and no additional incoming ownership.  Object kind determines only
+the durable directory-versus-non-directory ownership class; other completed
+filesystem metadata remains application evidence and is not copied into state.
+
+The adapter constructs a new state-owned `package_release`,
+`installed_control`, and `installed_package`.  Installed control records the
+incoming candidate-control, artifact, artifact-manifest, and completed-
+application-evidence identities as external provenance.  State recomputes all
+canonical release, control, package, delta, and request identities; planner or
+application identities are never relabelled as state-computed identities.
+Upgrade and removal additionally require the exact old installed package and
+control named by the plan to exist in the expected canonical snapshot.
+
+The result is one `state_publication_request` containing exactly one install,
+replace, or remove delta.  Projection performs no store I/O and never calls
+`canonical_store::compare_and_publish()`.  Failed or partial application
+receipts are not accepted; multi-package transaction evidence and publication
+remain orchestrator-owned later composition.
 
 Reference frontend
 ------------------
