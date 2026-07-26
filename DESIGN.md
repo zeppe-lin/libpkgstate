@@ -23,13 +23,13 @@ state-publication request
 state-publication receipt
 ```
 
-The 0.5.0 implementation exposes canonical package releases, immutable
+The 0.6.0 implementation exposes canonical package releases, immutable
 installed control, durable target-state bindings, complete canonical installed
 packages, identified immutable snapshots, publication requests and receipts,
 the immutable-generation backend, explicit legacy completeness and import,
-the optional planner adapter, and non-mutating state diagnostics. Canonical
-package records, ownership inventories, snapshots, requests, receipts, and
-legacy import records compute their own state-domain identities.
+the optional planner and application adapters, and non-mutating state
+diagnostics. Canonical package records, ownership inventories, snapshots,
+requests, receipts, and legacy import records compute their own state-domain identities.
 
 The historical `/var/lib/pkg/db` backend uses explicitly separate
 `legacy_installed_package` and `legacy_snapshot` values.  Those compatibility
@@ -1122,7 +1122,7 @@ The following designs violate the authority model:
 Implementation status
 ---------------------
 
-The 0.5.0 authority implementation retains the dependency-ordered core:
+The 0.6.0 authority implementation retains the dependency-ordered core:
 
 1. identity domains and canonical records are frozen at representation version
    `v1:sha256`;

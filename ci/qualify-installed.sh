@@ -60,18 +60,18 @@ unset PKG_CONFIG_SYSROOT_DIR
 runtime_path=$install_prefix/lib:$dependency_prefix/lib
 
 version=$(pkg-config --modversion libpkgstate)
-[ "$version" = 0.5.0 ] || {
-  echo "installed libpkgstate version is '$version', expected '0.5.0'" >&2
+[ "$version" = 0.6.0 ] || {
+  echo "installed libpkgstate version is '$version', expected '0.6.0'" >&2
   exit 1
 }
 plan_adapter_version=$(pkg-config --modversion libpkgstate-plan)
-[ "$plan_adapter_version" = 0.5.0 ] || {
-  echo "installed planner adapter version is '$plan_adapter_version', expected '0.5.0'" >&2
+[ "$plan_adapter_version" = 0.6.0 ] || {
+  echo "installed planner adapter version is '$plan_adapter_version', expected '0.6.0'" >&2
   exit 1
 }
 apply_adapter_version=$(pkg-config --modversion libpkgstate-apply)
-[ "$apply_adapter_version" = 0.5.0 ] || {
-  echo "installed application adapter version is '$apply_adapter_version', expected '0.5.0'" >&2
+[ "$apply_adapter_version" = 0.6.0 ] || {
+  echo "installed application adapter version is '$apply_adapter_version', expected '0.6.0'" >&2
   exit 1
 }
 
@@ -82,7 +82,7 @@ if {
   echo 'core libpkgstate metadata is contaminated by image, planner, or application dependencies' >&2
   exit 1
 fi
-pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgstate = 0.5.0' >/dev/null || {
+pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgstate = 0.6.0' >/dev/null || {
   echo 'adapter metadata omits exact libpkgstate dependency' >&2
   exit 1
 }
@@ -90,7 +90,7 @@ pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgplan >= 0.2.0' >/d
   echo 'adapter metadata omits libpkgplan dependency floor' >&2
   exit 1
 }
-pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate = 0.5.0' >/dev/null || {
+pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate = 0.6.0' >/dev/null || {
   echo 'application adapter metadata omits exact libpkgstate dependency' >&2
   exit 1
 }

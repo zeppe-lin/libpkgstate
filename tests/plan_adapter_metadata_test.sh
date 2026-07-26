@@ -32,7 +32,7 @@ test "$name" = libpkgstate-plan ||
 
 requires=$(sed -n 's/^Requires:[[:space:]]*//p' "$metadata" | tr '\n' ',')
 printf '%s\n' "$requires" |
-  grep -Eq '(^|,)[[:space:]]*libpkgstate[[:space:]]*=[[:space:]]*0\.5\.0([[:space:]]*,|$)' ||
+  grep -Eq '(^|,)[[:space:]]*libpkgstate[[:space:]]*=[[:space:]]*0\.6\.0([[:space:]]*,|$)' ||
   fail 'pkg-config metadata omits the exact libpkgstate dependency'
 printf '%s\n' "$requires" |
   grep -Eq '(^|,)[[:space:]]*libpkgplan[[:space:]]*>=[[:space:]]*0\.2\.0([[:space:]]*,|$)' ||

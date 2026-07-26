@@ -11,17 +11,20 @@ fail()
   exit 1
 }
 
-grep -F "version: '0.5.0'" "$root/meson.build" >/dev/null ||
-  fail 'Meson project version is not 0.5.0'
+grep -F "version: '0.6.0'" "$root/meson.build" >/dev/null ||
+  fail 'Meson project version is not 0.6.0'
 
-grep -F 'PROJECT_NUMBER         = 0.5.0' "$root/Doxyfile" >/dev/null ||
-  fail 'Doxygen project version is not 0.5.0'
+grep -F 'PROJECT_NUMBER         = 0.6.0' "$root/Doxyfile" >/dev/null ||
+  fail 'Doxygen project version is not 0.6.0'
 
 grep -F "soversion: '1'" "$root/src/meson.build" >/dev/null ||
   fail 'core libpkgstate soversion is not 1'
 
 grep -F "soversion: '1'" "$root/adapter/meson.build" >/dev/null ||
   fail 'planner adapter soversion is not 1'
+
+grep -F "soversion: '0'" "$root/apply_adapter/meson.build" >/dev/null ||
+  fail 'application adapter soversion is not 0'
 
 grep -F "'libcrypto'" "$root/meson.build" >/dev/null ||
   fail 'Meson metadata omits the canonical digest backend'
@@ -43,8 +46,15 @@ grep -F "required: get_option('planner_adapter')" \
   "$root/meson.build" >/dev/null ||
   fail 'libpkgplan is not scoped to the optional adapter feature'
 
-if grep -F 'libpkgimage' "$root/src/meson.build" >/dev/null; then
-  fail 'core library metadata still references libpkgimage'
+grep -F "version: '>=0.1.0'" "$root/meson.build" >/dev/null ||
+  fail 'Meson dependency floor does not require libpkgapply 0.1.0'
+
+grep -F "required: get_option('application_adapter')" \
+  "$root/meson.build" >/dev/null ||
+  fail 'libpkgapply is not scoped to the optional application adapter'
+
+if grep -E 'libpkg(image|plan|apply)' "$root/src/meson.build" >/dev/null; then
+  fail 'core library metadata references an optional composition dependency'
 fi
 
 grep -F 'dependencies: [libpkgstate_dep, libpkgimage_dep]' \
@@ -55,8 +65,20 @@ grep -F "'libpkgstate = ' + meson.project_version()" \
   "$root/adapter/meson.build" >/dev/null ||
   fail 'planner adapter metadata omits exact core version'
 
-grep -F '0.5.0' "$root/HISTORY.md" >/dev/null ||
-  fail 'history omits release 0.5.0'
+grep -F "'libpkgstate = ' + meson.project_version()" \
+  "$root/apply_adapter/meson.build" >/dev/null ||
+  fail 'application adapter metadata omits exact core version'
+
+grep -F "'libpkgapply >= 0.1.0'" \
+  "$root/apply_adapter/meson.build" >/dev/null ||
+  fail 'application adapter metadata omits libpkgapply floor'
+
+grep -F '0.6.0' "$root/HISTORY.md" >/dev/null ||
+  fail 'history omits release 0.6.0'
+
+grep -F 'application adapter begins at soversion 0' \
+  "$root/HISTORY.md" >/dev/null ||
+  fail 'history omits the application adapter ABI decision'
 
 grep -F 'core soversion advances from 0 to 1' \
   "$root/HISTORY.md" >/dev/null ||

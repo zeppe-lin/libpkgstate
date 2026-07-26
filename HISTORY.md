@@ -66,6 +66,34 @@ changing the installed-state library boundary:
   transition gate; and
 * the public libpkgstate ABI and soversion remain unchanged.
 
+0.6.0
+-----
+
+The sixth release adds the optional `libpkgstate-apply` composition adapter:
+
+* one exact canonical expected snapshot, lease-bound application projection,
+  accepted application request, and completed application-evidence value form
+  the complete projection input;
+* request, execution-control, operation, plan, target, projection, expected
+  snapshot, ownership, and old-package authorities are cross-checked before any
+  state value is constructed;
+* installation and replacement produce fresh state-owned releases, installed
+  controls, installed packages, package deltas, and publication requests;
+* installed control retains candidate-control, artifact, artifact-manifest, and
+  completed-application-evidence provenance;
+* resulting ownership is admitted only from the planned manifest and known,
+  publication-eligible completed object truth;
+* directory classification comes from the completed physical object kind;
+* removal names the exact prior installed package and constructs no fictional
+  resulting package; and
+* the adapter performs no store I/O, locking, publication, recovery, or
+  transaction composition.
+
+The core `libpkgstate` ABI remains at soversion 1. The planner adapter remains at
+soversion 1. The application adapter begins at soversion 0 as its first public
+ABI. Canonical digest representation, generation storage format version 1, and
+the historical compatibility database grammar remain unchanged.
+
 0.5.0
 -----
 
