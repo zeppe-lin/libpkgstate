@@ -16,7 +16,7 @@ libpkgstate_apply = library(
   ],
   install: true,
   version: meson.project_version(),
-  soversion: '2',
+  soversion: '3',
 )
 
 libpkgstate_apply_dep = declare_dependency(

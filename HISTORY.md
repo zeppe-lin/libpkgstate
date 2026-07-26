@@ -1,5 +1,38 @@
 # History
 
+## 2.1.0
+
+Native application-admission release. Version 2.1.0 keeps the generation-v3
+installed-state representation and core ABI while making the destination-owned
+application adapter consume request-bound native build authority.
+
+Authority transition:
+
+- require `libpkgapply 1.0.0` installation and upgrade requests, whose admitted
+  incoming package retains the complete successful build result, independent
+  image inspection, and source-derived planner candidate control;
+- remove the caller-supplied `incoming_installation_authority` wrapper from the
+  public state application adapter;
+- derive `package_source_record` and `build_authority` only from the exact
+  incoming package retained by the completed application request;
+- accept only an initial typed installation reason for installation, preserve
+  the prior installed reason for upgrade, and accept no incoming authority for
+  removal; and
+- verify that accepted plan publication and completed application evidence bind
+  the same artifact and request universe before constructing installed state.
+
+ABI and representation decisions:
+
+- project version becomes 2.1.0;
+- core `libpkgstate` remains at soversion 3;
+- source, build, and planner adapter SONAMEs remain unchanged;
+- `libpkgstate-apply` advances to soversion 3; and
+- canonical storage remains `libpkgstate-generation-v3`.
+
+Generation-v3 storage does not change in this release. No state-store migration
+is required between 2.0.0 and 2.1.0, but application-adapter consumers must be
+rebuilt for the new request-bound API.
+
 ## 2.0.0
 
 Native build-authority release. Version 2.0.0 is intentionally incompatible

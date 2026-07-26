@@ -37,6 +37,8 @@ for contract in \
   'The YAML document is not authority at this boundary.' \
   'Build authority is admitted only after exact artifact inspection.' \
   'Application admission never reconstructs build provenance from planner facts.' \
+  'It accepts no second caller-supplied build authority.' \
+  'Generation-v3 storage does not change in this release.' \
   'Native publication begins with a fresh state target.'
 do
   printf '%s\n' "$corpus" | grep -F "$contract" >/dev/null ||

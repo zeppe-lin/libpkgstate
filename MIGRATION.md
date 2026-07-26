@@ -30,3 +30,17 @@ the 2.0.0 model.
 The importer must never split opaque old version lines by guesswork, substitute
 current recipes for historical source authority, infer package meaning from
 archive filenames, or counterfeit absent build/application evidence.
+## 2.0.0 to 2.1.0 application API
+
+Generation-v3 storage and core installed-state identities are unchanged. No
+state-store migration is required.
+
+The `libpkgstate-apply` ABI is incompatible. Consumers must stop constructing
+`incoming_installation_authority` and must pass the exact typed libpkgapply
+installation, upgrade, or removal request named by completed evidence.
+Installation additionally supplies only its typed installation reason. Upgrade
+preserves the reason already stored for the replaced package.
+
+There is no compatibility overload accepting a separately projected build
+authority. Rebuild consumers against `libpkgstate-apply` soversion 3 and
+`libpkgapply` 1.0.0.

@@ -20,15 +20,34 @@ authority independently inspects those bytes. The state build adapter admits the
 pair only when source projection, artifact content, inspection receipt, and every
 normalized payload field agree exactly.
 
-Application authority supplies completed target effects. The state application
-adapter accepts only the unforgeable build authority produced by the build
-adapter, validates the accepted plan and exact artifact-content identity, and
-creates a complete installation receipt. Application admission never
-reconstructs build provenance from planner facts.
+Application authority supplies one operation-specific libpkgapply 1.0 request
+and completed target effects. Installation and upgrade requests retain the
+complete successful build result and independent image inspection admitted by
+libpkgapply. The state application adapter projects source and build authority
+from that exact request, validates the accepted plan and artifact-content
+identity, and creates a complete installation receipt. It accepts no second
+caller-supplied build authority. Application admission never reconstructs build
+provenance from planner facts.
 
 State authority begins at durable admission. It owns installed control, receipt,
 package, ownership, snapshot, publication request, and publication receipt
 identities.
+
+
+## Application admission
+
+The destination-owned adapter has three typed entry points. Installation takes
+an installation request, completed evidence, and one initial installation
+reason. Upgrade takes an upgrade request and completed evidence, retaining the
+reason already present in canonical state. Removal takes a removal request and
+completed evidence and has no incoming package.
+
+For install and upgrade, the adapter reprojects the build request's sealed
+source through `libpkgstate-source`, then admits the exact retained build result
+and image through `libpkgstate-build`. The resulting source record, build
+provenance, planner publication, application request, completed evidence, and
+expected state must all name one authority universe. A caller cannot substitute
+a valid build from another request or artifact after filesystem application.
 
 ## Complete native records
 

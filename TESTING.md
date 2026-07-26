@@ -11,7 +11,8 @@ The repository test suite covers:
 - publication request and receipt validation;
 - stale-safe immutable generation publication and recovery;
 - source, build, planner, and application adapter contracts against their exact
-  public APIs;
+  public APIs, including request-bound source/build derivation and rejection of
+  foreign incoming artifacts;
 - public header independence;
 - generated pkg-config metadata;
 - read-only diagnostic behavior;

@@ -2,7 +2,7 @@ PKGSTATE_APPLY_ADAPTER(3)
 
 # NAME
 
-pkgstate_apply_adapter - admit completed application as native installed state
+pkgstate_apply_adapter - admit completed native application as installed state
 
 # SYNOPSIS
 
@@ -10,36 +10,44 @@ pkgstate_apply_adapter - admit completed application as native installed state
 
 # DESCRIPTION
 
-*project_completed_application()* validates a completed libpkgapply operation
-against the accepted request, plan, target context, lease-bound state projection,
-expected native snapshot, ownership universe, and completed path consequences.
-It returns an immutable *state_publication_request* and performs no store I/O.
+*project_completed_application()* validates one completed *libpkgapply* 1.0
+operation against the exact operation-specific request, accepted plan, target
+context, lease-bound state projection, expected native snapshot, ownership
+universe, and completed path consequences. It returns an immutable
+*state_publication_request* and performs no store I/O.
 
-Install and upgrade additionally require *incoming_installation_authority*.
-That value supplies an immutable *build_authority* admitted by
-*libpkgstate-build* and, for initial installation, one installation reason.
-The adapter verifies that the accepted planner operation names the exact admitted
-artifact-content identity. Upgrade preserves the prior installed reason. Removal
-rejects incoming authority.
+# INCOMING AUTHORITY
 
-Application admission never reconstructs build provenance from planner facts.
+Installation and upgrade requests retain an *incoming_package_authority* that
+contains the complete successful *libpkgbuild* result, independent
+*libpkgimage* inspection, and source-derived planner candidate control admitted
+before mutation.
+
+The adapter projects the build request's sealed source through
+*libpkgstate-source* and admits the retained build result and image through
+*libpkgstate-build*. It accepts no separate caller-supplied source or build
+authority and never reconstructs build provenance from planner facts.
+
+Installation additionally takes one typed initial installation reason. Upgrade
+preserves the prior installed reason. Removal accepts no incoming package or
+installation reason.
 
 # OWNERSHIP
 
-Complete object metadata comes from completed application evidence. Active origin
-comes from the accepted active outcome. Rejected-object identity and side come
-from durable completed rejected-object evidence. Publication fails when an owned
-path lacks complete publication-eligible object truth or when application evidence
-grants unplanned ownership.
+Complete object metadata comes from completed application evidence. Active
+origin comes from the accepted active outcome. Rejected-object identity and
+side come from durable completed rejected-object evidence. Publication fails
+when an owned path lacks complete publication-eligible object truth or when
+application evidence grants unplanned ownership.
 
 # IDENTITY
 
 Planner and application identities are translated into typed state references.
-Source and build authority arrive through the already admitted build authority. State-owned installed control, receipt, package, snapshot, request,
-and receipt identities are computed by libpkgstate.
+State-owned installed control, receipt, package, snapshot, request, and
+publication identities are computed by *libpkgstate*.
 
 # SEE ALSO
 
-*libpkgapply*(3), *pkgstate_build_adapter*(3),
-*pkgstate_installation_receipt*(3),
+*libpkgapply*(3), *pkgstate_source_adapter*(3),
+*pkgstate_build_adapter*(3), *pkgstate_installation_receipt*(3),
 *pkgstate_publication*(3)
