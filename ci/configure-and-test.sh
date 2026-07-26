@@ -25,6 +25,7 @@ script_dir=$(CDPATH= cd "$(dirname "$0")" && pwd)
 source_dir=$(CDPATH= cd "$script_dir/.." && pwd)
 image_source=${LIBPKGIMAGE_SOURCE:-$source_dir/subprojects/libpkgimage}
 plan_source=${LIBPKGPLAN_SOURCE:-$source_dir/subprojects/libpkgplan}
+apply_source=${LIBPKGAPPLY_SOURCE:-$source_dir/subprojects/libpkgapply}
 
 [ -f "$image_source/meson.build" ] || {
   echo "libpkgimage source is absent: $image_source" >&2
@@ -32,6 +33,10 @@ plan_source=${LIBPKGPLAN_SOURCE:-$source_dir/subprojects/libpkgplan}
 }
 [ -f "$plan_source/meson.build" ] || {
   echo "libpkgplan source is absent: $plan_source" >&2
+  exit 1
+}
+[ -f "$apply_source/meson.build" ] || {
+  echo "libpkgapply source is absent: $apply_source" >&2
   exit 1
 }
 
@@ -44,6 +49,7 @@ dependency_prefix=$build_path/dependencies
 install_prefix=$build_path/install
 image_build=$build_path/libpkgimage
 plan_build=$build_path/libpkgplan
+apply_build=$build_path/libpkgapply
 
 rm -rf "$dependency_prefix" "$install_prefix"
 mkdir -p "$build_path"
@@ -87,6 +93,7 @@ unset PKG_CONFIG_SYSROOT_DIR
 export LD_LIBRARY_PATH=$dependency_prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 configure_dependency "$plan_source" "$plan_build"
+configure_dependency "$apply_source" "$apply_build"
 
 set -- \
   --wrap-mode=nofallback \
@@ -99,6 +106,7 @@ set -- \
   -Dtools=enabled \
   -Dinstall_tools=true \
   -Dplanner_adapter=enabled \
+  -Dapplication_adapter=enabled \
   -Dwerror=true \
   "$@"
 

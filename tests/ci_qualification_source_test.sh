@@ -19,7 +19,8 @@ for file in \
   "$source_root/ci/qualify-installed.sh" \
   "$source_root/ci/lint-manpages.sh" \
   "$source_root/ci/installed-core-consumer.cpp" \
-  "$source_root/ci/installed-plan-consumer.cpp"
+  "$source_root/ci/installed-plan-consumer.cpp" \
+  "$source_root/ci/installed-apply-consumer.cpp"
 do
   test -s "$file" || fail "missing or empty ${file#"$source_root"/}"
 done
@@ -30,7 +31,8 @@ done
 
 for pin in \
   e1f6dfd8cc4bfeb2f8da44345d8ec6368281c6e0 \
-  57a10b166450dd0396d4d461d1d38352073a5a1e
+  57a10b166450dd0396d4d461d1d38352073a5a1e \
+  05c5cf0ca752b57f668a1c59bb1c7e0a84ff3439
 do
   grep -F "$pin" "$workflow" >/dev/null ||
     fail "workflow omits dependency pin $pin"
@@ -53,6 +55,7 @@ done
 for contract in \
   '--wrap-mode=nofallback' \
   '-Dplanner_adapter=enabled' \
+  '-Dapplication_adapter=enabled' \
   '-Dtools=enabled' \
   '-Dinstall_tools=true' \
   '-Dwerror=true'
@@ -68,3 +71,5 @@ grep -F 'pkgstate-check' "$source_root/ci/qualify-installed.sh" >/dev/null ||
   fail 'installed qualification omits diagnostic tool'
 grep -F 'pkgstate_plan_adapter.3' "$source_root/ci/lint-manpages.sh" >/dev/null ||
   fail 'manual qualification omits planner adapter page'
+grep -F 'pkgstate_apply_adapter.3' "$source_root/ci/lint-manpages.sh" >/dev/null ||
+  fail 'manual qualification omits application adapter page'

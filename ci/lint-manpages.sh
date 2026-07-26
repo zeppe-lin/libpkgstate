@@ -19,6 +19,7 @@ pkgstate_canonical_generation_store.3
 pkgstate_legacy_compatibility.3
 pkgstate_legacy_import.3
 pkgstate_plan_adapter.3
+pkgstate_apply_adapter.3
 pkgstate_legacy_text_store.3
 pkgstate-db.5
 pkgstate-generation.5

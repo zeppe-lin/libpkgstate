@@ -64,17 +64,22 @@ version=$(pkg-config --modversion libpkgstate)
   echo "installed libpkgstate version is '$version', expected '0.5.0'" >&2
   exit 1
 }
-adapter_version=$(pkg-config --modversion libpkgstate-plan)
-[ "$adapter_version" = 0.5.0 ] || {
-  echo "installed adapter version is '$adapter_version', expected '0.5.0'" >&2
+plan_adapter_version=$(pkg-config --modversion libpkgstate-plan)
+[ "$plan_adapter_version" = 0.5.0 ] || {
+  echo "installed planner adapter version is '$plan_adapter_version', expected '0.5.0'" >&2
+  exit 1
+}
+apply_adapter_version=$(pkg-config --modversion libpkgstate-apply)
+[ "$apply_adapter_version" = 0.5.0 ] || {
+  echo "installed application adapter version is '$apply_adapter_version', expected '0.5.0'" >&2
   exit 1
 }
 
 if {
   pkg-config --print-requires libpkgstate
   pkg-config --print-requires-private libpkgstate
-} | grep -E '(^|[[:space:]])libpkg(image|plan)([[:space:]]|$)' >/dev/null; then
-  echo 'core libpkgstate metadata is contaminated by image or planner dependencies' >&2
+} | grep -E '(^|[[:space:]])libpkg(image|plan|apply)([[:space:]]|$)' >/dev/null; then
+  echo 'core libpkgstate metadata is contaminated by image, planner, or application dependencies' >&2
   exit 1
 fi
 pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgstate = 0.5.0' >/dev/null || {
@@ -85,19 +90,30 @@ pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgplan >= 0.2.0' >/d
   echo 'adapter metadata omits libpkgplan dependency floor' >&2
   exit 1
 }
+pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate = 0.5.0' >/dev/null || {
+  echo 'application adapter metadata omits exact libpkgstate dependency' >&2
+  exit 1
+}
+pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgapply >= 0.1.0' >/dev/null || {
+  echo 'application adapter metadata omits libpkgapply dependency floor' >&2
+  exit 1
+}
 
 cxx=${CXX:-c++}
 core_consumer=$temporary/core-consumer
 plan_consumer=$temporary/plan-consumer
+apply_consumer=$temporary/apply-consumer
 
 case $link_mode in
   shared)
     core_flags=$(pkg-config --cflags --libs libpkgstate)
     plan_flags=$(pkg-config --cflags --libs libpkgstate-plan)
+    apply_flags=$(pkg-config --cflags --libs libpkgstate-apply)
     ;;
   static)
     core_flags=$(pkg-config --static --cflags --libs libpkgstate)
     plan_flags=$(pkg-config --static --cflags --libs libpkgstate-plan)
+    apply_flags=$(pkg-config --static --cflags --libs libpkgstate-apply)
     ;;
 esac
 
@@ -107,6 +123,9 @@ esac
 # shellcheck disable=SC2086
 "$cxx" -std=c++17 -Wall -Wextra -Wpedantic -Werror \
   "$script_dir/installed-plan-consumer.cpp" $plan_flags -o "$plan_consumer"
+# shellcheck disable=SC2086
+"$cxx" -std=c++17 -Wall -Wextra -Wpedantic -Werror \
+  "$script_dir/installed-apply-consumer.cpp" $apply_flags -o "$apply_consumer"
 
 for header in "$install_prefix"/include/libpkgstate/*.h; do
   unit=$temporary/$(basename "$header").cpp
@@ -122,11 +141,19 @@ printf '#include <libpkgstate-plan/adapter.h>\n' >"$unit"
 "$cxx" -std=c++17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
   $(pkg-config --cflags libpkgstate-plan) "$unit"
 
+unit=$temporary/apply-adapter.cpp
+printf '#include <libpkgstate-apply/adapter.h>\n' >"$unit"
+# shellcheck disable=SC2046
+"$cxx" -std=c++17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
+  $(pkg-config --cflags libpkgstate-apply) "$unit"
+
 canonical_store=$temporary/canonical
 LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   "$core_consumer" "$canonical_store"
 LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   "$plan_consumer"
+LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
+  "$apply_consumer"
 
 identity()
 {
@@ -168,10 +195,10 @@ grep -F 'mode=legacy' "$temporary/legacy-report" >/dev/null
 grep -F 'packages=1' "$temporary/legacy-report" >/dev/null
 LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   "$install_prefix/bin/pkginfo" --version |
-  grep -E '^pkginfo \(libpkgstate\) 0\.4\.0$' >/dev/null
+  grep -E '^pkginfo \(libpkgstate\) 0\.5\.0$' >/dev/null
 LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   "$install_prefix/bin/pkgstate-check" --version |
-  grep -E '^pkgstate-check \(libpkgstate\) 0\.4\.0$' >/dev/null
+  grep -E '^pkgstate-check \(libpkgstate\) 0\.5\.0$' >/dev/null
 
 if [ -s "$build_dir/man/libpkgstate.3" ]; then
   for page in \
@@ -180,6 +207,7 @@ if [ -s "$build_dir/man/libpkgstate.3" ]; then
     man3/libpkgstate.3 \
     man3/pkgstate_model.3 \
     man3/pkgstate_publication.3 \
+    man3/pkgstate_apply_adapter.3 \
     man7/pkgstate_authority.7
   do
     [ -s "$install_prefix/share/man/$page" ] || {
@@ -193,14 +221,20 @@ case $link_mode in
   shared)
     core_library=$(find "$install_prefix/lib" -maxdepth 1 -type f \
       -name 'libpkgstate.so.*' -print | sort | head -n 1)
-    adapter_library=$(find "$install_prefix/lib" -maxdepth 1 -type f \
+    plan_adapter_library=$(find "$install_prefix/lib" -maxdepth 1 -type f \
       -name 'libpkgstate-plan.so.*' -print | sort | head -n 1)
+    apply_adapter_library=$(find "$install_prefix/lib" -maxdepth 1 -type f \
+      -name 'libpkgstate-apply.so.*' -print | sort | head -n 1)
     [ -n "$core_library" ] || {
       echo 'installed shared libpkgstate library is absent' >&2
       exit 1
     }
-    [ -n "$adapter_library" ] || {
+    [ -n "$plan_adapter_library" ] || {
       echo 'installed shared planner adapter library is absent' >&2
+      exit 1
+    }
+    [ -n "$apply_adapter_library" ] || {
+      echo 'installed shared application adapter library is absent' >&2
       exit 1
     }
     readelf -d "$core_library" |
@@ -208,25 +242,38 @@ case $link_mode in
       echo 'shared core SONAME is not libpkgstate.so.1' >&2
       exit 1
     }
-    readelf -d "$adapter_library" |
+    readelf -d "$plan_adapter_library" |
       grep -E 'SONAME.*\[libpkgstate-plan\.so\.1\]' >/dev/null || {
-      echo 'shared adapter SONAME is not libpkgstate-plan.so.1' >&2
+      echo 'shared planner adapter SONAME is not libpkgstate-plan.so.1' >&2
+      exit 1
+    }
+    readelf -d "$apply_adapter_library" |
+      grep -E 'SONAME.*\[libpkgstate-apply\.so\.0\]' >/dev/null || {
+      echo 'shared application adapter SONAME is not libpkgstate-apply.so.0' >&2
       exit 1
     }
     readelf -d "$core_library" | grep -q 'libcrypto\.so\.' || {
       echo 'shared libpkgstate does not record libcrypto' >&2
       exit 1
     }
-    if readelf -d "$core_library" | grep -E 'libpkg(image|plan)\.so\.' >/dev/null; then
-      echo 'shared libpkgstate is contaminated by image or planner linkage' >&2
+    if readelf -d "$core_library" | grep -E 'libpkg(image|plan|apply)\.so\.' >/dev/null; then
+      echo 'shared libpkgstate is contaminated by image, planner, or application linkage' >&2
       exit 1
     fi
-    readelf -d "$adapter_library" | grep -q 'libpkgstate\.so\.' || {
-      echo 'shared adapter does not record libpkgstate' >&2
+    readelf -d "$plan_adapter_library" | grep -q 'libpkgstate\.so\.' || {
+      echo 'shared planner adapter does not record libpkgstate' >&2
       exit 1
     }
-    readelf -d "$adapter_library" | grep -q 'libpkgplan\.so\.' || {
-      echo 'shared adapter does not record libpkgplan' >&2
+    readelf -d "$plan_adapter_library" | grep -q 'libpkgplan\.so\.' || {
+      echo 'shared planner adapter does not record libpkgplan' >&2
+      exit 1
+    }
+    readelf -d "$apply_adapter_library" | grep -q 'libpkgstate\.so\.' || {
+      echo 'shared application adapter does not record libpkgstate' >&2
+      exit 1
+    }
+    readelf -d "$apply_adapter_library" | grep -q 'libpkgapply\.so\.' || {
+      echo 'shared application adapter does not record libpkgapply' >&2
       exit 1
     }
     ;;
@@ -239,7 +286,12 @@ case $link_mode in
       echo 'installed static planner adapter archive is absent' >&2
       exit 1
     }
+    [ -f "$install_prefix/lib/libpkgstate-apply.a" ] || {
+      echo 'installed static application adapter archive is absent' >&2
+      exit 1
+    }
     pkg-config --static --libs libpkgstate >/dev/null
     pkg-config --static --libs libpkgstate-plan >/dev/null
+    pkg-config --static --libs libpkgstate-apply >/dev/null
     ;;
 esac

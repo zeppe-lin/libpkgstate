@@ -65,6 +65,13 @@ jobs:
           ref: 57a10b166450dd0396d4d461d1d38352073a5a1e
           path: subprojects/libpkgplan
 
+      - name: Check out libpkgapply 0.1.0
+        uses: actions/checkout@v4
+        with:
+          repository: zeppe-lin/libpkgapply
+          ref: 05c5cf0ca752b57f668a1c59bb1c7e0a84ff3439
+          path: subprojects/libpkgapply
+
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -134,6 +141,13 @@ jobs:
           repository: zeppe-lin/libpkgplan
           ref: 57a10b166450dd0396d4d461d1d38352073a5a1e
           path: subprojects/libpkgplan
+
+      - name: Check out libpkgapply 0.1.0
+        uses: actions/checkout@v4
+        with:
+          repository: zeppe-lin/libpkgapply
+          ref: 05c5cf0ca752b57f668a1c59bb1c7e0a84ff3439
+          path: subprojects/libpkgapply
 
       - name: Install build dependencies
         run: |
@@ -207,6 +221,13 @@ jobs:
           repository: zeppe-lin/libpkgplan
           ref: 57a10b166450dd0396d4d461d1d38352073a5a1e
           path: subprojects/libpkgplan
+
+      - name: Check out libpkgapply 0.1.0
+        uses: actions/checkout@v4
+        with:
+          repository: zeppe-lin/libpkgapply
+          ref: 05c5cf0ca752b57f668a1c59bb1c7e0a84ff3439
+          path: subprojects/libpkgapply
 
       - name: Install build dependencies
         run: |

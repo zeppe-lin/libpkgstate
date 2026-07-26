@@ -210,14 +210,15 @@ script surface under `ci/`. The normal matrix runs:
 * GCC and Clang;
 * separate shared and static dependency stacks;
 * the optional `libpkgstate-plan` adapter;
+* the optional `libpkgstate-apply` adapter;
 * `pkginfo(1)` compatibility and archive composition;
 * `pkgstate-check(1)` canonical and legacy diagnostics;
 * warnings as errors;
 * the complete test suite;
 * installed public-header isolation;
 * installed pkg-config consumers; and
-* linkage-closure checks that keep `libpkgimage` and `libpkgplan` out of the
-  core library.
+* linkage-closure checks that keep `libpkgimage`, `libpkgplan`, and
+  `libpkgapply` out of the core library.
 
 The GCC shared leg additionally generates and lints every manual with `mandoc`
 and builds the Doxygen reference with warnings as errors. Separate jobs qualify
