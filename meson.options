@@ -26,3 +26,10 @@ option(
   value: false,
   description: 'Install reference command-line tools',
 )
+
+option(
+  'source_adapter',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Build the optional libpkgsource authority adapter',
+)

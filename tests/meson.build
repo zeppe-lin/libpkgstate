@@ -32,6 +32,34 @@ if get_option('tests').allowed()
     test(item[1], target)
   endforeach
 
+  if libpkgsource_dep.found()
+    source_adapter_test = executable(
+      'source-adapter-test',
+      'source_adapter_test.cpp',
+      dependencies: libpkgstate_source_dep,
+    )
+    test('retain sealed libpkgsource authority', source_adapter_test)
+
+    source_adapter_header_test = executable(
+      'source-adapter-public-header-test',
+      'public_header_test.cpp',
+      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-source/adapter.h"'],
+      dependencies: libpkgstate_source_dep,
+    )
+    test('compile public header libpkgstate-source/adapter.h',
+         source_adapter_header_test)
+
+    test(
+      'verify source adapter pkg-config metadata',
+      sh,
+      args: [
+        join_paths(meson.current_source_dir(),
+                   'source_adapter_metadata_test.sh'),
+        meson.project_build_root(),
+      ],
+    )
+  endif
+
   public_headers = [
     ['libpkgstate', 'libpkgstate/libpkgstate.h'],
     ['error', 'libpkgstate/error.h'],
