@@ -60,6 +60,34 @@ if get_option('tests').allowed()
     )
   endif
 
+  if libpkgplan_dep.found()
+    plan_adapter_test = executable(
+      'plan-adapter-test',
+      'plan_adapter_test.cpp',
+      dependencies: libpkgstate_plan_dep,
+    )
+    test('project native installed state into libpkgplan', plan_adapter_test)
+
+    plan_adapter_header_test = executable(
+      'plan-adapter-public-header-test',
+      'public_header_test.cpp',
+      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-plan/adapter.h"'],
+      dependencies: libpkgstate_plan_dep,
+    )
+    test('compile public header libpkgstate-plan/adapter.h',
+         plan_adapter_header_test)
+
+    test(
+      'verify planner adapter pkg-config metadata',
+      sh,
+      args: [
+        join_paths(meson.current_source_dir(),
+                   'plan_adapter_metadata_test.sh'),
+        meson.project_build_root(),
+      ],
+    )
+  endif
+
   public_headers = [
     ['libpkgstate', 'libpkgstate/libpkgstate.h'],
     ['error', 'libpkgstate/error.h'],
