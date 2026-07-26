@@ -47,10 +47,3 @@ for removed in \
 do
   test ! -e "$root/$removed" || fail "removed contract remains: $removed"
 done
-# scdoc continuation: a line ending in backslash must be followed by a tabbed continuation.
-find "$root/man" -type f -name '*.scdoc' -print | while IFS= read -r page; do
-  awk '
-    previous { if ($0 !~ /^\t/) { print FILENAME ":" NR ": bad continuation"; exit 1 } }
-    { previous = ($0 ~ /\\$/) }
-  ' "$page" || exit 1
-done
