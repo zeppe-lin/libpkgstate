@@ -1,0 +1,59 @@
+LIBPKGSTATE(3)
+
+# NAME
+
+libpkgstate - native installed-package state authority
+
+# SYNOPSIS
+
+#include <libpkgstate/libpkgstate.h>
+
+# DESCRIPTION
+
+*libpkgstate* defines complete immutable installed-package state. Its values
+retain source-authoritative package release and recipe identities, installed
+runtime and lifecycle control, build provenance, installation reason, target
+binding, ownership, reconciliation results, and publication evidence.
+
+The library does not parse recipe syntax, inspect package archives, execute
+builds or lifecycle programs, resolve dependencies, install payloads, or import
+another package database. Those responsibilities belong to separate authorities
+and adapters.
+
+# AUTHORITY
+
+A *package_source_record* is a durable projection of one sealed source snapshot.
+An *installation_receipt* combines that source record with build, application,
+target, and completed ownership facts. An *installed_package* is admitted only
+from a complete receipt. A *snapshot* is the authoritative package and ownership
+state for one exact *state_target_binding*.
+
+All state-owned identities use domain-separated canonical records. Identities
+owned by source, planning, building, image, or application authorities are
+retained as typed external references and are never recomputed by libpkgstate.
+
+# STORAGE
+
+*canonical_store* owns compare-and-publish semantics. The supplied
+*canonical_generation_store* persists complete immutable snapshots and selects
+one current generation atomically.
+
+# ADAPTERS
+
+Optional libraries provide explicit authority bridges:
+
+*libpkgstate-source*
+	Projects a sealed *libpkgsource* snapshot into a *package_source_record*.
+
+*libpkgstate-plan*
+	Projects complete installed state into the existing *libpkgplan* fact model.
+
+*libpkgstate-apply*
+	Combines completed *libpkgapply* evidence with explicit incoming source and
+	build authority to construct a publication request.
+
+# SEE ALSO
+
+*pkgstate_authority*(7), *pkgstate_model*(3),
+*pkgstate_installation_receipt*(3), *pkgstate_publication*(3),
+*pkgstate_canonical_generation_store*(3)

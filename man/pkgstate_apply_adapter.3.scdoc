@@ -1,0 +1,40 @@
+PKGSTATE_APPLY_ADAPTER(3)
+
+# NAME
+
+pkgstate_apply_adapter - admit completed application as native installed state
+
+# SYNOPSIS
+
+#include <libpkgstate-apply/adapter.h>
+
+# DESCRIPTION
+
+*project_completed_application()* validates a completed libpkgapply operation
+against the accepted request, plan, target context, lease-bound state projection,
+expected native snapshot, ownership universe, and completed path consequences.
+It returns an immutable *state_publication_request* and performs no store I/O.
+
+Install and upgrade additionally require *incoming_installation_authority*.
+That value supplies the sealed *package_source_record*, build-input set, build
+result, and, for initial installation, installation reason. Upgrade preserves
+the prior installed reason. Removal rejects incoming authority.
+
+# OWNERSHIP
+
+Complete object metadata comes from completed application evidence. Active origin
+comes from the accepted active outcome. Rejected-object identity and side come
+from durable completed rejected-object evidence. Publication fails when an owned
+path lacks complete publication-eligible object truth or when application evidence
+grants unplanned ownership.
+
+# IDENTITY
+
+Planner, build, image, and application identities are translated into typed state
+references. State-owned installed control, receipt, package, snapshot, request,
+and receipt identities are computed by libpkgstate.
+
+# SEE ALSO
+
+*libpkgapply*(3), *pkgstate_installation_receipt*(3),
+*pkgstate_publication*(3)

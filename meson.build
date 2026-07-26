@@ -81,4 +81,5 @@ if libpkgapply_dep.found()
   subdir('apply_adapter')
 endif
 subdir('tools')
+subdir('man')
 subdir('tests')

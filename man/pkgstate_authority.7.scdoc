@@ -1,0 +1,61 @@
+PKGSTATE_AUTHORITY(7)
+
+# NAME
+
+pkgstate_authority - authority and trust boundaries for installed package state
+
+# SOURCE AUTHORITY
+
+*libpkgsource* owns normalized package release, requirement, profile, recipe,
+and source snapshot identities. *libpkgstate* retains those exact identities in
+*package_source_record*. It does not derive them from an archive name, package
+filename, installed path, or current source tree.
+
+# BUILD AUTHORITY
+
+The build layer owns the resolved build-input set, build result, package
+artifact, and artifact manifest. State records those identities through
+*build_provenance*. It does not inspect a build directory to reconstruct them.
+
+# APPLICATION AUTHORITY
+
+*libpkgapply* owns completed target effects and durable application evidence.
+The application adapter validates the accepted plan, expected state, target,
+ownership projection, and completed path consequences. It cannot invent source
+or build authority, so install and upgrade projection additionally require an
+*incoming_installation_authority* supplied by the orchestrator.
+
+# STATE AUTHORITY
+
+*libpkgstate* owns:
+
+- installed control identity;
+- installation receipt identity;
+- installed package identity;
+- ownership inventory identity;
+- installed snapshot identity;
+- publication request and receipt identities; and
+- durable target binding and generation semantics.
+
+A snapshot is complete state for exactly one target binding. Known empty facts are represented as empty typed collections. There is no
+incomplete native installed-package record.
+
+# PUBLICATION
+
+A caller submits deltas against one expected snapshot. *canonical_store* compares
+that expectation while holding the backend publication boundary. Stale input is
+a typed result and never causes silent rebase. The resulting snapshot is derived
+from the request and actual prior state; callers do not attach an arbitrary
+replacement snapshot.
+
+# MIGRATION BOUNDARY
+
+Import from the historical CRUX package database is not part of libpkgstate.
+A future standalone importer must observe the old source, require explicit facts
+that the old format did not retain, and emit native installation receipts or a
+separately defined bootstrap publication contract. The authoritative library
+contains no old-format parser, compatibility store, or import entry point.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_publication*(3)

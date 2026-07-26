@@ -148,12 +148,33 @@ if get_option('tests').allowed()
   endforeach
 
   test(
+    'verify documentation source contracts',
+    sh,
+    args: [join_paths(meson.current_source_dir(),
+                      'documentation_source_test.sh'),
+           meson.project_source_root()],
+  )
+  test(
+    'verify CI qualification source contracts',
+    sh,
+    args: [join_paths(meson.current_source_dir(),
+                      'ci_qualification_source_test.sh'),
+           meson.project_source_root()],
+  )
+  test(
     'verify pkg-config dependency metadata',
     sh,
     args: [join_paths(meson.current_source_dir(),
                       'pkgconfig_metadata_test.sh'),
            join_paths(meson.project_build_root(), 'meson-private',
                       'libpkgstate.pc')],
+  )
+  test(
+    'verify release metadata',
+    sh,
+    args: [join_paths(meson.current_source_dir(),
+                      'release_metadata_test.sh'),
+           meson.project_source_root()],
   )
 
   if get_option('tools').allowed()
@@ -168,6 +189,13 @@ if get_option('tests').allowed()
       args: [join_paths(meson.current_source_dir(),
                        'pkgstate_check_cli_test.sh'),
              pkgstate_check_tool, pkgstate_check_fixture],
+    )
+    test(
+      'verify pkgstate-check manual contract',
+      sh,
+      args: [join_paths(meson.current_source_dir(),
+                       'pkgstate_check_manual_test.sh'),
+             meson.project_source_root(), pkgstate_check_tool],
     )
   endif
 endif

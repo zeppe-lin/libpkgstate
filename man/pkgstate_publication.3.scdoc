@@ -1,0 +1,49 @@
+PKGSTATE_PUBLICATION(3)
+
+# NAME
+
+pkgstate_publication - immutable installed-state transition contracts
+
+# REQUEST
+
+*state_publication_request::make()* accepts one expected *snapshot* and one or
+more package deltas. A delta installs, replaces, or removes one package and binds
+its operation-plan and application-evidence identities. A composed request must
+also carry transaction evidence.
+
+The request validates target consistency, package expectations, duplicate names,
+and operation shape. It is immutable and performs no storage I/O.
+
+# COMPARE AND PUBLISH
+
+*canonical_store::compare_and_publish()* owns the stale-state check. Under the
+backend publication boundary it reads the actual prior snapshot and:
+
+1. returns *stale_expected_state* without invoking publication when the expected
+   snapshot differs;
+2. derives the resulting snapshot from request deltas when the expectation is
+   current; and
+3. asks the backend to publish that exact result.
+
+The backend cannot silently rebase an old request or accept a caller-authored
+replacement snapshot.
+
+# RECEIPT
+
+*state_publication_receipt* records request, expected and actual prior snapshots,
+target binding, storage format, outcome, durability, atomicity boundary,
+optional resulting snapshot, and subordinate evidence.
+
+A publication receipt does not prove filesystem transaction atomicity. It proves
+only the state-storage outcome and boundary explicitly recorded in the receipt.
+
+# OUTCOMES
+
+Published, stale expected state, rejected request, failure before publication,
+published with unconfirmed durability, and indeterminate outcome are distinct
+typed states.
+
+# SEE ALSO
+
+*pkgstate_store*(3), *pkgstate_canonical_generation_store*(3),
+*pkgstate-generation*(5)

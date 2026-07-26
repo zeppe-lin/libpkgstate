@@ -28,6 +28,13 @@ option(
 )
 
 option(
+  'man_pages',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build manual pages with scdoc',
+)
+
+option(
   'source_adapter',
   type: 'feature',
   value: 'disabled',
@@ -40,7 +47,6 @@ option(
   value: 'disabled',
   description: 'Build the optional libpkgplan projection adapter',
 )
-
 
 option(
   'application_adapter',
