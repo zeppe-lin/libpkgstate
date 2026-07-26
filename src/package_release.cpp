@@ -3,10 +3,6 @@
 
 #include <libpkgstate/package_release.h>
 
-#include "canonical_record.h"
-
-#include <string>
-#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -15,101 +11,37 @@
 namespace pkgstate {
 namespace {
 
-void
-validate_coordinate(std::string_view value, const char* label)
+bool valid_version(const std::string& value)
 {
-  if (value.empty())
-    throw identity_error(std::string(label) + " must not be empty");
-
-  for (const char byte : value)
-  {
-    if (byte == '\0' || byte == '\n' || byte == '\r')
-      throw identity_error(std::string(label) + " is not line-safe");
-  }
-}
-
-package_release_identity
-identify_release(std::string_view name,
-                 std::string_view version,
-                 std::string_view release)
-{
-  detail::canonical_record record(package_release_identity::canonical_domain());
-  record.append_bytes(name);
-  record.append_bytes(version);
-  record.append_bytes(release);
-  return package_release_identity::from_sha256(record.sha256());
+  if (value.empty() || value.find('/') != std::string::npos)
+    return false;
+  for (const unsigned char byte : value)
+    if (byte == 0 || byte == '\n' || byte == '\r' || byte < 0x20 || byte == 0x7f)
+      return false;
+  return true;
 }
 
 } // namespace
 
-package_release
-package_release::make(std::string_view name,
-                      std::string_view version,
-                      std::string_view release)
-{
-  validate_coordinate(name, "package name");
-  validate_coordinate(version, "package version");
-  validate_coordinate(release, "package release");
-
-  return package_release(identify_release(name, version, release),
-                         std::string(name),
-                         std::string(version),
-                         std::string(release));
-}
-
 package_release::package_release(package_release_identity identity,
-                                 std::string name,
+                                 package_reference package,
                                  std::string version,
-                                 std::string release)
-    : identity_(std::move(identity)),
-      name_(std::move(name)),
-      version_(std::move(version)),
-      release_(std::move(release))
+                                 std::uint32_t release)
+    : identity_(std::move(identity)), package_(std::move(package)),
+      version_(std::move(version)), release_(release)
 {
+  if (!valid_version(version_) || release_ == 0)
+    throw state_error("invalid package version or release");
 }
 
-const package_release_identity&
-package_release::identity() const noexcept
-{
-  return identity_;
-}
-
-const std::string&
-package_release::name() const noexcept
-{
-  return name_;
-}
-
-const std::string&
-package_release::version() const noexcept
-{
-  return version_;
-}
-
-const std::string&
-package_release::release() const noexcept
-{
-  return release_;
-}
-
-bool
-operator==(const package_release& lhs, const package_release& rhs) noexcept
-{
-  return lhs.identity_ == rhs.identity_ && lhs.name_ == rhs.name_ &&
-         lhs.version_ == rhs.version_ && lhs.release_ == rhs.release_;
-}
-
-bool
-operator!=(const package_release& lhs, const package_release& rhs) noexcept
-{
-  return !(lhs == rhs);
-}
-
-bool
-operator<(const package_release& lhs, const package_release& rhs) noexcept
-{
-  return std::tie(lhs.name_, lhs.version_, lhs.release_, lhs.identity_) <
-         std::tie(rhs.name_, rhs.version_, rhs.release_, rhs.identity_);
-}
+const package_release_identity& package_release::identity() const noexcept { return identity_; }
+const package_reference& package_release::package() const noexcept { return package_; }
+const std::string& package_release::name() const noexcept { return package_.name(); }
+const std::string& package_release::version() const noexcept { return version_; }
+std::uint32_t package_release::release() const noexcept { return release_; }
+std::string package_release::version_release() const { return version_ + "-" + std::to_string(release_); }
+bool operator==(const package_release& lhs, const package_release& rhs) noexcept { return std::tie(lhs.identity_, lhs.package_, lhs.version_, lhs.release_) == std::tie(rhs.identity_, rhs.package_, rhs.version_, rhs.release_); }
+bool operator!=(const package_release& lhs, const package_release& rhs) noexcept { return !(lhs == rhs); }
+bool operator<(const package_release& lhs, const package_release& rhs) noexcept { return std::tie(lhs.package_, lhs.version_, lhs.release_, lhs.identity_) < std::tie(rhs.package_, rhs.version_, rhs.release_, rhs.identity_); }
 
 } // namespace pkgstate

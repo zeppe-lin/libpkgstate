@@ -21,28 +21,8 @@
 #include <libpkgstate/state_target_binding.h>
 
 namespace pkgstate {
-namespace detail {
-
-struct operation_plan_reference_domain final {};
-struct application_evidence_reference_domain final {};
-struct transaction_evidence_reference_domain final {};
-
-} // namespace detail
-
-/*! \brief Caller-authoritative identity of one accepted operation plan. */
-using operation_plan_identity =
-    detail::referenced_digest<detail::operation_plan_reference_domain>;
-
-/*! \brief Caller-authoritative identity of completed application evidence. */
-using application_evidence_identity =
-    detail::referenced_digest<detail::application_evidence_reference_domain>;
-
-/*! \brief Caller-authoritative identity of one completed transaction. */
-using transaction_evidence_identity =
-    detail::referenced_digest<detail::transaction_evidence_reference_domain>;
-
 /*! \brief Current canonical state-publication request schema. */
-inline constexpr std::uint16_t state_publication_request_schema_version = 1;
+inline constexpr std::uint16_t state_publication_request_schema_version = 2;
 
 /*! \brief Semantic installed-state transition of one package name. */
 enum class package_state_delta_kind : std::uint8_t {

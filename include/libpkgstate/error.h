@@ -56,12 +56,5 @@ public:
   using error::error;
 };
 
-/*!
- * \brief Reports invalid use of a state write transaction.
- */
-class transaction_error : public error {
-public:
-  using error::error;
-};
 
 } // namespace pkgstate

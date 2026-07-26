@@ -1,11 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Alexandr Savca
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-/*!
- * \file digest.h
- * \brief Strongly typed installed-state identities and digest representations.
+/*! \file digest.h
+ *  \brief Strongly typed native installed-state identities.
  */
-
 #pragma once
 
 #include <array>
@@ -20,369 +18,253 @@
 
 namespace pkgstate {
 
-/*! \brief Version of the public algorithm-qualified digest representation. */
 inline constexpr std::uint16_t digest_representation_version = 1;
-
-/*! \brief Algorithm identifier carried by installed-state digest values. */
-enum class digest_algorithm : std::uint16_t {
-  sha256 = 1, //!< SHA-256 with a 32-byte result.
-};
-
-/*! \brief Number of bytes in a SHA-256 result. */
+enum class digest_algorithm : std::uint16_t { sha256 = 1 };
 inline constexpr std::size_t sha256_digest_size = 32;
-
-/*! \brief Algorithm-neutral storage for one digest result. */
 using digest_bytes = std::vector<std::uint8_t>;
-
-/*! \brief Fixed-size SHA-256 result accepted by identity factories. */
 using sha256_digest_bytes = std::array<std::uint8_t, sha256_digest_size>;
 
-/*! \brief Structured reason that a canonical digest representation is invalid. */
 enum class digest_error_code {
-  invalid_format,        //!< The representation does not have three fields.
-  unsupported_version,  //!< The representation version is not supported.
-  unsupported_algorithm, //!< The digest algorithm name is not supported.
-  invalid_length,        //!< The hexadecimal digest has the wrong length.
-  invalid_hex,           //!< The digest is not lowercase hexadecimal.
+  invalid_format,
+  unsupported_version,
+  unsupported_algorithm,
+  invalid_length,
+  invalid_hex,
 };
 
-/*! \brief Reports an invalid algorithm-qualified digest representation. */
 class digest_error final : public identity_error {
 public:
-  /*! \brief Construct a typed digest error. */
   digest_error(digest_error_code code, std::string message);
-
-  /*! \brief Return the machine-readable failure class. */
   [[nodiscard]] digest_error_code code() const noexcept;
-
 private:
   digest_error_code code_;
 };
 
 namespace detail {
 
-/*! \brief Shared representation used by strongly typed identity domains. */
 class digest_value final {
 public:
-  /*! \brief Construct a SHA-256 value from exact digest bytes. */
   [[nodiscard]] static digest_value from_sha256(sha256_digest_bytes bytes);
-
-  /*! \brief Parse `v1:sha256:<lowercase-hex>`. */
   [[nodiscard]] static digest_value parse(std::string_view input);
-
-  /*! \brief Return the representation version. */
   [[nodiscard]] std::uint16_t representation_version() const noexcept;
-
-  /*! \brief Return the represented algorithm. */
   [[nodiscard]] digest_algorithm algorithm() const noexcept;
-
-  /*! \brief Return the exact digest bytes. */
   [[nodiscard]] const digest_bytes& bytes() const noexcept;
-
-  /*! \brief Return canonical algorithm-qualified text. */
   [[nodiscard]] std::string string() const;
-
   friend bool operator==(const digest_value& lhs,
                          const digest_value& rhs) noexcept;
   friend bool operator!=(const digest_value& lhs,
                          const digest_value& rhs) noexcept;
   friend bool operator<(const digest_value& lhs,
                         const digest_value& rhs) noexcept;
-
 private:
   digest_value(std::uint16_t representation_version,
                digest_algorithm algorithm,
                digest_bytes bytes);
-
   std::uint16_t representation_version_;
   digest_algorithm algorithm_;
   digest_bytes bytes_;
 };
 
-/*! \brief Strong type wrapper for one installed-state identity domain. */
 template<typename Domain>
 class typed_digest final {
 public:
-  /*! \brief Construct a typed SHA-256 value from exact digest bytes. */
   [[nodiscard]] static typed_digest from_sha256(sha256_digest_bytes bytes)
   {
     return typed_digest(digest_value::from_sha256(std::move(bytes)));
   }
-
-  /*! \brief Parse `v1:sha256:<lowercase-hex>`. */
   [[nodiscard]] static typed_digest parse(std::string_view input)
   {
     return typed_digest(digest_value::parse(input));
   }
-
-  /*! \brief Return the canonical record domain assigned to this identity. */
   [[nodiscard]] static constexpr std::string_view canonical_domain() noexcept
   {
     return Domain::canonical_domain;
   }
-
-  /*! \brief Return the representation version. */
   [[nodiscard]] std::uint16_t representation_version() const noexcept
   {
     return value_.representation_version();
   }
-
-  /*! \brief Return the represented algorithm. */
   [[nodiscard]] digest_algorithm algorithm() const noexcept
   {
     return value_.algorithm();
   }
-
-  /*! \brief Return the exact digest bytes. */
   [[nodiscard]] const digest_bytes& bytes() const noexcept
   {
     return value_.bytes();
   }
-
-  /*! \brief Return canonical algorithm-qualified text. */
-  [[nodiscard]] std::string string() const
-  {
-    return value_.string();
-  }
-
+  [[nodiscard]] std::string string() const { return value_.string(); }
   friend bool operator==(const typed_digest& lhs,
                          const typed_digest& rhs) noexcept
   {
     return lhs.value_ == rhs.value_;
   }
-
   friend bool operator!=(const typed_digest& lhs,
                          const typed_digest& rhs) noexcept
   {
     return !(lhs == rhs);
   }
-
   friend bool operator<(const typed_digest& lhs,
                         const typed_digest& rhs) noexcept
   {
     return lhs.value_ < rhs.value_;
   }
-
 private:
-  explicit typed_digest(digest_value value)
-      : value_(std::move(value))
-  {
-  }
-
+  explicit typed_digest(digest_value value) : value_(std::move(value)) {}
   digest_value value_;
 };
 
-/*!
- * \brief Strong reference to an identity computed by another authority.
- *
- * The wrapper validates canonical digest representation and keeps external
- * semantic domains distinct in C++. It does not claim that libpkgstate
- * computed or authenticated the referenced object.
- */
 template<typename Domain>
 class referenced_digest final {
 public:
-  /*! \brief Construct a referenced SHA-256 identity from exact bytes. */
-  [[nodiscard]] static referenced_digest
-  from_sha256(sha256_digest_bytes bytes)
+  [[nodiscard]] static referenced_digest from_sha256(sha256_digest_bytes bytes)
   {
     return referenced_digest(digest_value::from_sha256(std::move(bytes)));
   }
-
-  /*! \brief Parse `v1:sha256:<lowercase-hex>`. */
   [[nodiscard]] static referenced_digest parse(std::string_view input)
   {
     return referenced_digest(digest_value::parse(input));
   }
-
-  /*! \brief Return the representation version. */
   [[nodiscard]] std::uint16_t representation_version() const noexcept
   {
     return value_.representation_version();
   }
-
-  /*! \brief Return the represented algorithm. */
   [[nodiscard]] digest_algorithm algorithm() const noexcept
   {
     return value_.algorithm();
   }
-
-  /*! \brief Return the exact digest bytes. */
   [[nodiscard]] const digest_bytes& bytes() const noexcept
   {
     return value_.bytes();
   }
-
-  /*! \brief Return canonical algorithm-qualified text. */
-  [[nodiscard]] std::string string() const
-  {
-    return value_.string();
-  }
-
+  [[nodiscard]] std::string string() const { return value_.string(); }
   friend bool operator==(const referenced_digest& lhs,
                          const referenced_digest& rhs) noexcept
   {
     return lhs.value_ == rhs.value_;
   }
-
   friend bool operator!=(const referenced_digest& lhs,
                          const referenced_digest& rhs) noexcept
   {
     return !(lhs == rhs);
   }
-
   friend bool operator<(const referenced_digest& lhs,
                         const referenced_digest& rhs) noexcept
   {
     return lhs.value_ < rhs.value_;
   }
-
 private:
-  explicit referenced_digest(digest_value value)
-      : value_(std::move(value))
-  {
-  }
-
+  explicit referenced_digest(digest_value value) : value_(std::move(value)) {}
   digest_value value_;
 };
 
-struct package_release_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/package-release/1";
-};
-struct installed_control_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/installed-control/1";
-};
-struct installed_package_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/installed-package/1";
-};
-struct ownership_inventory_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/ownership-inventory/1";
-};
-struct managed_target_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/managed-target/1";
-};
-struct state_store_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/state-store/1";
-};
-struct root_view_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/root-view/1";
-};
-struct state_backend_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/state-backend/1";
-};
-struct publication_domain_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/publication-domain/1";
-};
-struct state_target_binding_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/target-binding/1";
-};
-struct installed_state_snapshot_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/installed-snapshot/1";
-};
-struct state_publication_request_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/publication-request/1";
-};
-struct state_publication_receipt_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/publication-receipt/1";
-};
-struct legacy_import_request_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/legacy-import-request/1";
-};
-struct legacy_import_receipt_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/legacy-import-receipt/1";
-};
-struct legacy_package_observation_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/legacy-package-observation/1";
-};
-struct legacy_snapshot_observation_identity_domain final {
-  static constexpr std::string_view canonical_domain =
-      "pkgstate/legacy-snapshot-observation/1";
-};
+#define PKGSTATE_STATE_DOMAIN(name, text)                                      \
+  struct name##_domain final {                                                 \
+    static constexpr std::string_view canonical_domain = text;                 \
+  }
+
+PKGSTATE_STATE_DOMAIN(package_source_record_identity,
+                      "pkgstate/package-source-record/1");
+PKGSTATE_STATE_DOMAIN(installed_control_identity,
+                      "pkgstate/installed-control/2");
+PKGSTATE_STATE_DOMAIN(installation_receipt_identity,
+                      "pkgstate/installation-receipt/1");
+PKGSTATE_STATE_DOMAIN(installed_package_identity,
+                      "pkgstate/installed-package/2");
+PKGSTATE_STATE_DOMAIN(ownership_inventory_identity,
+                      "pkgstate/ownership-inventory/2");
+PKGSTATE_STATE_DOMAIN(managed_target_identity, "pkgstate/managed-target/1");
+PKGSTATE_STATE_DOMAIN(state_store_identity, "pkgstate/state-store/1");
+PKGSTATE_STATE_DOMAIN(root_view_identity, "pkgstate/root-view/1");
+PKGSTATE_STATE_DOMAIN(state_backend_identity, "pkgstate/state-backend/1");
+PKGSTATE_STATE_DOMAIN(publication_domain_identity,
+                      "pkgstate/publication-domain/1");
+PKGSTATE_STATE_DOMAIN(state_target_binding_identity,
+                      "pkgstate/target-binding/1");
+PKGSTATE_STATE_DOMAIN(installed_state_snapshot_identity,
+                      "pkgstate/installed-snapshot/2");
+PKGSTATE_STATE_DOMAIN(state_publication_request_identity,
+                      "pkgstate/publication-request/2");
+PKGSTATE_STATE_DOMAIN(state_publication_receipt_identity,
+                      "pkgstate/publication-receipt/2");
+#undef PKGSTATE_STATE_DOMAIN
+
+struct package_release_reference_domain final {};
+struct source_profile_reference_domain final {};
+struct source_recipe_reference_domain final {};
+struct source_snapshot_reference_domain final {};
+struct candidate_control_reference_domain final {};
+struct build_input_set_reference_domain final {};
+struct build_result_reference_domain final {};
+struct artifact_reference_domain final {};
+struct artifact_manifest_reference_domain final {};
+struct installed_regular_content_reference_domain final {};
+struct operation_plan_reference_domain final {};
+struct application_evidence_reference_domain final {};
+struct transaction_evidence_reference_domain final {};
+struct rejected_object_reference_domain final {};
+struct state_publication_evidence_reference_domain final {};
 
 } // namespace detail
 
-/*! \brief Identity of one package release independent of artifact transport. */
-using package_release_identity =
-    detail::typed_digest<detail::package_release_identity_domain>;
-
-/*! \brief Identity of durable historical installed control. */
+using package_source_record_identity =
+    detail::typed_digest<detail::package_source_record_identity_domain>;
 using installed_control_identity =
     detail::typed_digest<detail::installed_control_identity_domain>;
-
-/*! \brief Identity of one canonical installed package record. */
+using installation_receipt_identity =
+    detail::typed_digest<detail::installation_receipt_identity_domain>;
 using installed_package_identity =
     detail::typed_digest<detail::installed_package_identity_domain>;
-
-/*! \brief Identity of the admitted path-to-owner relation. */
 using ownership_inventory_identity =
     detail::typed_digest<detail::ownership_inventory_identity_domain>;
-
-/*! \brief Identity of one managed package target. */
 using managed_target_identity =
     detail::typed_digest<detail::managed_target_identity_domain>;
-
-/*! \brief Identity of one durable installed-state store. */
 using state_store_identity =
     detail::typed_digest<detail::state_store_identity_domain>;
-
-/*! \brief Identity of one logical target root view. */
 using root_view_identity =
     detail::typed_digest<detail::root_view_identity_domain>;
-
-/*! \brief Identity of one installed-state storage backend. */
 using state_backend_identity =
     detail::typed_digest<detail::state_backend_identity_domain>;
-
-/*! \brief Identity of one state-publication and locking domain. */
 using publication_domain_identity =
     detail::typed_digest<detail::publication_domain_identity_domain>;
-
-/*! \brief Identity of one durable state-target binding. */
 using state_target_binding_identity =
     detail::typed_digest<detail::state_target_binding_identity_domain>;
-
-/*! \brief Identity of one immutable installed-state snapshot. */
 using installed_state_snapshot_identity =
     detail::typed_digest<detail::installed_state_snapshot_identity_domain>;
-
-/*! \brief Identity of one immutable state-publication request. */
 using state_publication_request_identity =
     detail::typed_digest<detail::state_publication_request_identity_domain>;
-
-/*! \brief Identity of one immutable state-publication receipt. */
 using state_publication_receipt_identity =
     detail::typed_digest<detail::state_publication_receipt_identity_domain>;
 
-/*! \brief Identity of one explicit legacy-state import request. */
-using legacy_import_request_identity =
-    detail::typed_digest<detail::legacy_import_request_identity_domain>;
-
-/*! \brief Identity of one explicit legacy-state import receipt. */
-using legacy_import_receipt_identity =
-    detail::typed_digest<detail::legacy_import_receipt_identity_domain>;
-
-/*! \brief Identity of exact incomplete facts in one legacy package record. */
-using legacy_package_observation_identity =
-    detail::typed_digest<detail::legacy_package_observation_identity_domain>;
-
-/*! \brief Identity of one exact incomplete legacy database observation. */
-using legacy_snapshot_observation_identity =
-    detail::typed_digest<detail::legacy_snapshot_observation_identity_domain>;
+using package_release_identity =
+    detail::referenced_digest<detail::package_release_reference_domain>;
+using source_profile_identity =
+    detail::referenced_digest<detail::source_profile_reference_domain>;
+using source_recipe_identity =
+    detail::referenced_digest<detail::source_recipe_reference_domain>;
+using source_snapshot_identity =
+    detail::referenced_digest<detail::source_snapshot_reference_domain>;
+using candidate_control_identity =
+    detail::referenced_digest<detail::candidate_control_reference_domain>;
+using build_input_set_identity =
+    detail::referenced_digest<detail::build_input_set_reference_domain>;
+using build_result_identity =
+    detail::referenced_digest<detail::build_result_reference_domain>;
+using artifact_identity =
+    detail::referenced_digest<detail::artifact_reference_domain>;
+using artifact_manifest_identity =
+    detail::referenced_digest<detail::artifact_manifest_reference_domain>;
+using installed_regular_content_identity =
+    detail::referenced_digest<
+        detail::installed_regular_content_reference_domain>;
+using operation_plan_identity =
+    detail::referenced_digest<detail::operation_plan_reference_domain>;
+using application_evidence_identity =
+    detail::referenced_digest<detail::application_evidence_reference_domain>;
+using transaction_evidence_identity =
+    detail::referenced_digest<detail::transaction_evidence_reference_domain>;
+using rejected_object_identity =
+    detail::referenced_digest<detail::rejected_object_reference_domain>;
+using state_publication_evidence_identity =
+    detail::referenced_digest<detail::state_publication_evidence_reference_domain>;
 
 } // namespace pkgstate

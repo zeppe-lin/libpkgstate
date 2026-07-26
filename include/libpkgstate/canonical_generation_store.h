@@ -20,11 +20,11 @@
 namespace pkgstate {
 
 /*! \brief Current canonical generation storage-format version. */
-inline constexpr std::uint16_t canonical_generation_storage_version = 1;
+inline constexpr std::uint16_t canonical_generation_storage_version = 2;
 
 /*! \brief Receipt-visible canonical generation storage-format identifier. */
 inline constexpr std::string_view canonical_generation_storage_format =
-    "libpkgstate-generation-v1";
+    "libpkgstate-generation-v2";
 
 /*!
  * \brief Canonical backend using immutable generations and atomic selection.
@@ -36,8 +36,8 @@ inline constexpr std::string_view canonical_generation_storage_format =
  * canonical_store transaction hook.
  *
  * Construction creates and selects an empty generation when necessary and
- * durably binds the directory to exactly one state_target_binding. It never
- * rewrites the historical /var/lib/pkg/db compatibility database.
+ * durably binds the directory to exactly one state_target_binding. The backend
+ * knows only the native generation format and never imports another database.
  */
 class canonical_generation_store final : public canonical_store {
 public:

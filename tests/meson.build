@@ -3,359 +3,87 @@
 
 if get_option('tests').allowed()
   sh = find_program('sh')
-  digest_test = executable(
-    'digest-test',
-    'digest_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('validate versioned state identities', digest_test)
 
-  canonical_record_test = executable(
-    'canonical-record-test',
-    'canonical_record_test.cpp',
-    include_directories: include_directories('../src'),
-    dependencies: libpkgstate_dep,
-  )
-  test('hash canonical state records', canonical_record_test)
+  core_tests = [
+    ['digest', 'validate native identity domains'],
+    ['canonical_record', 'hash canonical state records'],
+    ['model', 'validate native installed-state values'],
+    ['package_release', 'retain source-authoritative package releases'],
+    ['package_source_record', 'seal durable package-source records'],
+    ['installed_control', 'retain complete installed control'],
+    ['state_target_binding', 'identify durable target-state bindings'],
+    ['package_path', 'normalize installed package paths'],
+    ['installation_receipt', 'seal native installation receipts'],
+    ['snapshot_identity', 'identify ownership and installed snapshots'],
+    ['publication_request', 'validate immutable publication requests'],
+    ['publication_receipt', 'classify typed publication receipts'],
+    ['canonical_generation_store', 'publish immutable canonical generations'],
+    ['canonical_store', 'enforce canonical compare and publish'],
+    ['umbrella_header', 'compile the native umbrella header'],
+  ]
 
-  package_release_test = executable(
-    'package-release-test',
-    'package_release_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('identify canonical package releases', package_release_test)
-
-  installed_control_test = executable(
-    'installed-control-test',
-    'installed_control_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('retain durable installed control', installed_control_test)
-
-  state_target_binding_test = executable(
-    'state-target-binding-test',
-    'state_target_binding_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('identify durable target-state bindings',
-       state_target_binding_test)
-
-  package_path_test = executable(
-    'package-path-test',
-    'package_path_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('normalize installed package paths', package_path_test)
-
-  model_test = executable(
-    'model-test',
-    'model_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('validate installed package state', model_test)
-
-  snapshot_identity_test = executable(
-    'snapshot-identity-test',
-    'snapshot_identity_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('identify ownership and installed snapshots',
-       snapshot_identity_test)
-
-  publication_request_test = executable(
-    'publication-request-test',
-    'publication_request_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('validate immutable state publication requests',
-       publication_request_test)
-
-  publication_receipt_test = executable(
-    'publication-receipt-test',
-    'publication_receipt_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('classify typed state publication receipts',
-       publication_receipt_test)
-
-  canonical_generation_store_test = executable(
-    'canonical-generation-store-test',
-    'canonical_generation_store_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('publish immutable canonical generations',
-       canonical_generation_store_test)
-
-  canonical_store_test = executable(
-    'canonical-store-test',
-    'canonical_store_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('enforce canonical compare and publish', canonical_store_test)
-
-  legacy_model_test = executable(
-    'legacy-model-test',
-    'legacy_model_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('preserve incomplete legacy state', legacy_model_test)
-
-  legacy_completeness_test = executable(
-    'legacy-completeness-test',
-    'legacy_completeness_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('identify incomplete legacy observations', legacy_completeness_test)
-
-  legacy_import_test = executable(
-    'legacy-import-test',
-    'legacy_import_test.cpp',
-    include_directories: include_directories('../src'),
-    dependencies: libpkgstate_dep,
-  )
-  test('import explicit legacy observations', legacy_import_test)
-
-  if libpkgapply_dep.found()
-    apply_adapter_test = executable(
-      'apply-adapter-test',
-      'apply_adapter_test.cpp',
-      dependencies: libpkgstate_apply_dep,
+  foreach item : core_tests
+    target = executable(
+      item[0] + '-test',
+      item[0] + '_test.cpp',
+      include_directories: include_directories('../src'),
+      dependencies: libpkgstate_dep,
     )
-    test('project completed application into canonical state',
-         apply_adapter_test)
-
-    apply_adapter_header_test = executable(
-      'apply-adapter-public-header-test',
-      'public_header_test.cpp',
-      cpp_args: [
-        '-DLIBPKGSTATE_TEST_HEADER="libpkgstate-apply/adapter.h"',
-      ],
-      dependencies: libpkgstate_apply_dep,
-    )
-    test('compile public header libpkgstate-apply/adapter.h',
-         apply_adapter_header_test)
-
-    test(
-      'verify application adapter pkg-config metadata',
-      sh,
-      args: [
-        join_paths(
-          meson.current_source_dir(),
-          'apply_adapter_metadata_test.sh',
-        ),
-        meson.project_build_root(),
-      ],
-    )
-  endif
-
-  if libpkgplan_dep.found()
-    plan_adapter_test = executable(
-      'plan-adapter-test',
-      'plan_adapter_test.cpp',
-      dependencies: libpkgstate_plan_dep,
-    )
-    test('project canonical state into libpkgplan', plan_adapter_test)
-
-    plan_adapter_header_test = executable(
-      'plan-adapter-public-header-test',
-      'public_header_test.cpp',
-      cpp_args: [
-        '-DLIBPKGSTATE_TEST_HEADER="libpkgstate-plan/adapter.h"',
-      ],
-      dependencies: libpkgstate_plan_dep,
-    )
-    test('compile public header libpkgstate-plan/adapter.h',
-         plan_adapter_header_test)
-
-    test(
-      'verify planner adapter pkg-config metadata',
-      sh,
-      args: [
-        join_paths(
-          meson.current_source_dir(),
-          'plan_adapter_metadata_test.sh',
-        ),
-        meson.project_build_root(),
-      ],
-    )
-  endif
-
-  legacy_text_store_test = executable(
-    'legacy-text-store-test',
-    'legacy_text_store_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('parse legacy package state', legacy_text_store_test)
-
-  write_transaction_test = executable(
-    'write-transaction-test',
-    'write_transaction_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('commit legacy package state', write_transaction_test)
-
-  locking_test = executable(
-    'locking-test',
-    'locking_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('interoperate through directory locks', locking_test)
-
-  umbrella_header_test = executable(
-    'umbrella-header-test',
-    'umbrella_header_test.cpp',
-    dependencies: libpkgstate_dep,
-  )
-  test('compile umbrella header', umbrella_header_test)
+    test(item[1], target)
+  endforeach
 
   public_headers = [
     ['libpkgstate', 'libpkgstate/libpkgstate.h'],
     ['error', 'libpkgstate/error.h'],
     ['digest', 'libpkgstate/digest.h'],
+    ['model', 'libpkgstate/model.h'],
     ['package-release', 'libpkgstate/package_release.h'],
+    ['package-source-record', 'libpkgstate/package_source_record.h'],
     ['installed-control', 'libpkgstate/installed_control.h'],
-    ['state-target-binding',
-     'libpkgstate/state_target_binding.h'],
-    ['package-identity', 'libpkgstate/package_identity.h'],
+    ['state-target-binding', 'libpkgstate/state_target_binding.h'],
     ['package-path', 'libpkgstate/package_path.h'],
     ['owned-entry', 'libpkgstate/owned_entry.h'],
+    ['installation-receipt', 'libpkgstate/installation_receipt.h'],
     ['installed-package', 'libpkgstate/installed_package.h'],
     ['snapshot', 'libpkgstate/snapshot.h'],
-    ['publication-request',
-     'libpkgstate/publication_request.h'],
-    ['publication-receipt',
-     'libpkgstate/publication_receipt.h'],
+    ['publication-request', 'libpkgstate/publication_request.h'],
+    ['publication-receipt', 'libpkgstate/publication_receipt.h'],
     ['canonical-store', 'libpkgstate/canonical_store.h'],
     ['canonical-generation-store',
      'libpkgstate/canonical_generation_store.h'],
-    ['legacy-completeness', 'libpkgstate/legacy_completeness.h'],
-    ['legacy-import', 'libpkgstate/legacy_import.h'],
-    ['legacy-installed-package',
-     'libpkgstate/legacy_installed_package.h'],
-    ['legacy-snapshot', 'libpkgstate/legacy_snapshot.h'],
-    ['write-transaction', 'libpkgstate/write_transaction.h'],
-    ['store', 'libpkgstate/store.h'],
-    ['legacy-text-store', 'libpkgstate/legacy_text_store.h'],
   ]
 
   foreach header : public_headers
-    public_header_test = executable(
+    target = executable(
       header[0] + '-public-header-test',
       'public_header_test.cpp',
-      cpp_args: [
-        '-DLIBPKGSTATE_TEST_HEADER="' + header[1] + '"',
-      ],
+      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="' + header[1] + '"'],
       dependencies: libpkgstate_dep,
     )
-    test('compile public header ' + header[1], public_header_test)
+    test('compile public header ' + header[1], target)
   endforeach
-
-  test(
-    'verify documentation source contracts',
-    sh,
-    args: [
-      join_paths(
-        meson.current_source_dir(),
-        'documentation_source_test.sh',
-      ),
-      meson.project_source_root(),
-    ],
-  )
-
-  test(
-    'verify CI qualification source contracts',
-    sh,
-    args: [
-      join_paths(
-        meson.current_source_dir(),
-        'ci_qualification_source_test.sh',
-      ),
-      meson.project_source_root(),
-    ],
-  )
 
   test(
     'verify pkg-config dependency metadata',
     sh,
-    args: [
-      join_paths(meson.current_source_dir(), 'pkgconfig_metadata_test.sh'),
-      join_paths(
-        meson.project_build_root(),
-        'meson-private',
-        'libpkgstate.pc',
-      ),
-    ],
-  )
-
-  test(
-    'verify release metadata',
-    sh,
-    args: [
-      join_paths(meson.current_source_dir(), 'release_metadata_test.sh'),
-      meson.project_source_root(),
-    ],
+    args: [join_paths(meson.current_source_dir(),
+                      'pkgconfig_metadata_test.sh'),
+           join_paths(meson.project_build_root(), 'meson-private',
+                      'libpkgstate.pc')],
   )
 
   if get_option('tools').allowed()
-    package_path_conformance_test = executable(
-      'package-path-conformance-test',
-      'package_path_conformance_test.cpp',
-      dependencies: [libpkgstate_dep, libpkgimage_dep],
-    )
-    test(
-      'conform installed and archive package paths',
-      package_path_conformance_test,
-    )
-
-    tar_program = find_program('tar')
-
-    test(
-      'exercise pkginfo reference tool',
-      sh,
-      args: [
-        join_paths(meson.current_source_dir(), 'pkginfo_cli_test.sh'),
-        pkginfo_tool,
-        tar_program,
-      ],
-    )
-
-    test(
-      'verify pkginfo manual contract',
-      sh,
-      args: [
-        join_paths(meson.current_source_dir(), 'pkginfo_manual_test.sh'),
-        meson.project_source_root(),
-        pkginfo_tool,
-      ],
-    )
-
     pkgstate_check_fixture = executable(
       'pkgstate-check-fixture',
       'pkgstate_check_fixture.cpp',
       dependencies: libpkgstate_dep,
     )
-
     test(
-      'exercise read-only state diagnostics',
+      'exercise read-only native state diagnostics',
       sh,
-      args: [
-        join_paths(meson.current_source_dir(), 'pkgstate_check_cli_test.sh'),
-        pkgstate_check_tool,
-        pkgstate_check_fixture,
-      ],
-    )
-
-    test(
-      'verify pkgstate-check manual contract',
-      sh,
-      args: [
-        join_paths(
-          meson.current_source_dir(),
-          'pkgstate_check_manual_test.sh',
-        ),
-        meson.project_source_root(),
-        pkgstate_check_tool,
-      ],
+      args: [join_paths(meson.current_source_dir(),
+                       'pkgstate_check_cli_test.sh'),
+             pkgstate_check_tool, pkgstate_check_fixture],
     )
   endif
 endif

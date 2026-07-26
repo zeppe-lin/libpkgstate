@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 
-#include <libpkgstate/legacy_import.h>
 #include <libpkgstate/publication_receipt.h>
 #include <libpkgstate/publication_request.h>
 #include <libpkgstate/snapshot.h>
@@ -132,10 +131,6 @@ public:
   /*! \brief Compare under lock, publish when current, and return a receipt. */
   [[nodiscard]] state_publication_receipt
   compare_and_publish(const state_publication_request& request) const;
-
-  /*! \brief Compare an empty destination and import one legacy observation. */
-  [[nodiscard]] legacy_import_receipt
-  import_legacy(const legacy_import_request& request) const;
 
 protected:
   /*!

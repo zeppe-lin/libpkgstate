@@ -92,8 +92,8 @@ snapshot::make(state_target_binding target_binding,
 
     for (const owned_entry& entry : package.manifest())
     {
-      owners[entry.path.string()].push_back(index);
-      canonical_owners[entry.path.string()].push_back(package.identity());
+      owners[entry.path().string()].push_back(index);
+      canonical_owners[entry.path().string()].push_back(package.identity());
     }
   }
 

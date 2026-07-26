@@ -23,6 +23,7 @@ public:
   void append_u16(std::uint16_t value);
   void append_u32(std::uint32_t value);
   void append_u64(std::uint64_t value);
+  void append_i64(std::int64_t value);
   void append_bytes(std::string_view value);
   void append_bytes(const digest_bytes& value);
 

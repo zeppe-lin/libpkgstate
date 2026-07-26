@@ -19,19 +19,8 @@
 #include <libpkgstate/state_target_binding.h>
 
 namespace pkgstate {
-namespace detail {
-
-struct state_publication_evidence_reference_domain final {};
-
-} // namespace detail
-
-/*! \brief Identity of backend-authoritative publication evidence. */
-using state_publication_evidence_identity =
-    detail::referenced_digest<
-        detail::state_publication_evidence_reference_domain>;
-
 /*! \brief Current canonical state-publication receipt schema. */
-inline constexpr std::uint16_t state_publication_receipt_schema_version = 1;
+inline constexpr std::uint16_t state_publication_receipt_schema_version = 2;
 
 /*! \brief Semantic outcome of one installed-state publication attempt. */
 enum class state_publication_outcome : std::uint8_t {

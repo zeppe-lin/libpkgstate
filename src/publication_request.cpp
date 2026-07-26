@@ -30,46 +30,18 @@ validate_package_name(std::string_view name)
   }
 }
 
-bool
-has_provenance(const installed_control& control,
-               control_provenance_kind kind,
-               std::string_view identity)
-{
-  const auto& provenance = control.provenance();
-  return std::any_of(
-      provenance.begin(), provenance.end(),
-      [kind, identity](const control_provenance& reference) {
-        return reference.kind() == kind && reference.identity() == identity;
-      });
-}
-
 void
-validate_application_evidence(
+validate_receipt_evidence(
     const installed_package& proposed,
+    const operation_plan_identity& operation_plan,
     const application_evidence_identity& application_evidence)
 {
-  if (!has_provenance(proposed.control(),
-                      control_provenance_kind::application_evidence,
-                      application_evidence.string()))
+  if (proposed.receipt().operation_plan() != operation_plan ||
+      proposed.receipt().application_evidence() != application_evidence)
   {
     throw state_error(
-        "proposed installed control does not retain matching application "
-        "evidence for package " + proposed.release().name());
-  }
-}
-
-void
-validate_transaction_evidence(
-    const installed_package& proposed,
-    const transaction_evidence_identity& transaction_evidence)
-{
-  if (!has_provenance(proposed.control(),
-                      control_provenance_kind::transaction_evidence,
-                      transaction_evidence.string()))
-  {
-    throw state_error(
-        "proposed installed control does not retain matching transaction "
-        "evidence for package " + proposed.release().name());
+        "proposed installation receipt does not retain matching plan and "
+        "application evidence for package " + proposed.release().name());
   }
 }
 
@@ -181,7 +153,7 @@ package_state_delta::install(
     operation_plan_identity operation_plan,
     application_evidence_identity application_evidence)
 {
-  validate_application_evidence(proposed, application_evidence);
+  validate_receipt_evidence(proposed, operation_plan, application_evidence);
   const std::string package_name = proposed.release().name();
   return package_state_delta(package_state_delta_kind::install,
                              package_name,
@@ -198,7 +170,7 @@ package_state_delta::replace(
     operation_plan_identity operation_plan,
     application_evidence_identity application_evidence)
 {
-  validate_application_evidence(proposed, application_evidence);
+  validate_receipt_evidence(proposed, operation_plan, application_evidence);
   if (expected_package == proposed.identity())
     throw state_error("replacement delta does not change installed package");
 
@@ -352,12 +324,10 @@ state_publication_request::make(
   for (const package_state_delta& delta : deltas)
   {
     validate_against_snapshot(expected_snapshot, delta);
-    if (transaction_evidence.has_value() &&
-        delta.proposed_package().has_value())
-    {
-      validate_transaction_evidence(*delta.proposed_package(),
-                                    *transaction_evidence);
-    }
+    if (delta.proposed_package().has_value() &&
+        delta.proposed_package()->receipt().transaction_evidence() !=
+            transaction_evidence)
+      throw state_error("proposed installation receipt transaction evidence mismatch");
   }
 
   state_publication_request_identity identity = identify_request(

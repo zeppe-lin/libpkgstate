@@ -43,3 +43,9 @@ check_throws(Callable&& callable)
   std::cerr << "expected exception was not thrown\n";
   std::exit(EXIT_FAILURE);
 }
+
+#define TEST(expression) CHECK(expression)
+#define TEST_EQ(lhs, rhs) CHECK((lhs) == (rhs))
+#define TEST_NE(lhs, rhs) CHECK((lhs) != (rhs))
+#define TEST_THROWS(Exception, ...)                                            \
+  check_throws<Exception>([&] { (void)(__VA_ARGS__); })

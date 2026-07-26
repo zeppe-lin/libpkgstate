@@ -26,24 +26,3 @@ option(
   value: false,
   description: 'Install reference command-line tools',
 )
-
-option(
-  'man_pages',
-  type: 'feature',
-  value: 'auto',
-  description: 'Build manual pages with scdoc',
-)
-
-option(
-  'planner_adapter',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Build the optional libpkgplan projection adapter',
-)
-
-option(
-  'application_adapter',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Build the optional libpkgapply publication adapter',
-)

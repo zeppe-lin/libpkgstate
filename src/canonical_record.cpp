@@ -85,6 +85,17 @@ canonical_record::append_u64(std::uint64_t value)
 }
 
 void
+canonical_record::append_i64(std::int64_t value)
+{
+  const bool negative = value < 0;
+  const std::uint64_t magnitude = negative
+      ? static_cast<std::uint64_t>(-(value + 1)) + 1U
+      : static_cast<std::uint64_t>(value);
+  append_bool(negative);
+  append_u64(magnitude);
+}
+
+void
 canonical_record::append_bytes(std::string_view value)
 {
   append_u64(static_cast<std::uint64_t>(value.size()));
