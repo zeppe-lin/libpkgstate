@@ -1135,8 +1135,9 @@ The 0.5.0 authority implementation retains the dependency-ordered core:
 8. explicit receipt-bound import into a fresh canonical destination is
    implemented; and
 9. the optional planner adapter is implemented without contaminating either
-   core library.
+   core library; and
+10. the optional application adapter projects exact durable completed
+    application into one state-owned publication request without store I/O.
 
-An application adapter remains a separate higher-layer integration. It is not
-required for the 0.5.0 state authority and must not move application semantics
-into the core library.
+Both adapters remain separate composition libraries. Neither moves planner or
+application semantics into the core state authority.

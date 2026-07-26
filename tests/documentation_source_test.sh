@@ -42,6 +42,9 @@ check_page \
   man/pkgstate_plan_adapter.3.scdoc \
   PKGSTATE_PLAN_ADAPTER\(3\)
 check_page \
+  man/pkgstate_apply_adapter.3.scdoc \
+  PKGSTATE_APPLY_ADAPTER\(3\)
+check_page \
   man/pkgstate_legacy_text_store.3.scdoc \
   PKGSTATE_LEGACY_TEXT_STORE\(3\)
 check_page man/pkgstate-db.5.scdoc PKGSTATE-DB\(5\)
@@ -236,6 +239,18 @@ grep -F 'runtime dependency declarations' \
 grep -F 'State control provenance is deliberately not copied' \
   "$source_root/man/pkgstate_plan_adapter.3.scdoc" >/dev/null ||
   fail "planner adapter manual counterfeits state provenance"
+
+grep -F 'It does not open a' \
+  "$source_root/man/pkgstate_apply_adapter.3.scdoc" >/dev/null ||
+  fail "application adapter manual performs state publication"
+
+grep -F 'Directory versus non-directory ownership comes from the completed object kind.' \
+  "$source_root/man/pkgstate_apply_adapter.3.scdoc" >/dev/null ||
+  fail "application adapter manual invents ownership type"
+
+grep -F 'planner identities are not reused as state identities.' \
+  "$source_root/man/pkgstate_apply_adapter.3.scdoc" >/dev/null ||
+  fail "application adapter manual counterfeits state identities"
 
 grep -F 'An empty retained manifest is known empty' \
   "$source_root/DESIGN.md" >/dev/null ||

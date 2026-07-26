@@ -1,0 +1,169 @@
+PKGSTATE_APPLY_ADAPTER(3)
+
+# NAME
+
+pkgstate_apply_adapter - project completed application into canonical state
+
+# SYNOPSIS
+
+```
+#include <libpkgstate-apply/adapter.h>
+
+auto publication = pkgstate::apply_adapter::project_completed_application(
+    expected_snapshot,
+    lease_bound_application_state,
+    exact_application_request,
+    completed_application_evidence);
+```
+
+# DESCRIPTION
+
+*libpkgstate-apply* is an optional adapter library. It depends on
+*libpkgstate* and *libpkgapply* so the core state library does not acquire
+application-layer types or effects.
+
+*project_completed_application()* accepts four exact immutable authorities:
+
+- the canonical *snapshot* expected by state publication;
+- the *lease_bound_state_projection* used while applying the operation;
+- the exact accepted *package_application_request*; and
+- one durable *completed_application_evidence* value for that request.
+
+It returns one state-owned *state_publication_request*. It does not open a
+store, acquire a state-publication lock, invoke *compare_and_publish()*, or
+construct transaction evidence.
+
+No overload accepts an application receipt for a failed, recovered, partial,
+or indeterminate attempt. Only completed application evidence can become
+installed-state publication intent.
+
+# AUTHORITY VALIDATION
+
+Before constructing state values, the adapter verifies that:
+
+- completed evidence names the supplied request and execution control;
+- request and evidence have the same operation and operation-plan identity;
+- evidence names the supplied application target and lease projection;
+- the lease projection is complete;
+- planner preconditions name the projection snapshot, ownership inventory, and
+  target context;
+- the projection snapshot and ownership identities name the canonical expected
+  snapshot;
+- managed-target and root-view identities agree with the state target binding;
+- every completed path has exactly the owners recorded in canonical state before
+  application; and
+- installation, replacement, or removal names the required old package state.
+
+A disagreement is a typed *projection_error*. The adapter never repairs,
+rebases, or weakens one authority to fit another.
+
+# INSTALLATION AND REPLACEMENT
+
+For installation and replacement, the planner publication intent supplies:
+
+- package release coordinates;
+- complete incoming historical control;
+- candidate-control, artifact, and artifact-manifest identities; and
+- the policy-resolved resulting ownership path set.
+
+Completed application evidence supplies the final physical truth for each owned
+path. A path enters the canonical installed manifest only when it is in the
+planned resulting manifest, application marked ownership publication eligible,
+incoming ownership exists after application, and the final object observation
+is known and present.
+
+Directory versus non-directory ownership comes from the completed object kind.
+It is not inferred from a pathname, archive entry, or planner path role.
+
+The adapter constructs a fresh state-owned *package_release*,
+*installed_control*, and *installed_package*. State constructors compute all
+canonical identities; planner identities are not reused as state identities.
+
+The resulting installed control retains exact provenance for:
+
+- candidate control;
+- artifact;
+- artifact manifest; and
+- completed application evidence.
+
+Runtime dependencies, removal lifecycle declarations, and target-profile facts
+are recorded as facts accepted at installation.
+
+# REMOVAL
+
+Removal requires the exact installed-package, installed-control, and release
+coordinates named by the accepted removal plan to exist in the expected
+snapshot. The adapter constructs one exact removal *package_state_delta*.
+
+Removal does not construct a resulting package or infer state from absent target
+paths.
+
+# PUBLICATION
+
+The returned request contains one package delta and the exact accepted
+operation-plan and completed-application-evidence identities. It carries no
+transaction-evidence identity because this adapter projects one completed
+package operation, not an orchestrator-owned multi-package transaction.
+
+The caller submits the request to *canonical_store::compare_and_publish()*.
+That state operation remains the only authority that compares current state and
+publishes a new canonical snapshot.
+
+# ERRORS
+
+*projection_error_code::request_binding_mismatch*
+	Evidence names another request or execution control.
+
+*projection_error_code::operation_binding_mismatch*
+	The request or evidence operation class is invalid or inconsistent.
+
+*projection_error_code::plan_binding_mismatch*
+	Request, evidence, planner preconditions, or plan identity disagree.
+
+*projection_error_code::target_binding_mismatch*
+	Application target identity disagrees with canonical target binding.
+
+*projection_error_code::state_projection_mismatch*
+	Evidence names another lease-bound state projection.
+
+*projection_error_code::expected_state_mismatch*
+	The projection is incomplete or does not name the expected snapshot.
+
+*projection_error_code::ownership_projection_mismatch*
+	Lease-projected owners differ from canonical pre-application ownership.
+
+*projection_error_code::package_state_mismatch*
+	Required old package, control, or release state is absent or different.
+
+*projection_error_code::completed_path_mismatch*
+	Completed application truth cannot support the planned installed manifest.
+
+*projection_error_code::identity_translation*
+	State identity vocabulary rejected an external canonical representation.
+
+*projection_error_code::path_translation*
+	State path vocabulary rejected an application path.
+
+*projection_error_code::control_translation*
+	State release or installed-control vocabulary rejected planner facts.
+
+*projection_error_code::publication_construction*
+	Canonical state constructors rejected the proposed package, delta, or request.
+
+# BUILD
+
+The adapter is disabled by default. Enable and link it with:
+
+```
+meson setup build -Dapplication_adapter=enabled
+pkg-config --cflags --libs libpkgstate-apply
+```
+
+The installed library and pkg-config module are named *libpkgstate-apply*. The
+core *libpkgstate* pkg-config closure does not acquire *libpkgapply* or
+*libpkgplan* dependencies.
+
+# SEE ALSO
+
+*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_publication*(3),
+*pkgstate_plan_adapter*(3)

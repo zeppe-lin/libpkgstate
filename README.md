@@ -20,6 +20,8 @@ It provides:
 * explicitly incomplete compatibility records and snapshots;
 * explicit receipt-bound import into a fresh canonical store;
 * an optional non-contaminating projection adapter for `libpkgplan`;
+* an optional destination-owned adapter from completed application evidence to
+  canonical state-publication requests;
 * non-mutating diagnostics for canonical and compatibility state;
 * compatibility write transactions for the historical database;
 * an original compatibility backend for `/var/lib/pkg/db`.
@@ -175,6 +177,15 @@ durable `state_target_binding` projection; the adapter refuses a snapshot whose
 binding differs. The adapter accepts no `legacy_snapshot`, invents no target
 context, and supplies no filesystem metadata absent from planner vocabulary.
 
+The optional `libpkgstate-apply` adapter consumes one exact canonical expected
+snapshot, the exact lease-bound state projection used by application, the exact
+accepted package-application request, and durable completed application
+evidence. It validates every cross-authority binding and returns one immutable
+state-publication request. Installation and replacement state is reconstructed
+only from planner publication intent plus completed publication-eligible object
+truth; removal names the exact old package. The adapter performs no store I/O,
+locking, publication, recovery, or transaction composition.
+
 Important invariants:
 
 * canonical release coordinates are non-empty and line-safe;
@@ -245,6 +256,7 @@ The installed manual suite is:
   identities;
 * `pkgstate_legacy_import(3)` — explicit validation and canonical import;
 * `pkgstate_plan_adapter(3)` — optional projection into `libpkgplan`;
+* `pkgstate_apply_adapter(3)` — completed application to state publication;
 * `pkgstate_legacy_text_store(3)` — compatibility backend;
 * `pkgstate-db(5)` — line-oriented compatibility database format;
 * `pkgstate-generation(5)` — canonical generation storage format;
@@ -273,6 +285,10 @@ frontend requires:
 The optional planner adapter requires:
 
 * `libpkgplan` 0.2.0 or later when `-Dplanner_adapter=enabled` is selected.
+
+The optional application adapter requires:
+
+* `libpkgapply` 0.1.0 or later when `-Dapplication_adapter=enabled` is selected.
 
 Optional documentation dependencies:
 
@@ -311,6 +327,7 @@ meson setup build -Dtests=disabled
 meson setup build -Dtools=disabled
 meson setup build -Dman_pages=disabled
 meson setup build-plan -Dplanner_adapter=enabled
+meson setup build-apply -Dapplication_adapter=enabled
 meson setup build-tools -Dinstall_tools=true
 ```
 
@@ -425,7 +442,9 @@ Layout
 
 * `include/libpkgstate/` — installed-state public API;
 * `include/libpkgstate-plan/` — optional planner adapter API;
-* `adapter/` — optional cross-library projection implementation;
+* `include/libpkgstate-apply/` — optional application adapter API;
+* `adapter/` — optional planner projection implementation;
+* `apply_adapter/` — optional application projection implementation;
 * `src/` — library implementation;
 * `tools/` — optional reference clients;
 * `tests/` — model, storage, locking, CLI, header, and documentation tests;

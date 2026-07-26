@@ -153,6 +153,25 @@ The optional adapter tests cover:
 * no `legacy_snapshot` projection path; and
 * separate core and adapter pkg-config dependency closure.
 
+Application-adapter tests
+-------------------------
+
+The optional completed-application adapter tests cover:
+
+* exact request, execution-control, operation, plan, target, and lease-projection
+  binding;
+* canonical expected-snapshot and pre-application ownership agreement;
+* installation, exact replacement, and exact removal deltas;
+* state-owned release, control, installed-package, delta, and request identities;
+* candidate-control, artifact, artifact-manifest, and application-evidence
+  provenance;
+* runtime, removal-lifecycle, and target-profile transfer without execution;
+* final manifest admission only from planned, publication-eligible, known
+  completed ownership truth;
+* directory classification from completed object kind;
+* deterministic publication-request identity; and
+* typed rejection of incomplete or mismatched authorities.
+
 Public-header tests
 -------------------
 
