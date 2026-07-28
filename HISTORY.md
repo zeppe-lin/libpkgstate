@@ -1,5 +1,35 @@
 # History
 
+## 2.2.0
+
+Transaction-provenance projection release. Version 2.2.0 keeps the
+generation-v3 installed-state representation and every existing ABI while
+allowing an effectful transaction controller to retain one exact transaction
+evidence identity during completed application projection.
+
+Authority transition:
+
+- add installation, upgrade, and removal projection overloads that accept one
+  exact `transaction_evidence_identity`;
+- retain that identity in the resulting `state_publication_request`;
+- retain the same identity in the durable `installation_receipt` produced for
+  installation or upgrade;
+- preserve the existing no-transaction-evidence overloads and their identities;
+  and
+- reject no publication model invariant: the adapter supplies the same evidence
+  to both the proposed package receipt and publication request rather than
+  trying to attach transaction provenance after projection.
+
+ABI and representation decisions:
+
+- project version becomes 2.2.0;
+- core `libpkgstate` remains at soversion 3;
+- source, build, planner, and application adapter SONAMEs remain unchanged; and
+- canonical storage remains `libpkgstate-generation-v3`.
+
+Generation-v3 storage does not change in this release. No state-store migration
+or consumer rebuild is required between 2.1.0 and 2.2.0.
+
 ## 2.1.0
 
 Native application-admission release. Version 2.1.0 keeps the generation-v3
