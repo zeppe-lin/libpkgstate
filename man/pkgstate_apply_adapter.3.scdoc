@@ -16,6 +16,12 @@ context, lease-bound state projection, expected native snapshot, ownership
 universe, and completed path consequences. It returns an immutable
 *state_publication_request* and performs no store I/O.
 
+Additive overloads accept one exact *transaction_evidence_identity*. When
+supplied, transaction evidence is retained by the publication request and, for
+installation or upgrade, by the durable installation receipt. The same
+evidence is supplied to both objects during construction; it is never attached
+after projection.
+
 # INCOMING AUTHORITY
 
 Installation and upgrade requests retain an *incoming_package_authority* that
@@ -45,6 +51,10 @@ application evidence grants unplanned ownership.
 Planner and application identities are translated into typed state references.
 State-owned installed control, receipt, package, snapshot, request, and
 publication identities are computed by *libpkgstate*.
+
+The overloads without transaction evidence remain authoritative for operations
+outside an effectful transaction session and preserve their existing identity
+semantics.
 
 # SEE ALSO
 

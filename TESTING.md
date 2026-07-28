@@ -13,6 +13,9 @@ The repository test suite covers:
 - source, build, planner, and application adapter contracts against their exact
   public APIs, including request-bound source/build derivation and rejection of
   foreign incoming artifacts;
+- additive transaction-provenance projection for installation, upgrade, and
+  removal, including exact receipt/publication agreement and preservation of
+  the existing no-evidence identities;
 - public header independence;
 - generated pkg-config metadata;
 - read-only diagnostic behavior;

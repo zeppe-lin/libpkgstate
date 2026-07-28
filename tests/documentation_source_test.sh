@@ -38,6 +38,7 @@ for contract in \
   'Build authority is admitted only after exact artifact inspection.' \
   'Application admission never reconstructs build provenance from planner facts.' \
   'It accepts no second caller-supplied build authority.' \
+  'When supplied, transaction evidence is retained by the publication request' \
   'Generation-v3 storage does not change in this release.' \
   'Native publication begins with a fresh state target.'
 do

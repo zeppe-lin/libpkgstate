@@ -25,9 +25,11 @@ and completed target effects. Installation and upgrade requests retain the
 complete successful build result and independent image inspection admitted by
 libpkgapply. The state application adapter projects source and build authority
 from that exact request, validates the accepted plan and artifact-content
-identity, and creates a complete installation receipt. It accepts no second
-caller-supplied build authority. Application admission never reconstructs build
-provenance from planner facts.
+identity, and creates a complete installation receipt. When an effectful
+transaction controller supplies exact transaction evidence, the adapter retains
+that same evidence in both the publication request and the installation receipt.
+It accepts no second caller-supplied build authority. Application admission
+never reconstructs build provenance from planner facts.
 
 State authority begins at durable admission. It owns installed control, receipt,
 package, ownership, snapshot, publication request, and publication receipt
@@ -48,6 +50,14 @@ and image through `libpkgstate-build`. The resulting source record, build
 provenance, planner publication, application request, completed evidence, and
 expected state must all name one authority universe. A caller cannot substitute
 a valid build from another request or artifact after filesystem application.
+
+Transaction provenance is construction-time authority. The adapter overloads
+that accept `transaction_evidence_identity` pass one exact value into the
+publication request and into every proposed installation receipt. Projection
+without transaction evidence remains available and preserves its existing
+identity semantics. Evidence cannot be attached after projection because that
+would permit the publication request and durable package receipt to name
+different transactions.
 
 ## Complete native records
 

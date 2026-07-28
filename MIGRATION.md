@@ -44,3 +44,20 @@ preserves the reason already stored for the replaced package.
 There is no compatibility overload accepting a separately projected build
 authority. Rebuild consumers against `libpkgstate-apply` soversion 3 and
 `libpkgapply` 1.0.0.
+
+## 2.1.0 to 2.2.0 transaction provenance
+
+Generation-v3 storage and every SONAME remain unchanged. No state-store
+migration or consumer rebuild is required.
+
+Existing `project_completed_application()` overloads continue to produce
+publication requests and installation receipts without transaction evidence.
+Transaction controllers should call the additive overload matching the exact
+installation, upgrade, or removal request and supply one
+`transaction_evidence_identity`. The adapter retains that evidence in the
+publication request and, for installation or upgrade, in the proposed package's
+durable installation receipt.
+
+Do not project first and attempt to add transaction evidence afterward. The
+state model requires the proposed package receipt and publication request to
+carry the same transaction evidence at construction time.

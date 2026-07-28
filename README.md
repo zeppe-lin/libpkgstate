@@ -1,8 +1,9 @@
 # libpkgstate
 
 `libpkgstate` is the native installed-package state authority for Zeppe-Lin.
-Version 2.1 retains the generation-v3 installed-state representation introduced
-in 2.0 while requiring request-bound native application authority.
+Version 2.2 retains the generation-v3 installed-state representation introduced
+in 2.0 while allowing transaction controllers to preserve exact transaction
+provenance during completed application projection.
 
 The library records complete immutable installed truth:
 
@@ -68,10 +69,13 @@ and build provenance that names that same source record.
 completed application evidence, and expected native snapshot. For installation
 it also receives only the initial installation reason. It derives source and
 build authority from the request-bound incoming package, preserves the prior
-reason on upgrade, and accepts no incoming authority on removal.
+reason on upgrade, and accepts no incoming authority on removal. Additive
+overloads carry one exact transaction-evidence identity into the publication
+request and, for install or upgrade, the durable installation receipt.
 
 An `installation_receipt` binds installed control to one target, one completed
-ownership manifest, one operation plan, and one application-evidence identity.
+ownership manifest, one operation plan, one application-evidence identity, and
+optional exact transaction evidence.
 `installed_package` can be constructed only from that complete receipt.
 
 A `snapshot` is complete installed package and ownership state for one exact
