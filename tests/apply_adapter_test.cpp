@@ -865,6 +865,28 @@ check_installation()
   CHECK(installed.receipt().application_evidence().string() ==
         fixture.evidence.identity().string());
 
+  CHECK(!publication.transaction_evidence().has_value());
+  CHECK(!installed.receipt().transaction_evidence().has_value());
+
+  const auto transaction =
+      state_identity<pkgstate::transaction_evidence_identity>(200);
+  const pkgstate::state_publication_request composed =
+      pkgstate::apply_adapter::project_completed_application(
+          fixture.expected,
+          fixture.projection,
+          fixture.request,
+          fixture.evidence,
+          pkgstate::installation_reason::explicit_request(),
+          transaction);
+  CHECK(composed.transaction_evidence().has_value());
+  CHECK(*composed.transaction_evidence() == transaction);
+  CHECK(composed.deltas().front().proposed_package().has_value());
+  CHECK(composed.deltas().front().proposed_package()->receipt()
+            .transaction_evidence().has_value());
+  CHECK(*composed.deltas().front().proposed_package()->receipt()
+             .transaction_evidence() == transaction);
+  CHECK(composed.identity() != publication.identity());
+
   const pkgstate::state_publication_request repeated =
       pkgstate::apply_adapter::project_completed_application(
           fixture.expected,
@@ -919,6 +941,25 @@ check_upgrade()
   CHECK(delta.proposed_package()->identity() != fixture.old_package.identity());
   CHECK(delta.proposed_package()->control().reason() ==
         fixture.old_package.control().reason());
+  CHECK(!publication.transaction_evidence().has_value());
+  CHECK(!delta.proposed_package()->receipt().transaction_evidence().has_value());
+
+  const auto transaction =
+      state_identity<pkgstate::transaction_evidence_identity>(201);
+  const pkgstate::state_publication_request composed =
+      pkgstate::apply_adapter::project_completed_application(
+          fixture.expected,
+          fixture.projection,
+          fixture.request,
+          fixture.evidence,
+          transaction);
+  CHECK(composed.transaction_evidence().has_value());
+  CHECK(*composed.transaction_evidence() == transaction);
+  CHECK(composed.deltas().front().proposed_package().has_value());
+  CHECK(composed.deltas().front().proposed_package()->receipt()
+            .transaction_evidence().has_value());
+  CHECK(*composed.deltas().front().proposed_package()->receipt()
+             .transaction_evidence() == transaction);
 }
 
 void
@@ -937,6 +978,21 @@ check_removal()
   CHECK(delta.expected_package().has_value());
   CHECK(*delta.expected_package() == fixture.old_package.identity());
   CHECK(!delta.proposed_package().has_value());
+  CHECK(!publication.transaction_evidence().has_value());
+
+  const auto transaction =
+      state_identity<pkgstate::transaction_evidence_identity>(202);
+  const pkgstate::state_publication_request composed =
+      pkgstate::apply_adapter::project_completed_application(
+          fixture.expected,
+          fixture.projection,
+          fixture.request,
+          fixture.evidence,
+          transaction);
+  CHECK(composed.transaction_evidence().has_value());
+  CHECK(*composed.transaction_evidence() == transaction);
+  CHECK(composed.deltas().front().kind() ==
+        pkgstate::package_state_delta_kind::remove);
 }
 
 void
