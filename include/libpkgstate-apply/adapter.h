@@ -59,6 +59,15 @@ private:
     const pkgapply::completed_application_evidence& evidence,
     installation_reason reason);
 
+/*! \brief Construct installation publication with exact transaction evidence. */
+[[nodiscard]] state_publication_request project_completed_application(
+    const snapshot& expected_state,
+    const pkgapply::lease_bound_state_projection& application_state,
+    const pkgapply::installation_application_request& request,
+    const pkgapply::completed_application_evidence& evidence,
+    installation_reason reason,
+    transaction_evidence_identity transaction_evidence);
+
 /*! \brief Construct replacement publication from completed native application.
  *
  * The existing installed reason is retained. Incoming source and build
@@ -70,11 +79,27 @@ private:
     const pkgapply::upgrade_application_request& request,
     const pkgapply::completed_application_evidence& evidence);
 
+/*! \brief Construct replacement publication with exact transaction evidence. */
+[[nodiscard]] state_publication_request project_completed_application(
+    const snapshot& expected_state,
+    const pkgapply::lease_bound_state_projection& application_state,
+    const pkgapply::upgrade_application_request& request,
+    const pkgapply::completed_application_evidence& evidence,
+    transaction_evidence_identity transaction_evidence);
+
 /*! \brief Construct removal publication from completed native application. */
 [[nodiscard]] state_publication_request project_completed_application(
     const snapshot& expected_state,
     const pkgapply::lease_bound_state_projection& application_state,
     const pkgapply::removal_application_request& request,
     const pkgapply::completed_application_evidence& evidence);
+
+/*! \brief Construct removal publication with exact transaction evidence. */
+[[nodiscard]] state_publication_request project_completed_application(
+    const snapshot& expected_state,
+    const pkgapply::lease_bound_state_projection& application_state,
+    const pkgapply::removal_application_request& request,
+    const pkgapply::completed_application_evidence& evidence,
+    transaction_evidence_identity transaction_evidence);
 
 } // namespace pkgstate::apply_adapter

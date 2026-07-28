@@ -545,7 +545,8 @@ installed_package construct_installed_package(
     const Publication& publication,
     const pkgapply::completed_application_evidence& evidence,
     const build_adapter::build_authority& incoming,
-    installation_reason reason)
+    installation_reason reason,
+    std::optional<transaction_evidence_identity> transaction_evidence)
 {
   validate_incoming_release(incoming.source(), publication.release(),
                             publication.installed_control());
@@ -569,7 +570,8 @@ installed_package construct_installed_package(
         std::move(control), expected_state.target_binding(),
         std::move(manifest),
         translate_identity<operation_plan_identity>(evidence.plan()),
-        translate_identity<application_evidence_identity>(evidence.identity()));
+        translate_identity<application_evidence_identity>(evidence.identity()),
+        std::move(transaction_evidence));
     return installed_package::make(std::move(receipt));
   }
   catch (const std::exception& error)
@@ -606,7 +608,8 @@ state_publication_request construct_installation(
     const snapshot& expected_state,
     const pkgapply::installation_application_request& request,
     const pkgapply::completed_application_evidence& evidence,
-    installation_reason reason)
+    installation_reason reason,
+    std::optional<transaction_evidence_identity> transaction_evidence)
 {
   build_adapter::build_authority incoming =
       admit_incoming_build(request.incoming());
@@ -619,18 +622,21 @@ state_publication_request construct_installation(
   }
 
   installed_package proposed = construct_installed_package(
-      expected_state, publication, evidence, incoming, std::move(reason));
+      expected_state, publication, evidence, incoming, std::move(reason),
+      transaction_evidence);
   package_state_delta delta = package_state_delta::install(
       std::move(proposed),
       translate_identity<operation_plan_identity>(request.plan().identity()),
       translate_identity<application_evidence_identity>(evidence.identity()));
-  return state_publication_request::make(expected_state, {std::move(delta)});
+  return state_publication_request::make(
+      expected_state, {std::move(delta)}, std::move(transaction_evidence));
 }
 
 state_publication_request construct_upgrade(
     const snapshot& expected_state,
     const pkgapply::upgrade_application_request& request,
-    const pkgapply::completed_application_evidence& evidence)
+    const pkgapply::completed_application_evidence& evidence,
+    std::optional<transaction_evidence_identity> transaction_evidence)
 {
   build_adapter::build_authority incoming =
       admit_incoming_build(request.incoming());
@@ -643,18 +649,20 @@ state_publication_request construct_upgrade(
 
   installed_package proposed = construct_installed_package(
       expected_state, publication, evidence, incoming,
-      old.control().reason());
+      old.control().reason(), transaction_evidence);
   package_state_delta delta = package_state_delta::replace(
       old.identity(), std::move(proposed),
       translate_identity<operation_plan_identity>(plan.identity()),
       translate_identity<application_evidence_identity>(evidence.identity()));
-  return state_publication_request::make(expected_state, {std::move(delta)});
+  return state_publication_request::make(
+      expected_state, {std::move(delta)}, std::move(transaction_evidence));
 }
 
 state_publication_request construct_removal(
     const snapshot& expected_state,
     const pkgapply::removal_application_request& request,
-    const pkgapply::completed_application_evidence& evidence)
+    const pkgapply::completed_application_evidence& evidence,
+    std::optional<transaction_evidence_identity> transaction_evidence)
 {
   const auto& plan = request.plan();
   const auto& publication = plan.publication();
@@ -666,7 +674,8 @@ state_publication_request construct_removal(
       old.release().name(), old.identity(),
       translate_identity<operation_plan_identity>(plan.identity()),
       translate_identity<application_evidence_identity>(evidence.identity()));
-  return state_publication_request::make(expected_state, {std::move(delta)});
+  return state_publication_request::make(
+      expected_state, {std::move(delta)}, std::move(transaction_evidence));
 }
 
 } // namespace
@@ -690,7 +699,36 @@ state_publication_request project_completed_application(
   try
   {
     return construct_installation(
-        expected_state, request, evidence, std::move(reason));
+        expected_state, request, evidence, std::move(reason), std::nullopt);
+  }
+  catch (const projection_error&)
+  {
+    throw;
+  }
+  catch (const std::exception& error)
+  {
+    throw projection_error(
+        projection_error_code::publication_construction,
+        std::string("state rejected installation publication projection: ") +
+            error.what());
+  }
+}
+
+state_publication_request project_completed_application(
+    const snapshot& expected_state,
+    const pkgapply::lease_bound_state_projection& application_state,
+    const pkgapply::installation_application_request& request,
+    const pkgapply::completed_application_evidence& evidence,
+    installation_reason reason,
+    transaction_evidence_identity transaction_evidence)
+{
+  const pkgapply::package_application_request envelope(request);
+  validate_common(expected_state, application_state, envelope, evidence);
+  try
+  {
+    return construct_installation(
+        expected_state, request, evidence, std::move(reason),
+        std::move(transaction_evidence));
   }
   catch (const projection_error&)
   {
@@ -715,7 +753,35 @@ state_publication_request project_completed_application(
   validate_common(expected_state, application_state, envelope, evidence);
   try
   {
-    return construct_upgrade(expected_state, request, evidence);
+    return construct_upgrade(
+        expected_state, request, evidence, std::nullopt);
+  }
+  catch (const projection_error&)
+  {
+    throw;
+  }
+  catch (const std::exception& error)
+  {
+    throw projection_error(
+        projection_error_code::publication_construction,
+        std::string("state rejected upgrade publication projection: ") +
+            error.what());
+  }
+}
+
+state_publication_request project_completed_application(
+    const snapshot& expected_state,
+    const pkgapply::lease_bound_state_projection& application_state,
+    const pkgapply::upgrade_application_request& request,
+    const pkgapply::completed_application_evidence& evidence,
+    transaction_evidence_identity transaction_evidence)
+{
+  const pkgapply::package_application_request envelope(request);
+  validate_common(expected_state, application_state, envelope, evidence);
+  try
+  {
+    return construct_upgrade(
+        expected_state, request, evidence, std::move(transaction_evidence));
   }
   catch (const projection_error&)
   {
@@ -740,7 +806,35 @@ state_publication_request project_completed_application(
   validate_common(expected_state, application_state, envelope, evidence);
   try
   {
-    return construct_removal(expected_state, request, evidence);
+    return construct_removal(
+        expected_state, request, evidence, std::nullopt);
+  }
+  catch (const projection_error&)
+  {
+    throw;
+  }
+  catch (const std::exception& error)
+  {
+    throw projection_error(
+        projection_error_code::publication_construction,
+        std::string("state rejected removal publication projection: ") +
+            error.what());
+  }
+}
+
+state_publication_request project_completed_application(
+    const snapshot& expected_state,
+    const pkgapply::lease_bound_state_projection& application_state,
+    const pkgapply::removal_application_request& request,
+    const pkgapply::completed_application_evidence& evidence,
+    transaction_evidence_identity transaction_evidence)
+{
+  const pkgapply::package_application_request envelope(request);
+  validate_common(expected_state, application_state, envelope, evidence);
+  try
+  {
+    return construct_removal(
+        expected_state, request, evidence, std::move(transaction_evidence));
   }
   catch (const projection_error&)
   {
