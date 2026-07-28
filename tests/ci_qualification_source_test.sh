@@ -36,7 +36,7 @@ for pin in \
   e1f6dfd8cc4bfeb2f8da44345d8ec6368281c6e0 \
   4fbe346fb08459ca56b0096eb54505130ea17244 \
   57a10b166450dd0396d4d461d1d38352073a5a1e \
-  05c5cf0ca752b57f668a1c59bb1c7e0a84ff3439
+  fbf21697f1fe4a597a07a6ffea3521af6e2d06e4
 do
   count=$(grep -F -c "$pin" "$workflow")
   test "$count" -eq 3 ||
