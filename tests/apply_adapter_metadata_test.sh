@@ -32,9 +32,9 @@ test "$name" = libpkgstate-apply ||
 
 requires=$(sed -n 's/^Requires:[[:space:]]*//p' "$metadata" | tr '\n' ',')
 for requirement in \
-  'libpkgstate-source[[:space:]]*>=[[:space:]]*2\.0\.0' \
-  'libpkgstate-build[[:space:]]*>=[[:space:]]*2\.0\.0' \
-  'libpkgapply[[:space:]]*>=[[:space:]]*1\.0\.0'
+  'libpkgstate-source[[:space:]]*>=[[:space:]]*2\.3\.0' \
+  'libpkgstate-build[[:space:]]*>=[[:space:]]*2\.3\.0' \
+  'libpkgapply[[:space:]]*>=[[:space:]]*2\.0\.0'
 do
   printf '%s\n' "$requires" |
     grep -Eq "(^|,)[[:space:]]*$requirement([[:space:]]*,|$)" ||
@@ -42,12 +42,12 @@ do
 done
 
 # Meson may de-duplicate the direct core requirement because both state-side
-# adapters already carry libpkgstate >= 2.0.0 in the effective closure.
+# adapters at 2.3.0 already carry libpkgstate >= 2.0.0 in the effective closure.
 if ! printf '%s\n' "$requires" |
      grep -Eq '(^|,)[[:space:]]*libpkgstate[[:space:]]*>=[[:space:]]*2\.0\.0([[:space:]]*,|$)'
 then
   printf '%s\n' "$requires" |
-    grep -Eq 'libpkgstate-(source|build)[[:space:]]*>=[[:space:]]*2\.0\.0' ||
+    grep -Eq 'libpkgstate-(source|build)[[:space:]]*>=[[:space:]]*2\.3\.0' ||
     fail 'pkg-config metadata has no effective libpkgstate 2.0.0 closure'
 fi
 

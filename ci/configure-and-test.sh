@@ -63,10 +63,10 @@ configure_dependency "$apply_source" "$build_path/libpkgapply"
 for requirement in \
   'libpkgimage:0.3.0' \
   'libpkgplan:0.2.0' \
-  'libpkgsource:1.0.0' \
-  'libpkgsource-plan:1.0.0' \
-  'libpkgbuild:1.0.0' \
-  'libpkgapply:1.0.0'
+  'libpkgsource:2.0.0' \
+  'libpkgsource-plan:2.0.0' \
+  'libpkgbuild:2.0.0' \
+  'libpkgapply:2.0.0'
 do
   module=${requirement%:*} expected=${requirement#*:}
   actual=$(pkg-config --modversion "$module")

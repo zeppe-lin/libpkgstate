@@ -35,8 +35,8 @@ test "$name" = libpkgstate-build ||
 # repeat the core module literally.
 requires=$(sed -n 's/^Requires:[[:space:]]*//p' "$metadata" | tr '\n' ',')
 for dependency in \
-  'libpkgstate-source[[:space:]]*>=[[:space:]]*2\.0\.0' \
-  'libpkgbuild[[:space:]]*>=[[:space:]]*1\.0\.0' \
+  'libpkgstate-source[[:space:]]*>=[[:space:]]*2\.3\.0' \
+  'libpkgbuild[[:space:]]*>=[[:space:]]*2\.0\.0' \
   'libpkgimage[[:space:]]*>=[[:space:]]*0\.3\.0'
 do
   printf '%s\n' "$requires" |

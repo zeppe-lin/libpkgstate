@@ -1,5 +1,19 @@
 # History
 
+## 2.3.0
+
+Generation-2 authority-closure migration release.
+
+- Rebuilt `libpkgstate-source` against `libpkgsource 2.0.0`.
+- Rebuilt `libpkgstate-build` against `libpkgbuild 2.0.0`.
+- Rebuilt `libpkgstate-apply` against `libpkgapply 2.0.0`.
+- Raised all adapter pkg-config floors so generation-1 source/build/application
+  libraries cannot re-enter a native process.
+- Core `libpkgstate` remains at soversion 3; source, build, planner, and
+  application adapter SONAMEs remain unchanged.
+- Generation-v3 storage does not change in this release. No durable state
+  migration is required.
+
 ## 2.2.0
 
 Transaction-provenance projection release. Version 2.2.0 keeps the

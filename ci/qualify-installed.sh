@@ -19,20 +19,21 @@ unset PKG_CONFIG_SYSROOT_DIR
 runtime_path=$install_prefix/lib:$dependency_prefix/lib
 for module in libpkgstate libpkgstate-source libpkgstate-build libpkgstate-plan libpkgstate-apply; do
   version=$(pkg-config --modversion "$module")
-  [ "$version" = 2.2.0 ] || { echo "$module version is '$version', expected 2.2.0" >&2; exit 1; }
+  [ "$version" = 2.3.0 ] || { echo "$module version is '$version', expected 2.3.0" >&2; exit 1; }
 done
 if { pkg-config --print-requires libpkgstate; pkg-config --print-requires-private libpkgstate; } |
   grep -E '(^|[[:space:]])libpkg(source|build|image|plan|apply)([[:space:]]|$)' >/dev/null; then
   echo 'core libpkgstate metadata is contaminated by external authority dependencies' >&2
   exit 1
 fi
-pkg-config --print-requires libpkgstate-source | grep -F 'libpkgsource >= 1.0.0' >/dev/null
-pkg-config --print-requires libpkgstate-build | grep -F 'libpkgbuild >= 1.0.0' >/dev/null
+pkg-config --print-requires libpkgstate-source | grep -F 'libpkgsource >= 2.0.0' >/dev/null
+pkg-config --print-requires libpkgstate-build | grep -F 'libpkgstate-source >= 2.3.0' >/dev/null
+pkg-config --print-requires libpkgstate-build | grep -F 'libpkgbuild >= 2.0.0' >/dev/null
 pkg-config --print-requires libpkgstate-build | grep -F 'libpkgimage >= 0.3.0' >/dev/null
 pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgplan >= 0.2.0' >/dev/null
-pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate-source >= 2.0.0' >/dev/null
-pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate-build >= 2.0.0' >/dev/null
-pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgapply >= 1.0.0' >/dev/null
+pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate-source >= 2.3.0' >/dev/null
+pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate-build >= 2.3.0' >/dev/null
+pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgapply >= 2.0.0' >/dev/null
 cxx=${CXX:-c++}
 for pair in \
   core:libpkgstate \
@@ -91,7 +92,7 @@ grep -F 'storage-format=libpkgstate-generation-v3' "$temporary/report" >/dev/nul
 grep -F 'packages=0' "$temporary/report" >/dev/null
 LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   "$install_prefix/bin/pkgstate-check" --version |
-  grep -E '^pkgstate-check \(libpkgstate\) 2\.2\.0$' >/dev/null
+  grep -E '^pkgstate-check \(libpkgstate\) 2\.3\.0$' >/dev/null
 if [ -s "$build_dir/man/libpkgstate.3" ]; then
   for page in \
     man1/pkgstate-check.1 \

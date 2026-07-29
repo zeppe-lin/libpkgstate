@@ -1,7 +1,7 @@
 project(
   'libpkgstate',
   'cpp',
-  version: '2.2.0',
+  version: '2.3.0',
   license: 'GPL-3.0-or-later',
   meson_version: '>=1.6.0',
   default_options: [
@@ -32,7 +32,7 @@ libcrypto_dep = dependency(
 
 libpkgsource_dep = dependency(
   'libpkgsource',
-  version: '>=1.0.0',
+  version: '>=2.0.0',
   required: get_option('source_adapter').enabled() or
             get_option('build_adapter').enabled() or
             get_option('application_adapter').enabled(),
@@ -46,7 +46,7 @@ libpkgsource_dep = dependency(
 
 libpkgbuild_dep = dependency(
   'libpkgbuild',
-  version: '>=1.0.0',
+  version: '>=2.0.0',
   required: get_option('build_adapter').enabled() or get_option('application_adapter').enabled(),
   static: want_static,
   fallback: ['libpkgbuild', 'libpkgbuild_dep'],
@@ -82,7 +82,7 @@ libpkgplan_dep = dependency(
 
 libpkgapply_dep = dependency(
   'libpkgapply',
-  version: '>=1.0.0',
+  version: '>=2.0.0',
   required: get_option('application_adapter'),
   static: want_static,
   fallback: ['libpkgapply', 'libpkgapply_dep'],

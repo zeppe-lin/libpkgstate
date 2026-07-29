@@ -20,7 +20,7 @@ authority independently inspects those bytes. The state build adapter admits the
 pair only when source projection, artifact content, inspection receipt, and every
 normalized payload field agree exactly.
 
-Application authority supplies one operation-specific libpkgapply 1.0 request
+Application authority supplies one operation-specific libpkgapply 2.0 request
 and completed target effects. Installation and upgrade requests retain the
 complete successful build result and independent image inspection admitted by
 libpkgapply. The state application adapter projects source and build authority

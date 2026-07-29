@@ -61,3 +61,11 @@ durable installation receipt.
 Do not project first and attempt to add transaction evidence afterward. The
 state model requires the proposed package receipt and publication request to
 carry the same transaction evidence at construction time.
+
+## 2.2.0 to 2.3.0 authority closure
+
+No state-store migration is required. Rebuild and reinstall all adapters after
+installing `libpkgsource 2.0.0`, `libpkgbuild 2.0.0`, and `libpkgapply 2.0.0`.
+The adapter SONAMEs remain stable because they project external authority by
+reference into unchanged native state values; their runtime dependency closure
+must nevertheless be generation-consistent.

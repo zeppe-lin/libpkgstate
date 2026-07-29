@@ -46,8 +46,8 @@ pkgconf.generate(
   subdirs: '.',
   requires: [
     'libpkgstate >= 2.0.0',
-    'libpkgstate-source >= 2.0.0',
-    'libpkgstate-build >= 2.0.0',
-    'libpkgapply >= 1.0.0',
+    'libpkgstate-source >= 2.3.0',
+    'libpkgstate-build >= 2.3.0',
+    'libpkgapply >= 2.0.0',
   ],
 )

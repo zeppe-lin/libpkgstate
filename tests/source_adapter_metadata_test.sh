@@ -35,8 +35,8 @@ printf '%s\n' "$requires" |
   grep -Eq '(^|,)[[:space:]]*libpkgstate[[:space:]]*>=[[:space:]]*2\.0\.0([[:space:]]*,|$)' ||
   fail 'pkg-config metadata omits the libpkgstate 2.0.0 dependency floor'
 printf '%s\n' "$requires" |
-  grep -Eq '(^|,)[[:space:]]*libpkgsource[[:space:]]*>=[[:space:]]*1\.0\.0([[:space:]]*,|$)' ||
-  fail 'pkg-config metadata omits the libpkgsource 1.0.0 dependency floor'
+  grep -Eq '(^|,)[[:space:]]*libpkgsource[[:space:]]*>=[[:space:]]*2\.0\.0([[:space:]]*,|$)' ||
+  fail 'pkg-config metadata omits the libpkgsource 2.0.0 dependency floor'
 
 libs=$(sed -n 's/^Libs:[[:space:]]*//p' "$metadata")
 printf ' %s \n' "$libs" |

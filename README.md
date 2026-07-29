@@ -36,7 +36,7 @@ libpkgbuild successful result + exact libpkgimage inspection
         v
 libpkgstate-build -> build_authority
         |
-libpkgapply 1.0 request-bound incoming build + completed effects
+libpkgapply 2.0 request-bound incoming build + completed effects
         |
         v
 libpkgstate-apply -> source/build admission -> installation_receipt
