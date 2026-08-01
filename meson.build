@@ -82,7 +82,7 @@ libpkgplan_dep = dependency(
 
 libpkgapply_dep = dependency(
   'libpkgapply',
-  version: '>=2.0.0',
+  version: '>=2.1.0',
   required: get_option('application_adapter'),
   static: want_static,
   fallback: ['libpkgapply', 'libpkgapply_dep'],

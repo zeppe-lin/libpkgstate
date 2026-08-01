@@ -5,7 +5,10 @@ apply_adapter_inc = include_directories('../include')
 
 libpkgstate_apply = library(
   'pkgstate-apply',
-  'apply_adapter.cpp',
+  [
+    'apply_adapter.cpp',
+    'state_projection.cpp',
+  ],
   cpp_args: ['-D_FILE_OFFSET_BITS=64'],
   include_directories: apply_adapter_inc,
   dependencies: [
@@ -35,6 +38,7 @@ meson.override_dependency('libpkgstate-apply', libpkgstate_apply_dep)
 
 install_headers(
   '../include/libpkgstate-apply/adapter.h',
+  '../include/libpkgstate-apply/state_projection.h',
   subdir: 'libpkgstate-apply',
 )
 
@@ -48,6 +52,6 @@ pkgconf.generate(
     'libpkgstate >= 2.0.0',
     'libpkgstate-source >= 2.3.0',
     'libpkgstate-build >= 2.3.0',
-    'libpkgapply >= 2.0.0',
+    'libpkgapply >= 2.1.0',
   ],
 )
