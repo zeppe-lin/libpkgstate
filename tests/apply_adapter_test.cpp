@@ -7,6 +7,8 @@
 #include <array>
 #include <cstdint>
 #include <optional>
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -26,6 +28,8 @@
 #include <libpkgplan/remove.h>
 #include <libpkgplan/upgrade.h>
 #include <libpkgstate-apply/adapter.h>
+#include <libpkgstate-apply/state_projection.h>
+#include <libpkgstate/canonical_store.h>
 #include <libpkgstate-build/adapter.h>
 #include <libpkgstate-source/adapter.h>
 #include <libpkgstate/installed_control.h>
@@ -695,6 +699,87 @@ removal_consequence(const pkgplan::removal_path_decision& decision)
       pkgapply::ownership_publication_status::eligible);
 }
 
+
+
+class recording_lease final : public pkgapply::target_mutation_lease {
+public:
+  recording_lease(
+      pkgapply::mutation_lease_instance_identity identity,
+      pkgapply::application_target_context_identity target,
+      pkgapply::mutation_exclusion_domain_identity domain,
+      std::vector<bool> held_results,
+      std::vector<std::string>& trace)
+      : identity_(std::move(identity)), target_(std::move(target)),
+        domain_(std::move(domain)), held_results_(std::move(held_results)),
+        trace_(trace)
+  {
+  }
+
+  const pkgapply::mutation_lease_instance_identity&
+  identity() const noexcept override
+  {
+    return identity_;
+  }
+
+  const pkgapply::application_target_context_identity&
+  target() const noexcept override
+  {
+    return target_;
+  }
+
+  const pkgapply::mutation_exclusion_domain_identity&
+  exclusion_domain() const noexcept override
+  {
+    return domain_;
+  }
+
+  bool held() const noexcept override
+  {
+    trace_.push_back("held");
+    const std::size_t index = held_calls_++;
+    if (held_results_.empty())
+      return false;
+    return held_results_[std::min(index, held_results_.size() - 1)];
+  }
+
+private:
+  pkgapply::mutation_lease_instance_identity identity_;
+  pkgapply::application_target_context_identity target_;
+  pkgapply::mutation_exclusion_domain_identity domain_;
+  std::vector<bool> held_results_;
+  std::vector<std::string>& trace_;
+  mutable std::size_t held_calls_ = 0;
+};
+
+class recording_store final : public pkgstate::canonical_store {
+public:
+  recording_store(pkgstate::snapshot state, std::vector<std::string>& trace)
+      : state_(std::move(state)), trace_(trace)
+  {
+  }
+
+  pkgstate::snapshot read() const override
+  {
+    trace_.push_back("read");
+    ++reads_;
+    return state_;
+  }
+
+  std::size_t reads() const noexcept { return reads_; }
+
+protected:
+  std::unique_ptr<pkgstate::canonical_publication_transaction>
+  begin_publication() const override
+  {
+    throw std::runtime_error("unexpected publication");
+  }
+
+private:
+  pkgstate::snapshot state_;
+  std::vector<std::string>& trace_;
+  mutable std::size_t reads_ = 0;
+};
+
 struct installation_fixture final {
   pkgstate::snapshot expected;
   planner_context planner;
@@ -1189,6 +1274,203 @@ check_failures()
   }
 }
 
+
+
+void
+check_lease_bound_state_projection()
+{
+  removal_fixture fixture;
+  const pkgapply::package_application_request request(fixture.request);
+  std::vector<std::string> trace;
+  recording_lease lease(
+      apply_identity<pkgapply::mutation_lease_instance_identity>(130),
+      fixture.target.identity(), fixture.target.mutation_exclusion_domain(),
+      {true}, trace);
+  recording_store store(fixture.expected, trace);
+
+  const auto projected =
+      pkgstate::apply_adapter::read_application_state(request, lease, store);
+
+  CHECK(store.reads() == 1);
+  CHECK(trace == std::vector<std::string>({"held", "read", "held", "held"}));
+  CHECK(projected.state().identity() == fixture.expected.identity());
+  CHECK(projected.projection().lease() == lease.identity());
+  CHECK(projected.projection().snapshot().string() ==
+        fixture.expected.identity().string());
+  CHECK(projected.projection().ownership_inventory().string() ==
+        fixture.expected.ownership_identity().string());
+  CHECK(projected.projection().completeness() ==
+        pkgapply::state_projection_completeness::complete);
+  CHECK(projected.projection().paths().size() ==
+        fixture.plan.preconditions().paths().size());
+  CHECK(projected.projection().paths().front().path() ==
+        fixture.plan.preconditions().paths().front().path());
+  CHECK(projected.projection().paths().front().owners() ==
+        fixture.plan.preconditions().paths().front().owners());
+
+  std::vector<std::string> repeated_trace;
+  recording_lease repeated_lease(
+      lease.identity(), fixture.target.identity(),
+      fixture.target.mutation_exclusion_domain(), {true}, repeated_trace);
+  recording_store repeated_store(fixture.expected, repeated_trace);
+  const auto repeated = pkgstate::apply_adapter::read_application_state(
+      request, repeated_lease, repeated_store);
+  CHECK(repeated.projection().identity() == projected.projection().identity());
+  CHECK(repeated.projection().evidence() == projected.projection().evidence());
+
+  std::vector<std::string> other_trace;
+  recording_lease other_lease(
+      apply_identity<pkgapply::mutation_lease_instance_identity>(131),
+      fixture.target.identity(), fixture.target.mutation_exclusion_domain(),
+      {true}, other_trace);
+  recording_store other_store(fixture.expected, other_trace);
+  const auto other = pkgstate::apply_adapter::read_application_state(
+      request, other_lease, other_store);
+  CHECK(other.projection().identity() != projected.projection().identity());
+  CHECK(other.projection().evidence() != projected.projection().evidence());
+}
+
+void
+check_lease_bound_state_projection_failures()
+{
+  removal_fixture fixture;
+  const pkgapply::package_application_request request(fixture.request);
+
+  {
+    std::vector<std::string> trace;
+    recording_lease lease(
+        apply_identity<pkgapply::mutation_lease_instance_identity>(140),
+        fixture.target.identity(), fixture.target.mutation_exclusion_domain(),
+        {false}, trace);
+    recording_store store(fixture.expected, trace);
+    try
+    {
+      static_cast<void>(pkgstate::apply_adapter::read_application_state(
+          request, lease, store));
+      CHECK(false);
+    }
+    catch (const pkgstate::apply_adapter::application_state_projection_error& error)
+    {
+      CHECK(error.code() ==
+            pkgstate::apply_adapter::application_state_projection_error_code::
+                lease_not_held);
+      CHECK(store.reads() == 0);
+    }
+  }
+
+  {
+    std::vector<std::string> trace;
+    recording_lease lease(
+        apply_identity<pkgapply::mutation_lease_instance_identity>(141),
+        fixture.target.identity(), fixture.target.mutation_exclusion_domain(),
+        {true, false}, trace);
+    recording_store store(fixture.expected, trace);
+    try
+    {
+      static_cast<void>(pkgstate::apply_adapter::read_application_state(
+          request, lease, store));
+      CHECK(false);
+    }
+    catch (const pkgstate::apply_adapter::application_state_projection_error& error)
+    {
+      CHECK(error.code() ==
+            pkgstate::apply_adapter::application_state_projection_error_code::
+                lease_lost);
+      CHECK(store.reads() == 1);
+    }
+  }
+
+  {
+    std::vector<std::string> trace;
+    recording_lease lease(
+        apply_identity<pkgapply::mutation_lease_instance_identity>(142),
+        apply_identity<pkgapply::application_target_context_identity>(143),
+        fixture.target.mutation_exclusion_domain(), {true}, trace);
+    recording_store store(fixture.expected, trace);
+    try
+    {
+      static_cast<void>(pkgstate::apply_adapter::read_application_state(
+          request, lease, store));
+      CHECK(false);
+    }
+    catch (const pkgstate::apply_adapter::application_state_projection_error& error)
+    {
+      CHECK(error.code() ==
+            pkgstate::apply_adapter::application_state_projection_error_code::
+                lease_target_mismatch);
+      CHECK(store.reads() == 0);
+    }
+  }
+
+  {
+    std::vector<std::string> trace;
+    recording_lease lease(
+        apply_identity<pkgapply::mutation_lease_instance_identity>(144),
+        fixture.target.identity(),
+        apply_identity<pkgapply::mutation_exclusion_domain_identity>(145),
+        {true}, trace);
+    recording_store store(fixture.expected, trace);
+    try
+    {
+      static_cast<void>(pkgstate::apply_adapter::read_application_state(
+          request, lease, store));
+      CHECK(false);
+    }
+    catch (const pkgstate::apply_adapter::application_state_projection_error& error)
+    {
+      CHECK(error.code() ==
+            pkgstate::apply_adapter::application_state_projection_error_code::
+                lease_domain_mismatch);
+      CHECK(store.reads() == 0);
+    }
+  }
+
+  {
+    std::vector<std::string> trace;
+    recording_lease lease(
+        apply_identity<pkgapply::mutation_lease_instance_identity>(146),
+        fixture.target.identity(), fixture.target.mutation_exclusion_domain(),
+        {true}, trace);
+    recording_store store(pkgstate::snapshot::make(state_target(20)), trace);
+    try
+    {
+      static_cast<void>(pkgstate::apply_adapter::read_application_state(
+          request, lease, store));
+      CHECK(false);
+    }
+    catch (const pkgstate::apply_adapter::application_state_projection_error& error)
+    {
+      CHECK(error.code() ==
+            pkgstate::apply_adapter::application_state_projection_error_code::
+                target_binding_mismatch);
+      CHECK(store.reads() == 1);
+    }
+  }
+
+  {
+    std::vector<std::string> trace;
+    recording_lease lease(
+        apply_identity<pkgapply::mutation_lease_instance_identity>(147),
+        fixture.target.identity(), fixture.target.mutation_exclusion_domain(),
+        {true}, trace);
+    recording_store store(
+        pkgstate::snapshot::make(fixture.target_binding), trace);
+    try
+    {
+      static_cast<void>(pkgstate::apply_adapter::read_application_state(
+          request, lease, store));
+      CHECK(false);
+    }
+    catch (const pkgstate::apply_adapter::application_state_projection_error& error)
+    {
+      CHECK(error.code() ==
+            pkgstate::apply_adapter::application_state_projection_error_code::
+                expected_snapshot_mismatch);
+      CHECK(store.reads() == 1);
+    }
+  }
+}
+
 } // namespace
 
 int
@@ -1199,5 +1481,7 @@ main()
   check_upgrade();
   check_removal();
   check_failures();
+  check_lease_bound_state_projection();
+  check_lease_bound_state_projection_failures();
   return 0;
 }

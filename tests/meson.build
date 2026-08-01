@@ -133,6 +133,15 @@ if get_option('tests').allowed()
     test('compile public header libpkgstate-apply/adapter.h',
          apply_adapter_header_test)
 
+    apply_state_projection_header_test = executable(
+      'apply-state-projection-public-header-test',
+      'public_header_test.cpp',
+      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-apply/state_projection.h"'],
+      dependencies: libpkgstate_apply_dep,
+    )
+    test('compile public header libpkgstate-apply/state_projection.h',
+         apply_state_projection_header_test)
+
     test(
       'verify application adapter pkg-config metadata',
       sh,
