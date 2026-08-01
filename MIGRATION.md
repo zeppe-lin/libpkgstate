@@ -69,3 +69,13 @@ installing `libpkgsource 2.0.0`, `libpkgbuild 2.0.0`, and `libpkgapply 2.0.0`.
 The adapter SONAMEs remain stable because they project external authority by
 reference into unchanged native state values; their runtime dependency closure
 must nevertheless be generation-consistent.
+
+## 2.3.0 to 2.4.0 lease-bound application state
+
+No durable state migration is required. Canonical generation storage remains
+`libpkgstate-generation-v3`, core soversion remains 3, and the application
+adapter soversion remains 3. Consumers that assemble native application effects
+should replace caller-constructed `lease_bound_state_projection` values with
+`read_application_state()`, passing the exact application request, live
+libpkgapply 2.1 target mutation lease, and canonical store. The returned snapshot
+and projection must remain paired for the lifetime of the effect driver.
