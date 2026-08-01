@@ -25,13 +25,18 @@ build directory or accept planner candidate facts as substitutes.
 
 # APPLICATION AUTHORITY
 
-*libpkgapply* owns completed target effects and durable application evidence.
-The application adapter validates the accepted plan, expected state, target,
-ownership projection, and completed path consequences. Install and upgrade
-projection require an *incoming_installation_authority* containing the exact
-*build_authority* produced by *libpkgstate-build*. It verifies the accepted plan
-against the admitted artifact-content identity and never reconstructs build
-provenance from planner facts.
+*libpkgapply* owns the target context, outer mutation-lease contract, accepted
+application request, completed target effects, and durable application evidence.
+Before mutation, *libpkgstate-apply* performs one canonical state read while the
+caller-owned lease is live and derives the exact path-owner projection required
+by that request. The snapshot and projection are returned as one value; the
+projection evidence identity is not caller supplied.
+
+After completed application, the same adapter validates the accepted plan,
+expected state, target, ownership projection, and completed path consequences.
+Install and upgrade authority is taken only from the request-bound successful
+build and independent image inspection retained by *libpkgapply*. The adapter
+never reconstructs build provenance from planner facts.
 
 # STATE AUTHORITY
 

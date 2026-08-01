@@ -40,3 +40,7 @@ meson test -C build --print-errorlogs
 
 Sanitizer qualification uses address and undefined-behavior sanitizers. Shared
 and static dependency closures are built separately.
+
+- lease-bound application-state projection performs one canonical read, rejects
+  absent, lost, foreign, stale, or target-mismatched authority, derives stable
+  evidence, and never enters publication;

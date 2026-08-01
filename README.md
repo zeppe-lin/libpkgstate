@@ -1,9 +1,9 @@
 # libpkgstate
 
 `libpkgstate` is the native installed-package state authority for Zeppe-Lin.
-Version 2.2 retains the generation-v3 installed-state representation introduced
-in 2.0 while allowing transaction controllers to preserve exact transaction
-provenance during completed application projection.
+Version 2.4 retains the generation-v3 installed-state representation introduced
+in 2.0 and adds the missing lease-bound read bridge from canonical installed
+truth into libpkgapply's exact application path universe.
 
 The library records complete immutable installed truth:
 
@@ -36,7 +36,14 @@ libpkgbuild successful result + exact libpkgimage inspection
         v
 libpkgstate-build -> build_authority
         |
-libpkgapply 2.0 request-bound incoming build + completed effects
+caller-held libpkgapply 2.1 target mutation lease
+        |
+canonical_store -- one read --> libpkgstate-apply
+        |                           |
+        |                           v
+        |                 lease-bound application state
+        |
+libpkgapply request-bound incoming build + completed effects
         |
         v
 libpkgstate-apply -> source/build admission -> installation_receipt
@@ -65,7 +72,12 @@ and inspection identities.
 An `installed_control` binds one source record, one typed installation reason,
 and build provenance that names that same source record.
 
-`libpkgstate-apply` receives the exact operation-specific libpkgapply request,
+Before application, `libpkgstate-apply` reads the canonical store exactly once
+while the caller's target mutation lease is live. It returns the snapshot and
+its exact accepted-plan path-owner projection as one inseparable value and
+derives projection evidence rather than accepting an identity from the caller.
+
+`libpkgstate-apply` also receives the exact operation-specific libpkgapply request,
 completed application evidence, and expected native snapshot. For installation
 it also receives only the initial installation reason. It derives source and
 build authority from the request-bound incoming package, preserves the prior

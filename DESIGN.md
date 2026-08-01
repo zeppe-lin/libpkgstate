@@ -20,8 +20,15 @@ authority independently inspects those bytes. The state build adapter admits the
 pair only when source projection, artifact content, inspection receipt, and every
 normalized payload field agree exactly.
 
-Application authority supplies one operation-specific libpkgapply 2.0 request
-and completed target effects. Installation and upgrade requests retain the
+Application authority supplies one operation-specific libpkgapply 2.1 request,
+one caller-owned live target mutation lease, and completed target effects. Before
+mutation, the state application adapter performs exactly one canonical store read
+under that lease, validates the request's expected snapshot and ownership
+inventory, and derives the complete accepted-plan path-owner projection. The
+returned snapshot and projection are one value, and projection evidence is
+computed from the exact authority universe rather than supplied by the caller.
+
+After application, application authority supplies the completed target effects. Installation and upgrade requests retain the
 complete successful build result and independent image inspection admitted by
 libpkgapply. The state application adapter projects source and build authority
 from that exact request, validates the accepted plan and artifact-content

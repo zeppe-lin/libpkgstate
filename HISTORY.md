@@ -1,5 +1,27 @@
 # History
 
+## 2.4.0
+
+Lease-bound application-state projection release.
+
+- add `read_application_state()` to `libpkgstate-apply`;
+- require one explicit caller-owned libpkgapply 2.1 target mutation lease and
+  one canonical store;
+- perform exactly one store read while the lease is live and recheck lease
+  retention after the read and before returning;
+- return the exact canonical snapshot together with its complete accepted-plan
+  path-owner projection as one value;
+- derive state-projection evidence canonically from the request, target, lease
+  acquisition, state target, snapshot, ownership inventory, and path closure;
+- add no target observation, application execution, publication, reconciliation,
+  repair, store initialization, lease acquisition, waiting, or retry policy;
+- raise the `libpkgstate-apply` dependency floor to libpkgapply 2.1.0 while
+  retaining adapter soversion 3 and core soversion 3; and
+- retain `libpkgstate-generation-v3` without migration.
+
+Generation-v3 storage does not change in this release. No durable state
+migration is required between 2.3.0 and 2.4.0.
+
 ## 2.3.0
 
 Generation-2 authority-closure migration release.

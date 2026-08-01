@@ -53,8 +53,10 @@ Optional libraries provide explicit authority bridges:
 	Projects complete installed state into the existing *libpkgplan* fact model.
 
 *libpkgstate-apply*
-	Combines completed *libpkgapply* evidence with admitted *libpkgstate-build*
-	authority to construct a publication request.
+	Reads one exact canonical snapshot under a caller-held target mutation lease,
+	projects the accepted application path-owner universe, and combines completed
+	*libpkgapply* evidence with admitted *libpkgstate-build* authority to construct
+	a publication request.
 
 # SEE ALSO
 
