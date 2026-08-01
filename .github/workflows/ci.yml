@@ -51,11 +51,11 @@ jobs:
       - name: Check out libpkgstate
         uses: actions/checkout@v4
 
-      - name: Check out libpkgsource 1.0.0
+      - name: Check out libpkgsource 2.0.0
         uses: actions/checkout@v4
         with:
           repository: zeppe-lin/libpkgsource
-          ref: d9f6090beb65b1069ac49e02e010ceb2ea676ea5
+          ref: fb48d79d1814959fbda0ac6740b26a76f50c1222
           path: subprojects/libpkgsource
 
       - name: Check out libpkgimage 0.3.0
@@ -65,11 +65,11 @@ jobs:
           ref: e1f6dfd8cc4bfeb2f8da44345d8ec6368281c6e0
           path: subprojects/libpkgimage
 
-      - name: Check out libpkgbuild 1.0.0
+      - name: Check out libpkgbuild 2.0.0
         uses: actions/checkout@v4
         with:
           repository: zeppe-lin/libpkgbuild
-          ref: 4fbe346fb08459ca56b0096eb54505130ea17244
+          ref: fda7ccc10a9955eb7cdaf00c2a00104590fdd3d5
           path: subprojects/libpkgbuild
 
       - name: Check out libpkgplan 0.2.0
@@ -79,11 +79,11 @@ jobs:
           ref: 57a10b166450dd0396d4d461d1d38352073a5a1e
           path: subprojects/libpkgplan
 
-      - name: Check out libpkgapply 1.0.0
+      - name: Check out libpkgapply 2.1.0
         uses: actions/checkout@v4
         with:
           repository: zeppe-lin/libpkgapply
-          ref: fbf21697f1fe4a597a07a6ffea3521af6e2d06e4
+          ref: 8d3468dff11205603916a14de7dbcb843577b7d0
           path: subprojects/libpkgapply
 
       - name: Install build dependencies
@@ -142,11 +142,11 @@ jobs:
       - name: Check out libpkgstate
         uses: actions/checkout@v4
 
-      - name: Check out libpkgsource 1.0.0
+      - name: Check out libpkgsource 2.0.0
         uses: actions/checkout@v4
         with:
           repository: zeppe-lin/libpkgsource
-          ref: d9f6090beb65b1069ac49e02e010ceb2ea676ea5
+          ref: fb48d79d1814959fbda0ac6740b26a76f50c1222
           path: subprojects/libpkgsource
 
       - name: Check out libpkgimage 0.3.0
@@ -156,11 +156,11 @@ jobs:
           ref: e1f6dfd8cc4bfeb2f8da44345d8ec6368281c6e0
           path: subprojects/libpkgimage
 
-      - name: Check out libpkgbuild 1.0.0
+      - name: Check out libpkgbuild 2.0.0
         uses: actions/checkout@v4
         with:
           repository: zeppe-lin/libpkgbuild
-          ref: 4fbe346fb08459ca56b0096eb54505130ea17244
+          ref: fda7ccc10a9955eb7cdaf00c2a00104590fdd3d5
           path: subprojects/libpkgbuild
 
       - name: Check out libpkgplan 0.2.0
@@ -170,11 +170,11 @@ jobs:
           ref: 57a10b166450dd0396d4d461d1d38352073a5a1e
           path: subprojects/libpkgplan
 
-      - name: Check out libpkgapply 1.0.0
+      - name: Check out libpkgapply 2.1.0
         uses: actions/checkout@v4
         with:
           repository: zeppe-lin/libpkgapply
-          ref: fbf21697f1fe4a597a07a6ffea3521af6e2d06e4
+          ref: 8d3468dff11205603916a14de7dbcb843577b7d0
           path: subprojects/libpkgapply
 
       - name: Install build dependencies
@@ -236,11 +236,11 @@ jobs:
       - name: Check out libpkgstate
         uses: actions/checkout@v4
 
-      - name: Check out libpkgsource 1.0.0
+      - name: Check out libpkgsource 2.0.0
         uses: actions/checkout@v4
         with:
           repository: zeppe-lin/libpkgsource
-          ref: d9f6090beb65b1069ac49e02e010ceb2ea676ea5
+          ref: fb48d79d1814959fbda0ac6740b26a76f50c1222
           path: subprojects/libpkgsource
 
       - name: Check out libpkgimage 0.3.0
@@ -250,11 +250,11 @@ jobs:
           ref: e1f6dfd8cc4bfeb2f8da44345d8ec6368281c6e0
           path: subprojects/libpkgimage
 
-      - name: Check out libpkgbuild 1.0.0
+      - name: Check out libpkgbuild 2.0.0
         uses: actions/checkout@v4
         with:
           repository: zeppe-lin/libpkgbuild
-          ref: 4fbe346fb08459ca56b0096eb54505130ea17244
+          ref: fda7ccc10a9955eb7cdaf00c2a00104590fdd3d5
           path: subprojects/libpkgbuild
 
       - name: Check out libpkgplan 0.2.0
@@ -264,11 +264,11 @@ jobs:
           ref: 57a10b166450dd0396d4d461d1d38352073a5a1e
           path: subprojects/libpkgplan
 
-      - name: Check out libpkgapply 1.0.0
+      - name: Check out libpkgapply 2.1.0
         uses: actions/checkout@v4
         with:
           repository: zeppe-lin/libpkgapply
-          ref: fbf21697f1fe4a597a07a6ffea3521af6e2d06e4
+          ref: 8d3468dff11205603916a14de7dbcb843577b7d0
           path: subprojects/libpkgapply
 
       - name: Install build dependencies

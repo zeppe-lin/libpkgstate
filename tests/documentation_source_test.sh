@@ -40,7 +40,9 @@ for contract in \
   'It accepts no second caller-supplied build authority.' \
   'When supplied, transaction evidence is retained by the publication request' \
   'Generation-v3 storage does not change in this release.' \
-  'Native publication begins with a fresh state target.'
+  'Native publication begins with a fresh state target.' \
+  'performs exactly one canonical store read' \
+  'A caller does not supply that evidence identity.'
 do
   printf '%s\n' "$corpus" | grep -F "$contract" >/dev/null ||
     fail "documentation omits: $contract"

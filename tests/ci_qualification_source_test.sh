@@ -22,7 +22,9 @@ for file in \
   "$source_root/ci/installed-source-consumer.cpp" \
   "$source_root/ci/installed-build-consumer.cpp" \
   "$source_root/ci/installed-plan-consumer.cpp" \
-  "$source_root/ci/installed-apply-consumer.cpp"
+  "$source_root/ci/installed-apply-consumer.cpp" \
+  "$source_root/include/libpkgstate-apply/state_projection.h" \
+  "$source_root/apply_adapter/state_projection.cpp"
 do
   test -s "$file" || fail "missing or empty ${file#"$source_root"/}"
 done
@@ -32,11 +34,11 @@ for script in "$source_root"/ci/*.sh; do
 done
 
 for pin in \
-  d9f6090beb65b1069ac49e02e010ceb2ea676ea5 \
+  fb48d79d1814959fbda0ac6740b26a76f50c1222 \
   e1f6dfd8cc4bfeb2f8da44345d8ec6368281c6e0 \
-  4fbe346fb08459ca56b0096eb54505130ea17244 \
+  fda7ccc10a9955eb7cdaf00c2a00104590fdd3d5 \
   57a10b166450dd0396d4d461d1d38352073a5a1e \
-  fbf21697f1fe4a597a07a6ffea3521af6e2d06e4
+  8d3468dff11205603916a14de7dbcb843577b7d0
 do
   count=$(grep -F -c "$pin" "$workflow")
   test "$count" -eq 3 ||
@@ -86,6 +88,13 @@ do
   grep -F "$page" "$source_root/ci/lint-manpages.sh" >/dev/null ||
     fail "manual qualification omits $page"
 done
+
+grep -F 'read_application_state' \
+  "$source_root/ci/installed-apply-consumer.cpp" >/dev/null ||
+  fail 'installed application consumer omits lease-bound state projection'
+grep -F 'libpkgapply >= 2.1.0' \
+  "$source_root/apply_adapter/meson.build" >/dev/null ||
+  fail 'application adapter metadata omits libpkgapply 2.1.0 floor'
 
 test ! -e "$source_root/.github/workflows/build.yml" ||
   fail 'obsolete unpinned build workflow remains'

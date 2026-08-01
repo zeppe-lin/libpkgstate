@@ -34,7 +34,7 @@ requires=$(sed -n 's/^Requires:[[:space:]]*//p' "$metadata" | tr '\n' ',')
 for requirement in \
   'libpkgstate-source[[:space:]]*>=[[:space:]]*2\.3\.0' \
   'libpkgstate-build[[:space:]]*>=[[:space:]]*2\.3\.0' \
-  'libpkgapply[[:space:]]*>=[[:space:]]*2\.0\.0'
+  'libpkgapply[[:space:]]*>=[[:space:]]*2\.1\.0'
 do
   printf '%s\n' "$requires" |
     grep -Eq "(^|,)[[:space:]]*$requirement([[:space:]]*,|$)" ||

@@ -33,7 +33,7 @@ pkg-config --print-requires libpkgstate-build | grep -F 'libpkgimage >= 0.3.0' >
 pkg-config --print-requires libpkgstate-plan | grep -F 'libpkgplan >= 0.2.0' >/dev/null
 pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate-source >= 2.3.0' >/dev/null
 pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgstate-build >= 2.3.0' >/dev/null
-pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgapply >= 2.0.0' >/dev/null
+pkg-config --print-requires libpkgstate-apply | grep -F 'libpkgapply >= 2.1.0' >/dev/null
 cxx=${CXX:-c++}
 for pair in \
   core:libpkgstate \
@@ -66,6 +66,11 @@ for module in source build plan apply; do
   "$cxx" -std=c++17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
     $(pkg-config --cflags "libpkgstate-$module") "$unit"
 done
+unit=$temporary/apply-state-projection.cpp
+printf '#include <libpkgstate-apply/state_projection.h>\n' >"$unit"
+# shellcheck disable=SC2046
+"$cxx" -std=c++17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
+  $(pkg-config --cflags libpkgstate-apply) "$unit"
 canonical_store=$temporary/canonical
 for consumer in core source build plan apply; do
   if [ "$consumer" = core ]; then
