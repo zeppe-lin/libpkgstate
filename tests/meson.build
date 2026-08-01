@@ -187,6 +187,13 @@ if get_option('tests').allowed()
   endforeach
 
   test(
+    'verify durable publication codec source contracts',
+    sh,
+    args: [join_paths(meson.current_source_dir(),
+                      'publication_codec_source_test.sh'),
+           meson.project_source_root()],
+  )
+  test(
     'verify documentation source contracts',
     sh,
     args: [join_paths(meson.current_source_dir(),

@@ -24,7 +24,10 @@ for file in \
   "$source_root/ci/installed-plan-consumer.cpp" \
   "$source_root/ci/installed-apply-consumer.cpp" \
   "$source_root/include/libpkgstate-apply/state_projection.h" \
-  "$source_root/apply_adapter/state_projection.cpp"
+  "$source_root/apply_adapter/state_projection.cpp" \
+  "$source_root/include/libpkgstate/publication_codec.h" \
+  "$source_root/src/publication_codec.cpp" \
+  "$source_root/tests/publication_codec_source_test.sh"
 do
   test -s "$file" || fail "missing or empty ${file#"$source_root"/}"
 done
@@ -38,7 +41,7 @@ for pin in \
   e1f6dfd8cc4bfeb2f8da44345d8ec6368281c6e0 \
   fda7ccc10a9955eb7cdaf00c2a00104590fdd3d5 \
   57a10b166450dd0396d4d461d1d38352073a5a1e \
-  8d3468dff11205603916a14de7dbcb843577b7d0
+  3c17b56e7a9ff77e1a00087f7aabf5cc8fcb04ad
 do
   count=$(grep -F -c "$pin" "$workflow")
   test "$count" -eq 3 ||
@@ -98,3 +101,13 @@ grep -F 'libpkgapply >= 2.1.0' \
 
 test ! -e "$source_root/.github/workflows/build.yml" ||
   fail 'obsolete unpinned build workflow remains'
+
+for contract in \
+  encode_state_publication_request \
+  decode_state_publication_request \
+  encode_state_publication_receipt \
+  decode_state_publication_receipt
+do
+  grep -F "$contract" "$source_root/ci/installed-core-consumer.cpp" >/dev/null ||
+    fail "installed core consumer omits $contract"
+done

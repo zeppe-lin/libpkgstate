@@ -42,7 +42,9 @@ for contract in \
   'Generation-v3 storage does not change in this release.' \
   'Native publication begins with a fresh state target.' \
   'performs exactly one canonical store read' \
-  'A caller does not supply that evidence identity.'
+  'A caller does not supply that evidence identity.' \
+  'The codecs are pure evidence admission.' \
+  'request decode still requires the exact expected snapshot.'
 do
   printf '%s\n' "$corpus" | grep -F "$contract" >/dev/null ||
     fail "documentation omits: $contract"

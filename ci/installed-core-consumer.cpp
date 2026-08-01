@@ -34,6 +34,18 @@ main(int argc, char** argv)
   if (argc != 1 && argc != 2)
     return 2;
 
+  const auto request_encoder = &pkgstate::encode_state_publication_request;
+  const auto request_decoder = &pkgstate::decode_state_publication_request;
+  const auto receipt_encoder = &pkgstate::encode_state_publication_receipt;
+  const auto receipt_decoder = &pkgstate::decode_state_publication_receipt;
+  static_cast<void>(request_encoder);
+  static_cast<void>(request_decoder);
+  static_cast<void>(receipt_encoder);
+  static_cast<void>(receipt_decoder);
+  if (pkgstate::state_publication_request_encoding_version != 1 ||
+      pkgstate::state_publication_receipt_encoding_version != 1)
+    return 1;
+
   const pkgstate::state_target_binding target = target_binding();
   const pkgstate::snapshot state = pkgstate::snapshot::make(target, {});
   if (state.size() != 0 ||
