@@ -41,6 +41,13 @@ meson test -C build --print-errorlogs
 Sanitizer qualification uses address and undefined-behavior sanitizers. Shared
 and static dependency closures are built separately.
 
+
+- publication request codecs round-trip install, replace, remove, and
+  transaction-bound evidence under the exact expected snapshot;
+- publication receipt codecs round-trip every typed outcome under the exact
+  request and actual-prior snapshot;
+- request/receipt checksums, truncation, foreign snapshot/request authority,
+  impossible resulting state, and deterministic re-encoding are enforced;
 - lease-bound application-state projection performs one canonical read, rejects
   absent, lost, foreign, stale, or target-mismatched authority, derives stable
   evidence, and never enters publication;

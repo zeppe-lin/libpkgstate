@@ -108,6 +108,18 @@ actual state under its publication boundary, compares the expected snapshot, and
 derives the only valid result. Stale requests return a typed stale receipt before
 the backend publication primitive runs.
 
+Publication evidence has a separate durable representation. Request encoding
+retains exact delta bodies, including complete proposed installed packages, but
+request decode still requires the exact expected snapshot. Receipt decode
+requires the exact request and actual prior snapshot. Successful and
+publication-indeterminate resulting snapshots are projected from those
+authorities. A record cannot supply arbitrary replacement state or rehydrate a
+snapshot from an identity alone.
+
+The codecs are pure evidence admission. They do not open the canonical store,
+acquire a publication transaction, call a backend, retry an attempt, reconcile
+state, or select policy.
+
 ## Storage
 
 The generation backend writes complete immutable state objects and atomically

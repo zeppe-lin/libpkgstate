@@ -1,9 +1,10 @@
 # libpkgstate
 
 `libpkgstate` is the native installed-package state authority for Zeppe-Lin.
-Version 2.4 retains the generation-v3 installed-state representation introduced
-in 2.0 and adds the missing lease-bound read bridge from canonical installed
-truth into libpkgapply's exact application path universe.
+Version 2.5 retains the generation-v3 installed-state representation introduced
+in 2.0 and adds canonical durable encodings for immutable state-publication
+requests and receipts. The codecs reopen evidence only under exact snapshot and
+request authority; they do not turn stored identities into semantic bodies.
 
 The library records complete immutable installed truth:
 
@@ -17,7 +18,8 @@ The library records complete immutable installed truth:
   hard-link, retained-object, and rejected-object evidence;
 - installation receipts and installed packages;
 - target-bound ownership and installed snapshots; and
-- immutable publication requests, receipts, and generations.
+- immutable publication requests, receipts, and generations; and
+- canonical request and receipt encodings for restart-safe state publication.
 
 The core library does not parse recipe syntax, inspect archives, build packages,
 resolve dependencies, execute lifecycle programs, mutate target filesystems, or
@@ -100,6 +102,12 @@ canonical records; external identities remain typed references.
 one expected snapshot. `canonical_store::compare_and_publish()` owns stale-state
 comparison and derives the resulting snapshot. Backends cannot silently rebase a
 request or accept a caller-authored replacement state.
+
+`encode_state_publication_request()` retains the complete delta bodies but not the
+expected snapshot authority. Decode requires that exact snapshot. Publication
+receipt decode likewise requires the exact request and actual prior snapshot;
+any resulting snapshot is derived from those bodies rather than accepted from
+record bytes as replacement state.
 
 `canonical_generation_store` persists complete immutable generations and
 atomically selects one current generation. The native storage identifier is

@@ -1,5 +1,28 @@
 # History
 
+## 2.5.0
+
+Durable state-publication evidence:
+
+- add canonical request and receipt encodings to the core library;
+- require the exact expected snapshot to decode a publication request;
+- retain complete proposed installed-package bodies without serializing the
+  expected snapshot as caller-replaceable authority;
+- require the exact request and actual-prior snapshot to decode a receipt;
+- derive successful or indeterminate resulting state from those exact bodies;
+- distinguish malformed records from expected-snapshot, request, actual-prior,
+  and recomputed-identity mismatches; and
+- add whole-record SHA-256 checksums, refusal bounds, deterministic re-encoding,
+  and direct corruption/substitution coverage.
+
+ABI and storage decisions:
+
+- project version becomes 2.5.0;
+- core `libpkgstate` remains at soversion 3;
+- every adapter soversion remains unchanged;
+- generation-v3 installed-state storage does not change; and
+- no publication codec opens a store, invokes a backend, or publishes state.
+
 ## 2.4.0
 
 Lease-bound application-state projection release.

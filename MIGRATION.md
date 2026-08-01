@@ -79,3 +79,17 @@ should replace caller-constructed `lease_bound_state_projection` values with
 `read_application_state()`, passing the exact application request, live
 libpkgapply 2.1 target mutation lease, and canonical store. The returned snapshot
 and projection must remain paired for the lifetime of the effect driver.
+
+
+## 2.4.0 to 2.5.0 durable publication evidence
+
+No state-store migration is required. Canonical generation storage remains
+`libpkgstate-generation-v3`, core soversion remains 3, and every adapter
+soversion remains unchanged.
+
+Controllers that persist state-publication checkpoints may encode the immutable
+request and receipt. Request decode must be supplied the exact expected snapshot.
+Receipt decode must be supplied that reconstructed request and the exact actual
+prior snapshot observed by the publication attempt. Do not reconstruct those
+semantic bodies from their digest strings or substitute the current store state
+for the retained actual prior.
