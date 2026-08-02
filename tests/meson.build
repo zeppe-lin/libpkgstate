@@ -24,11 +24,15 @@ if get_option('tests').allowed()
   ]
 
   foreach item : core_tests
+    test_dependencies = [libpkgstate_dep]
+    if item[0] == 'publication_codec'
+      test_dependencies += libcrypto_dep
+    endif
     target = executable(
       item[0] + '-test',
       item[0] + '_test.cpp',
       include_directories: include_directories('../src'),
-      dependencies: libpkgstate_dep,
+      dependencies: test_dependencies,
     )
     test(item[1], target)
   endforeach

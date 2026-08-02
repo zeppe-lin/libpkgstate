@@ -21,6 +21,22 @@ do
   grep -F "$contract" "$header" "$source" >/dev/null ||
     fail "codec omits $contract"
 done
+grep -F 'state_publication_request_encoding_version = 2' "$header" >/dev/null ||
+  fail 'request codec version is not 2'
+grep -F 'state_publication_receipt_encoding_version = 2' "$header" >/dev/null ||
+  fail 'receipt codec version is not 2'
+grep -F "'Z', 'L', 'S', 'P', 'R', 'Q', 'S', 'T'" "$source" >/dev/null ||
+  fail 'request codec omits ZLSPRQST framing'
+grep -F "'Z', 'L', 'S', 'P', 'R', 'C', 'P', 'T'" "$source" >/dev/null ||
+  fail 'receipt codec omits ZLSPRCPT framing'
+for legacy in legacy_request_magic legacy_receipt_magic legacy_v1; do
+  grep -F "$legacy" "$source" >/dev/null ||
+    fail "codec omits published v1 compatibility: $legacy"
+done
+grep -F 'output.raw(request_magic)' "$source" >/dev/null ||
+  fail 'request encoder does not emit current framing'
+grep -F 'output.raw(receipt_magic)' "$source" >/dev/null ||
+  fail 'receipt encoder does not emit current framing'
 for forbidden in \
   'canonical_generation_store' \
   'compare_and_publish(' \
