@@ -19,7 +19,7 @@ unset PKG_CONFIG_SYSROOT_DIR
 runtime_path=$install_prefix/lib:$dependency_prefix/lib
 for module in libpkgstate libpkgstate-source libpkgstate-build libpkgstate-plan libpkgstate-apply; do
   version=$(pkg-config --modversion "$module")
-  [ "$version" = 2.4.0 ] || { echo "$module version is '$version', expected 2.4.0" >&2; exit 1; }
+  [ "$version" = 2.5.1 ] || { echo "$module version is '$version', expected 2.5.1" >&2; exit 1; }
 done
 if { pkg-config --print-requires libpkgstate; pkg-config --print-requires-private libpkgstate; } |
   grep -E '(^|[[:space:]])libpkg(source|build|image|plan|apply)([[:space:]]|$)' >/dev/null; then
@@ -97,7 +97,7 @@ grep -F 'storage-format=libpkgstate-generation-v3' "$temporary/report" >/dev/nul
 grep -F 'packages=0' "$temporary/report" >/dev/null
 LD_LIBRARY_PATH=$runtime_path${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
   "$install_prefix/bin/pkgstate-check" --version |
-  grep -E '^pkgstate-check \(libpkgstate\) 2\.4\.0$' >/dev/null
+  grep -E '^pkgstate-check \(libpkgstate\) 2\.5\.1$' >/dev/null
 if [ -s "$build_dir/man/libpkgstate.3" ]; then
   for page in \
     man1/pkgstate-check.1 \
