@@ -25,11 +25,22 @@
 namespace pkgstate {
 namespace {
 
-constexpr std::array<std::uint8_t, 29> request_magic = {
+constexpr std::array<std::uint8_t, 8> request_magic = {
+    'Z', 'L', 'S', 'P', 'R', 'Q', 'S', 'T',
+};
+constexpr std::array<std::uint8_t, 8> receipt_magic = {
+    'Z', 'L', 'S', 'P', 'R', 'C', 'P', 'T',
+};
+constexpr std::array<std::uint8_t, 29> legacy_request_magic = {
     'p','k','g','s','t','a','t','e','-','p','u','b','l','i','c','a','t','i','o','n','-','r','e','q','u','e','s','t',0,
 };
-constexpr std::array<std::uint8_t, 29> receipt_magic = {
+constexpr std::array<std::uint8_t, 29> legacy_receipt_magic = {
     'p','k','g','s','t','a','t','e','-','p','u','b','l','i','c','a','t','i','o','n','-','r','e','c','e','i','p','t',0,
+};
+constexpr std::uint16_t legacy_state_publication_encoding_version = 1;
+enum class publication_wire_format : std::uint8_t {
+  legacy_v1 = 1,
+  house_v2 = 2,
 };
 constexpr std::size_t checksum_size = 32;
 constexpr std::size_t maximum_collection_count = 1024ULL * 1024ULL;
@@ -203,6 +214,79 @@ private:
   std::string_view bytes_;
   std::size_t position_ = 0;
 };
+
+template<std::size_t Size>
+bool has_prefix(std::string_view bytes,
+                const std::array<std::uint8_t, Size>& expected)
+{
+  if (bytes.size() < Size)
+    return false;
+  return std::equal(
+      expected.begin(), expected.end(),
+      reinterpret_cast<const std::uint8_t*>(bytes.data()));
+}
+
+publication_wire_format read_request_prefix(reader& input,
+                                            std::string_view body)
+{
+  if (has_prefix(body, request_magic))
+  {
+    input.expect(request_magic, "publication request magic");
+    if (input.u16("publication request encoding version") !=
+        state_publication_request_encoding_version)
+    {
+      fail(state_publication_codec_error_code::unsupported_version,
+           "unsupported publication request encoding version");
+    }
+    return publication_wire_format::house_v2;
+  }
+
+  if (has_prefix(body, legacy_request_magic))
+  {
+    input.expect(legacy_request_magic, "legacy publication request magic");
+    if (input.u16("legacy publication request encoding version") !=
+        legacy_state_publication_encoding_version)
+    {
+      fail(state_publication_codec_error_code::unsupported_version,
+           "unsupported legacy publication request encoding version");
+    }
+    return publication_wire_format::legacy_v1;
+  }
+
+  fail(state_publication_codec_error_code::invalid_magic,
+       "invalid publication request magic");
+}
+
+publication_wire_format read_receipt_prefix(reader& input,
+                                            std::string_view body)
+{
+  if (has_prefix(body, receipt_magic))
+  {
+    input.expect(receipt_magic, "publication receipt magic");
+    if (input.u16("publication receipt encoding version") !=
+        state_publication_receipt_encoding_version)
+    {
+      fail(state_publication_codec_error_code::unsupported_version,
+           "unsupported publication receipt encoding version");
+    }
+    return publication_wire_format::house_v2;
+  }
+
+  if (has_prefix(body, legacy_receipt_magic))
+  {
+    input.expect(legacy_receipt_magic, "legacy publication receipt magic");
+    if (input.u16("legacy publication receipt encoding version") !=
+        legacy_state_publication_encoding_version)
+    {
+      fail(state_publication_codec_error_code::unsupported_version,
+           "unsupported legacy publication receipt encoding version");
+    }
+    return publication_wire_format::legacy_v1;
+  }
+
+  fail(state_publication_codec_error_code::invalid_magic,
+       "invalid publication receipt magic");
+}
 
 sha256_digest_bytes sha256(std::string_view bytes)
 {
@@ -431,18 +515,58 @@ void require_request_shape(const package_state_delta& delta)
   }
 }
 
-void require_canonical_request(const state_publication_request_encoding& encoded,
-                               const state_publication_request& request)
+template<std::size_t LegacyMagicSize>
+std::vector<std::uint8_t> legacy_encoding(
+    const std::vector<std::uint8_t>& current,
+    const std::array<std::uint8_t, LegacyMagicSize>& legacy_magic,
+    std::size_t maximum_size)
 {
-  if (encode_state_publication_request(request) != encoded)
+  constexpr std::size_t current_prefix_size = request_magic.size() + 2U;
+  if (current.size() < current_prefix_size + checksum_size)
+    fail(state_publication_codec_error_code::truncated,
+         "current publication evidence encoding is truncated");
+
+  writer output;
+  output.raw(legacy_magic);
+  output.u16(legacy_state_publication_encoding_version);
+  output.raw(current.data() + current_prefix_size,
+             current.size() - current_prefix_size - checksum_size);
+  append_checksum(output, maximum_size);
+  return output.take();
+}
+
+void require_canonical_request(
+    const state_publication_request_encoding& encoded,
+    const state_publication_request& request,
+    publication_wire_format format)
+{
+  state_publication_request_encoding expected =
+      encode_state_publication_request(request);
+  if (format == publication_wire_format::legacy_v1)
+  {
+    expected = legacy_encoding(
+        expected, legacy_request_magic,
+        maximum_state_publication_request_encoding_size);
+  }
+  if (expected != encoded)
     fail(state_publication_codec_error_code::invalid_value,
          "publication request is not canonically encoded");
 }
 
-void require_canonical_receipt(const state_publication_receipt_encoding& encoded,
-                               const state_publication_receipt& receipt)
+void require_canonical_receipt(
+    const state_publication_receipt_encoding& encoded,
+    const state_publication_receipt& receipt,
+    publication_wire_format format)
 {
-  if (encode_state_publication_receipt(receipt) != encoded)
+  state_publication_receipt_encoding expected =
+      encode_state_publication_receipt(receipt);
+  if (format == publication_wire_format::legacy_v1)
+  {
+    expected = legacy_encoding(
+        expected, legacy_receipt_magic,
+        maximum_state_publication_receipt_encoding_size);
+  }
+  if (expected != encoded)
     fail(state_publication_codec_error_code::invalid_value,
          "publication receipt is not canonically encoded");
 }
@@ -502,15 +626,10 @@ decode_state_publication_request(
 {
   try
   {
-    reader input(verified_body(
-        encoding, maximum_state_publication_request_encoding_size));
-    input.expect(request_magic, "publication request magic");
-    if (input.u16("publication request encoding version") !=
-        state_publication_request_encoding_version)
-    {
-      fail(state_publication_codec_error_code::unsupported_version,
-           "unsupported publication request encoding version");
-    }
+    const std::string_view body = verified_body(
+        encoding, maximum_state_publication_request_encoding_size);
+    reader input(body);
+    const publication_wire_format format = read_request_prefix(input, body);
 
     const state_publication_request_identity encoded_identity =
         read_digest<state_publication_request_identity>(
@@ -598,7 +717,7 @@ decode_state_publication_request(
     if (result.identity() != encoded_identity)
       fail(state_publication_codec_error_code::identity_mismatch,
            "publication request identity does not match reconstructed evidence");
-    require_canonical_request(encoding, result);
+    require_canonical_request(encoding, result, format);
     return result;
   }
   catch (const state_publication_codec_error&)
@@ -648,15 +767,10 @@ decode_state_publication_receipt(
 {
   try
   {
-    reader input(verified_body(
-        encoding, maximum_state_publication_receipt_encoding_size));
-    input.expect(receipt_magic, "publication receipt magic");
-    if (input.u16("publication receipt encoding version") !=
-        state_publication_receipt_encoding_version)
-    {
-      fail(state_publication_codec_error_code::unsupported_version,
-           "unsupported publication receipt encoding version");
-    }
+    const std::string_view body = verified_body(
+        encoding, maximum_state_publication_receipt_encoding_size);
+    reader input(body);
+    const publication_wire_format format = read_receipt_prefix(input, body);
 
     const state_publication_receipt_identity encoded_identity =
         read_digest<state_publication_receipt_identity>(
@@ -789,7 +903,7 @@ decode_state_publication_receipt(
     if (result.identity() != encoded_identity)
       fail(state_publication_codec_error_code::identity_mismatch,
            "publication receipt identity does not match reconstructed evidence");
-    require_canonical_receipt(encoding, result);
+    require_canonical_receipt(encoding, result, format);
     return result;
   }
   catch (const state_publication_codec_error&)
