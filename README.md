@@ -1,10 +1,12 @@
 # libpkgstate
 
 `libpkgstate` is the native installed-package state authority for Zeppe-Lin.
-Version 2.5 retains the generation-v3 installed-state representation introduced
-in 2.0 and adds canonical durable encodings for immutable state-publication
-requests and receipts. The codecs reopen evidence only under exact snapshot and
-request authority; they do not turn stored identities into semantic bodies.
+Version 2.5.1 retains the generation-v3 installed-state representation
+introduced in 2.0 and corrects publication evidence framing to fixed eight-byte
+house identifiers. New request and receipt records use `ZLSPRQST` and
+`ZLSPRCPT`; decoders retain narrow compatibility with the just-published 2.5.0
+framing. The codecs reopen evidence only under exact snapshot and request
+authority; they do not turn stored identities into semantic bodies.
 
 The library records complete immutable installed truth:
 
@@ -108,6 +110,10 @@ expected snapshot authority. Decode requires that exact snapshot. Publication
 receipt decode likewise requires the exact request and actual prior snapshot;
 any resulting snapshot is derived from those bodies rather than accepted from
 record bytes as replacement state.
+
+Current publication evidence is schema version 2 with fixed eight-byte framing.
+Version-1 records from 2.5.0 remain decodeable, but public encoders never emit
+the legacy textual magic.
 
 `canonical_generation_store` persists complete immutable generations and
 atomically selects one current generation. The native storage identifier is

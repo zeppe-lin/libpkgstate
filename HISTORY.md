@@ -1,5 +1,27 @@
 # History
 
+## 2.5.1
+
+State-publication framing correction:
+
+- replace the 2.5.0 variable-length textual request and receipt magics with the
+  fixed eight-byte house identifiers `ZLSPRQST` and `ZLSPRCPT`;
+- advance both publication evidence encoding versions from 1 to 2;
+- emit only version-2 records while retaining decode-only compatibility for the
+  just-published version-1 framing;
+- verify canonical re-encoding against the record's own wire version so valid
+  2.5.0 evidence is not compared against version-2 bytes; and
+- add no store scan, migration command, dual-write mode, or generation-storage
+  change.
+
+ABI and storage decisions:
+
+- project version becomes 2.5.1;
+- core and adapter SONAMEs remain unchanged;
+- generation-v3 installed-state storage remains unchanged; and
+- the narrow version-1 decoder exists only to preserve the published 2.5.0
+  evidence boundary while all new writers use house framing.
+
 ## 2.5.0
 
 Durable state-publication evidence:

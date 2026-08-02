@@ -120,6 +120,19 @@ The codecs are pure evidence admission. They do not open the canonical store,
 acquire a publication transaction, call a backend, retry an attempt, reconcile
 state, or select policy.
 
+### Publication record framing
+
+New durable evidence records use the house-level fixed eight-byte framing
+convention: `ZL`, a two-byte authority boundary, and a four-byte record kind.
+State-publication requests use `ZLSPRQST`; receipts use `ZLSPRCPT`. A big-endian
+16-bit schema version follows the magic. Human-readable format names belong in
+diagnostics and documentation rather than variable-length magic strings.
+
+Version 2.5.1 emits only schema version 2. Decode retains narrow compatibility
+with the published 2.5.0 textual version-1 framing and checks canonical bytes
+against that original version. This compatibility does not introduce a store
+migrator, dual-write policy, or another semantic authority.
+
 ## Storage
 
 The generation backend writes complete immutable state objects and atomically

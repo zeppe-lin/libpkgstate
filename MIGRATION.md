@@ -93,3 +93,23 @@ Receipt decode must be supplied that reconstructed request and the exact actual
 prior snapshot observed by the publication attempt. Do not reconstruct those
 semantic bodies from their digest strings or substitute the current store state
 for the retained actual prior.
+
+
+## 2.5.0 to 2.5.1 publication framing correction
+
+No installed-state store migration is required. Generation storage remains
+`libpkgstate-generation-v3` and every SONAME remains unchanged.
+
+New request and receipt encodings use fixed eight-byte house framing and schema
+version 2:
+
+```text
+ZLSPRQST  state-publication request
+ZLSPRCPT  state-publication receipt
+```
+
+The 2.5.1 decoders continue to admit canonical version-1 records emitted by
+2.5.0, but all public encoders emit version 2. There is no dual-write option,
+store scanner, or migration utility because these evidence records have not yet
+entered production storage. Controllers may simply retain any existing 2.5.0
+bytes and allow a later semantic rewrite to encode version 2.

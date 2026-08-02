@@ -46,6 +46,9 @@ and static dependency closures are built separately.
   transaction-bound evidence under the exact expected snapshot;
 - publication receipt codecs round-trip every typed outcome under the exact
   request and actual-prior snapshot;
+- request and receipt encoders emit `ZLSPRQST` and `ZLSPRCPT` schema version 2;
+- canonical 2.5.0 version-1 request and receipt records remain decodeable and
+  are checked against their own legacy wire form before re-encoding as version 2;
 - request/receipt checksums, truncation, foreign snapshot/request authority,
   impossible resulting state, and deterministic re-encoding are enforced;
 - lease-bound application-state projection performs one canonical read, rejects
