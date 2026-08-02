@@ -27,7 +27,8 @@ for file in \
   "$source_root/apply_adapter/state_projection.cpp" \
   "$source_root/include/libpkgstate/publication_codec.h" \
   "$source_root/src/publication_codec.cpp" \
-  "$source_root/tests/publication_codec_source_test.sh"
+  "$source_root/tests/publication_codec_source_test.sh" \
+  "$source_root/tests/publication_codec_test.cpp"
 do
   test -s "$file" || fail "missing or empty ${file#"$source_root"/}"
 done
@@ -110,4 +111,16 @@ for contract in \
 do
   grep -F "$contract" "$source_root/ci/installed-core-consumer.cpp" >/dev/null ||
     fail "installed core consumer omits $contract"
+done
+
+for contract in \
+  'state_publication_request_encoding_version != 2' \
+  'state_publication_receipt_encoding_version != 2'
+do
+  grep -F "$contract" "$source_root/ci/installed-core-consumer.cpp" >/dev/null ||
+    fail "installed core consumer omits current codec contract: $contract"
+done
+for contract in ZLSPRQST ZLSPRCPT legacy_request_magic legacy_receipt_magic; do
+  grep -F "$contract" "$source_root/tests/publication_codec_source_test.sh" >/dev/null ||
+    fail "publication framing source qualification omits $contract"
 done
