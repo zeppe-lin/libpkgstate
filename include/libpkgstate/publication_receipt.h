@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -56,7 +58,7 @@ enum class state_storage_atomicity_boundary : std::uint8_t {
  * resulting snapshot implied by the request deltas.  Receipt construction does
  * not mutate storage and does not claim filesystem/state global atomicity.
  */
-class state_publication_receipt final {
+class PKGSTATE_API state_publication_receipt final {
 public:
   /*! \brief Record confirmed successful state publication. */
   [[nodiscard]] static state_publication_receipt
@@ -167,11 +169,11 @@ public:
   [[nodiscard]] const std::vector<state_publication_evidence_identity>&
   subordinate_evidence() const noexcept;
 
-  friend bool operator==(const state_publication_receipt& lhs,
+  friend PKGSTATE_API bool operator==(const state_publication_receipt& lhs,
                          const state_publication_receipt& rhs) noexcept;
-  friend bool operator!=(const state_publication_receipt& lhs,
+  friend PKGSTATE_API bool operator!=(const state_publication_receipt& lhs,
                          const state_publication_receipt& rhs) noexcept;
-  friend bool operator<(const state_publication_receipt& lhs,
+  friend PKGSTATE_API bool operator<(const state_publication_receipt& lhs,
                         const state_publication_receipt& rhs) noexcept;
 
 private:

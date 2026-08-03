@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <iosfwd>
 #include <optional>
 #include <string>
@@ -27,7 +29,7 @@ namespace pkgstate {
  * Installed package paths are durable logical state, not host paths interpreted
  * through the filesystem view of the reading process.
  */
-class package_path final {
+class PKGSTATE_API package_path final {
 public:
   /*!
    * \brief Normalize and validate an installed package path.
@@ -62,19 +64,19 @@ public:
   /*!
    * \brief Compare two canonical paths for equality.
    */
-  friend bool operator==(const package_path& lhs,
+  friend PKGSTATE_API bool operator==(const package_path& lhs,
                          const package_path& rhs) noexcept;
 
   /*!
    * \brief Compare two canonical paths for inequality.
    */
-  friend bool operator!=(const package_path& lhs,
+  friend PKGSTATE_API bool operator!=(const package_path& lhs,
                          const package_path& rhs) noexcept;
 
   /*!
    * \brief Order canonical paths lexicographically.
    */
-  friend bool operator<(const package_path& lhs,
+  friend PKGSTATE_API bool operator<(const package_path& lhs,
                         const package_path& rhs) noexcept;
 
 private:
@@ -89,6 +91,6 @@ private:
  * \param path Path to write.
  * \return The destination stream.
  */
-std::ostream& operator<<(std::ostream& out, const package_path& path);
+PKGSTATE_API std::ostream& operator<<(std::ostream& out, const package_path& path);
 
 } // namespace pkgstate

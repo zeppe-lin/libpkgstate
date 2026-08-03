@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -23,7 +25,7 @@ enum class installation_reason_kind : std::uint8_t {
   system_policy = 4,
 };
 
-class installation_reason final {
+class PKGSTATE_API installation_reason final {
 public:
   [[nodiscard]] static installation_reason explicit_request();
   [[nodiscard]] static installation_reason runtime_dependency(package_reference issuer);
@@ -37,11 +39,11 @@ public:
   [[nodiscard]] const std::optional<source_profile_identity>& issuer_profile_identity() const noexcept;
   [[nodiscard]] const std::optional<std::string>& policy() const noexcept;
 
-  friend bool operator==(const installation_reason& lhs,
+  friend PKGSTATE_API bool operator==(const installation_reason& lhs,
                          const installation_reason& rhs) noexcept;
-  friend bool operator!=(const installation_reason& lhs,
+  friend PKGSTATE_API bool operator!=(const installation_reason& lhs,
                          const installation_reason& rhs) noexcept;
-  friend bool operator<(const installation_reason& lhs,
+  friend PKGSTATE_API bool operator<(const installation_reason& lhs,
                         const installation_reason& rhs) noexcept;
 private:
   installation_reason(installation_reason_kind kind,
@@ -56,7 +58,7 @@ private:
   std::optional<std::string> policy_;
 };
 
-class build_provenance final {
+class PKGSTATE_API build_provenance final {
 public:
   build_provenance(
       package_source_record_identity source_record,
@@ -89,11 +91,11 @@ public:
   [[nodiscard]] const artifact_image_identity& artifact_image() const noexcept;
   [[nodiscard]] const artifact_inspection_identity& artifact_inspection() const noexcept;
 
-  friend bool operator==(const build_provenance& lhs,
+  friend PKGSTATE_API bool operator==(const build_provenance& lhs,
                          const build_provenance& rhs) noexcept;
-  friend bool operator!=(const build_provenance& lhs,
+  friend PKGSTATE_API bool operator!=(const build_provenance& lhs,
                          const build_provenance& rhs) noexcept;
-  friend bool operator<(const build_provenance& lhs,
+  friend PKGSTATE_API bool operator<(const build_provenance& lhs,
                         const build_provenance& rhs) noexcept;
 private:
   package_source_record_identity source_record_;
@@ -112,7 +114,7 @@ private:
   artifact_inspection_identity artifact_inspection_;
 };
 
-class installed_control final {
+class PKGSTATE_API installed_control final {
 public:
   [[nodiscard]] static installed_control make(
       package_source_record source,
@@ -125,11 +127,11 @@ public:
   [[nodiscard]] const installation_reason& reason() const noexcept;
   [[nodiscard]] const build_provenance& build() const noexcept;
 
-  friend bool operator==(const installed_control& lhs,
+  friend PKGSTATE_API bool operator==(const installed_control& lhs,
                          const installed_control& rhs) noexcept;
-  friend bool operator!=(const installed_control& lhs,
+  friend PKGSTATE_API bool operator!=(const installed_control& lhs,
                          const installed_control& rhs) noexcept;
-  friend bool operator<(const installed_control& lhs,
+  friend PKGSTATE_API bool operator<(const installed_control& lhs,
                         const installed_control& rhs) noexcept;
 private:
   installed_control(installed_control_identity identity,

@@ -11,10 +11,6 @@ if scdoc.found()
     ['pkgstate_publication.3', '3'],
     ['pkgstate_store.3', '3'],
     ['pkgstate_canonical_generation_store.3', '3'],
-    ['pkgstate_source_adapter.3', '3'],
-    ['pkgstate_build_adapter.3', '3'],
-    ['pkgstate_plan_adapter.3', '3'],
-    ['pkgstate_apply_adapter.3', '3'],
     ['pkgstate-generation.5', '5'],
   ]
 

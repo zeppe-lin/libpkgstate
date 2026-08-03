@@ -1,9 +1,19 @@
 # SPDX-FileCopyrightText: 2026 Alexandr Savca
 # SPDX-License-Identifier: GPL-3.0-or-later
-
 if get_option('tests').allowed()
   sh = find_program('sh')
-
+  if library_kind == 'shared'
+    nm = find_program('nm')
+    test(
+      'verify reviewed core ABI surface',
+      find_program(meson.current_source_dir() / 'check_abi_surface.sh'),
+      args: [
+        libpkgstate.full_path(),
+        meson.project_source_root() / 'abi/libpkgstate.exports',
+        nm.full_path(),
+      ],
+    )
+  endif
   core_tests = [
     ['digest', 'validate native identity domains'],
     ['canonical_record', 'hash canonical state records'],
@@ -22,144 +32,27 @@ if get_option('tests').allowed()
     ['canonical_store', 'enforce canonical compare and publish'],
     ['umbrella_header', 'compile the native umbrella header'],
   ]
-
   foreach item : core_tests
     test_dependencies = [libpkgstate_dep]
     if item[0] == 'publication_codec'
       test_dependencies += libcrypto_dep
     endif
+    test_sources = [item[0] + '_test.cpp']
+    if item[0] == 'canonical_record'
+      test_sources += '../src/canonical_record.cpp'
+    endif
     target = executable(
       item[0] + '-test',
-      item[0] + '_test.cpp',
+      test_sources,
       include_directories: include_directories('../src'),
       dependencies: test_dependencies,
     )
     test(item[1], target)
   endforeach
 
-  if libpkgsource_dep.found()
-    source_adapter_test = executable(
-      'source-adapter-test',
-      'source_adapter_test.cpp',
-      dependencies: libpkgstate_source_dep,
-    )
-    test('retain sealed libpkgsource authority', source_adapter_test)
-
-    source_adapter_header_test = executable(
-      'source-adapter-public-header-test',
-      'public_header_test.cpp',
-      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-source/adapter.h"'],
-      dependencies: libpkgstate_source_dep,
-    )
-    test('compile public header libpkgstate-source/adapter.h',
-         source_adapter_header_test)
-
-    test(
-      'verify source adapter pkg-config metadata',
-      sh,
-      args: [
-        join_paths(meson.current_source_dir(),
-                   'source_adapter_metadata_test.sh'),
-        meson.project_build_root(),
-      ],
-    )
-  endif
-
-  if libpkgbuild_dep.found() and libpkgimage_dep.found()
-    build_adapter_test = executable(
-      'build-adapter-test',
-      'build_adapter_test.cpp',
-      dependencies: libpkgstate_build_dep,
-    )
-    test('retain verified libpkgbuild authority', build_adapter_test)
-
-    build_adapter_header_test = executable(
-      'build-adapter-public-header-test',
-      'public_header_test.cpp',
-      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-build/adapter.h"'],
-      dependencies: libpkgstate_build_dep,
-    )
-    test('compile public header libpkgstate-build/adapter.h',
-         build_adapter_header_test)
-
-    test(
-      'verify build adapter pkg-config metadata',
-      sh,
-      args: [
-        join_paths(meson.current_source_dir(),
-                   'build_adapter_metadata_test.sh'),
-        meson.project_build_root(),
-      ],
-    )
-  endif
-
-  if libpkgplan_dep.found()
-    plan_adapter_test = executable(
-      'plan-adapter-test',
-      'plan_adapter_test.cpp',
-      dependencies: libpkgstate_plan_dep,
-    )
-    test('project native installed state into libpkgplan', plan_adapter_test)
-
-    plan_adapter_header_test = executable(
-      'plan-adapter-public-header-test',
-      'public_header_test.cpp',
-      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-plan/adapter.h"'],
-      dependencies: libpkgstate_plan_dep,
-    )
-    test('compile public header libpkgstate-plan/adapter.h',
-         plan_adapter_header_test)
-
-    test(
-      'verify planner adapter pkg-config metadata',
-      sh,
-      args: [
-        join_paths(meson.current_source_dir(),
-                   'plan_adapter_metadata_test.sh'),
-        meson.project_build_root(),
-      ],
-    )
-  endif
-
-  if libpkgapply_dep.found()
-    apply_adapter_test = executable(
-      'apply-adapter-test',
-      'apply_adapter_test.cpp',
-      dependencies: libpkgstate_apply_dep,
-    )
-    test('admit completed application as native state', apply_adapter_test)
-
-    apply_adapter_header_test = executable(
-      'apply-adapter-public-header-test',
-      'public_header_test.cpp',
-      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-apply/adapter.h"'],
-      dependencies: libpkgstate_apply_dep,
-    )
-    test('compile public header libpkgstate-apply/adapter.h',
-         apply_adapter_header_test)
-
-    apply_state_projection_header_test = executable(
-      'apply-state-projection-public-header-test',
-      'public_header_test.cpp',
-      cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="libpkgstate-apply/state_projection.h"'],
-      dependencies: libpkgstate_apply_dep,
-    )
-    test('compile public header libpkgstate-apply/state_projection.h',
-         apply_state_projection_header_test)
-
-    test(
-      'verify application adapter pkg-config metadata',
-      sh,
-      args: [
-        join_paths(meson.current_source_dir(),
-                   'apply_adapter_metadata_test.sh'),
-        meson.project_build_root(),
-      ],
-    )
-  endif
-
   public_headers = [
     ['libpkgstate', 'libpkgstate/libpkgstate.h'],
+    ['export', 'libpkgstate/export.h'],
     ['error', 'libpkgstate/error.h'],
     ['digest', 'libpkgstate/digest.h'],
     ['model', 'libpkgstate/model.h'],
@@ -176,10 +69,8 @@ if get_option('tests').allowed()
     ['publication-receipt', 'libpkgstate/publication_receipt.h'],
     ['publication-codec', 'libpkgstate/publication_codec.h'],
     ['canonical-store', 'libpkgstate/canonical_store.h'],
-    ['canonical-generation-store',
-     'libpkgstate/canonical_generation_store.h'],
+    ['canonical-generation-store', 'libpkgstate/canonical_generation_store.h'],
   ]
-
   foreach header : public_headers
     target = executable(
       header[0] + '-public-header-test',
@@ -190,62 +81,41 @@ if get_option('tests').allowed()
     test('compile public header ' + header[1], target)
   endforeach
 
+  foreach contract : [
+    'publication_codec_source_test.sh',
+    'documentation_source_test.sh',
+    'ci_qualification_source_test.sh',
+    'architecture_contract_test.sh',
+    'repository_contract_test.sh',
+  ]
+    test(
+      contract.replace('_test.sh', '').replace('_', '-'),
+      sh,
+      args: [join_paths(meson.current_source_dir(), contract), meson.project_source_root()],
+    )
+  endforeach
   test(
-    'verify durable publication codec source contracts',
+    'verify source style contract',
     sh,
-    args: [join_paths(meson.current_source_dir(),
-                      'publication_codec_source_test.sh'),
-           meson.project_source_root()],
-  )
-  test(
-    'verify documentation source contracts',
-    sh,
-    args: [join_paths(meson.current_source_dir(),
-                      'documentation_source_test.sh'),
-           meson.project_source_root()],
-  )
-  test(
-    'verify CI qualification source contracts',
-    sh,
-    args: [join_paths(meson.current_source_dir(),
-                      'ci_qualification_source_test.sh'),
-           meson.project_source_root()],
+    args: [
+      join_paths(meson.current_source_dir(), 'style_contract_test.sh'),
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
   )
   test(
     'verify pkg-config dependency metadata',
     sh,
-    args: [join_paths(meson.current_source_dir(),
-                      'pkgconfig_metadata_test.sh'),
-           join_paths(meson.project_build_root(), 'meson-private',
-                      'libpkgstate.pc')],
+    args: [join_paths(meson.current_source_dir(), 'pkgconfig_metadata_test.sh'), join_paths(meson.project_build_root(), 'meson-private', 'libpkgstate.pc')],
   )
   test(
     'verify release metadata',
     sh,
-    args: [join_paths(meson.current_source_dir(),
-                      'release_metadata_test.sh'),
-           meson.project_source_root()],
+    args: [join_paths(meson.current_source_dir(), 'release_metadata_test.sh'), meson.project_source_root()],
   )
-
   if get_option('tools').allowed()
-    pkgstate_check_fixture = executable(
-      'pkgstate-check-fixture',
-      'pkgstate_check_fixture.cpp',
-      dependencies: libpkgstate_dep,
-    )
-    test(
-      'exercise read-only native state diagnostics',
-      sh,
-      args: [join_paths(meson.current_source_dir(),
-                       'pkgstate_check_cli_test.sh'),
-             pkgstate_check_tool, pkgstate_check_fixture],
-    )
-    test(
-      'verify pkgstate-check manual contract',
-      sh,
-      args: [join_paths(meson.current_source_dir(),
-                       'pkgstate_check_manual_test.sh'),
-             meson.project_source_root(), pkgstate_check_tool],
-    )
+    pkgstate_check_fixture = executable('pkgstate-check-fixture', 'pkgstate_check_fixture.cpp', dependencies: libpkgstate_dep)
+    test('exercise read-only native state diagnostics', sh, args: [join_paths(meson.current_source_dir(), 'pkgstate_check_cli_test.sh'), pkgstate_check_tool, pkgstate_check_fixture])
+    test('verify pkgstate-check manual contract', sh, args: [join_paths(meson.current_source_dir(), 'pkgstate_check_manual_test.sh'), meson.project_source_root(), pkgstate_check_tool])
   endif
 endif

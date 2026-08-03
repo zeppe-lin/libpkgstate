@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <stdexcept>
 #include <string>
 
@@ -16,7 +18,7 @@ namespace pkgstate {
 /*!
  * \brief Base class for all libpkgstate failures.
  */
-class error : public std::runtime_error {
+class PKGSTATE_API error : public std::runtime_error {
 public:
   /*!
    * \brief Construct an error with a human-readable diagnostic.
@@ -27,7 +29,7 @@ public:
 /*!
  * \brief Reports an invalid package identity.
  */
-class identity_error : public error {
+class PKGSTATE_API identity_error : public error {
 public:
   using error::error;
 };
@@ -35,7 +37,7 @@ public:
 /*!
  * \brief Reports an invalid canonical installed package path.
  */
-class path_error : public error {
+class PKGSTATE_API path_error : public error {
 public:
   using error::error;
 };
@@ -43,7 +45,7 @@ public:
 /*!
  * \brief Reports invalid installed state or publication model construction.
  */
-class state_error : public error {
+class PKGSTATE_API state_error : public error {
 public:
   using error::error;
 };
@@ -51,7 +53,7 @@ public:
 /*!
  * \brief Reports package-state storage, parsing, locking, or commit failure.
  */
-class store_error : public error {
+class PKGSTATE_API store_error : public error {
 public:
   using error::error;
 };

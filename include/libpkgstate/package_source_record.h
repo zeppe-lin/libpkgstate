@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <vector>
 
 #include <libpkgstate/digest.h>
@@ -14,7 +16,7 @@
 
 namespace pkgstate {
 
-class package_source_record final {
+class PKGSTATE_API package_source_record final {
 public:
   [[nodiscard]] static package_source_record make(
       package_release release,
@@ -40,11 +42,11 @@ public:
   [[nodiscard]] const source_recipe_identity& recipe() const noexcept;
   [[nodiscard]] const source_snapshot_identity& snapshot() const noexcept;
 
-  friend bool operator==(const package_source_record& lhs,
+  friend PKGSTATE_API bool operator==(const package_source_record& lhs,
                          const package_source_record& rhs) noexcept;
-  friend bool operator!=(const package_source_record& lhs,
+  friend PKGSTATE_API bool operator!=(const package_source_record& lhs,
                          const package_source_record& rhs) noexcept;
-  friend bool operator<(const package_source_record& lhs,
+  friend PKGSTATE_API bool operator<(const package_source_record& lhs,
                         const package_source_record& rhs) noexcept;
 
 private:

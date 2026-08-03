@@ -38,9 +38,9 @@ retained as typed external references and are never recomputed by libpkgstate.
 *canonical_generation_store* persists complete immutable snapshots and selects
 one current generation atomically.
 
-# ADAPTERS
+# INDEPENDENT ADAPTERS
 
-Optional libraries provide explicit authority bridges:
+Independent repositories provide explicit authority bridges:
 
 *libpkgstate-source*
 	Projects a sealed *libpkgsource* snapshot into a *package_source_record*.

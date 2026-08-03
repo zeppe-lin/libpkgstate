@@ -1,5 +1,12 @@
 # History
 
+## 3.0.0 (2026-08-04)
+
+- Extracted source, build, plan, and apply translations into independent role-qualified repositories.
+- Removed every foreign package-management dependency and adapter option from the durable state owner.
+- Retained publication codecs, compare-and-publish semantics, canonical generation-v3 storage, and `pkgstate-check` as state-owned products.
+- Added explicit architecture, integration, repository, documentation, and release contracts for the pure owner boundary.
+
 ## 2.5.1
 
 State-publication framing correction:

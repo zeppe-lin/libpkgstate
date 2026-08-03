@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -40,7 +42,7 @@ enum class package_state_delta_kind : std::uint8_t {
  * delta carries one accepted operation-plan identity and one completed
  * application-evidence identity.
  */
-class package_state_delta final {
+class PKGSTATE_API package_state_delta final {
 public:
   /*! \brief Construct an installation delta. */
   [[nodiscard]] static package_state_delta
@@ -84,11 +86,11 @@ public:
   [[nodiscard]] const application_evidence_identity&
   application_evidence() const noexcept;
 
-  friend bool operator==(const package_state_delta& lhs,
+  friend PKGSTATE_API bool operator==(const package_state_delta& lhs,
                          const package_state_delta& rhs) noexcept;
-  friend bool operator!=(const package_state_delta& lhs,
+  friend PKGSTATE_API bool operator!=(const package_state_delta& lhs,
                          const package_state_delta& rhs) noexcept;
-  friend bool operator<(const package_state_delta& lhs,
+  friend PKGSTATE_API bool operator<(const package_state_delta& lhs,
                         const package_state_delta& rhs) noexcept;
 
 private:
@@ -117,7 +119,7 @@ private:
  * for a composed request, and computes one request identity.  It does not
  * mutate a store and is not an arbitrary caller-authored replacement snapshot.
  */
-class state_publication_request final {
+class PKGSTATE_API state_publication_request final {
 public:
   /*! \brief Validate, normalize, identify, and construct a request. */
   [[nodiscard]] static state_publication_request

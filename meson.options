@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Alexandr Savca
+# SPDX-License-Identifier: GPL-3.0-or-later
 option(
   'link_mode',
   type: 'combo',
@@ -5,60 +7,27 @@ option(
   value: 'shared',
   description: 'How libpkgstate links against external dependencies',
 )
-
 option(
   'tests',
   type: 'feature',
   value: 'enabled',
-  description: 'Build and run unit tests',
+  description: 'Build and run the libpkgstate test suite',
 )
-
 option(
   'tools',
   type: 'feature',
   value: 'enabled',
   description: 'Build reference command-line tools',
 )
-
 option(
   'install_tools',
   type: 'boolean',
   value: false,
   description: 'Install reference command-line tools',
 )
-
 option(
   'man_pages',
   type: 'feature',
   value: 'auto',
   description: 'Build manual pages with scdoc',
-)
-
-option(
-  'source_adapter',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Build the optional libpkgsource authority adapter',
-)
-
-
-option(
-  'build_adapter',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Build the optional libpkgbuild authority adapter',
-)
-
-option(
-  'planner_adapter',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Build the optional libpkgplan projection adapter',
-)
-
-option(
-  'application_adapter',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Build the optional libpkgapply publication adapter',
 )

@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -25,7 +27,7 @@ namespace pkgstate {
  * expected snapshot and computed the one permitted resulting snapshot.  It
  * cannot represent stale state; that outcome is owned by compare_and_publish().
  */
-class state_publication_backend_result final {
+class PKGSTATE_API state_publication_backend_result final {
 public:
   /*! \brief Report confirmed publication and durability. */
   [[nodiscard]] static state_publication_backend_result
@@ -90,7 +92,7 @@ private:
  * durable state under that lock.  Destruction releases the lock.  publish()
  * receives the only snapshot permitted by the validated request.
  */
-class canonical_publication_transaction {
+class PKGSTATE_API canonical_publication_transaction {
 public:
   /*! \brief Release the publication lock. */
   virtual ~canonical_publication_transaction() = default;
@@ -120,7 +122,7 @@ public:
  * without mutation, derives the only permitted result, invokes publication,
  * and constructs the typed receipt.  Backends cannot override that sequence.
  */
-class canonical_store {
+class PKGSTATE_API canonical_store {
 public:
   /*! \brief Destroy the canonical store backend. */
   virtual ~canonical_store() = default;
@@ -129,7 +131,7 @@ public:
   [[nodiscard]] virtual snapshot read() const = 0;
 
   /*! \brief Compare under lock, publish when current, and return a receipt. */
-  [[nodiscard]] state_publication_receipt
+  [[nodiscard]] PKGSTATE_API state_publication_receipt
   compare_and_publish(const state_publication_request& request) const;
 
 protected:

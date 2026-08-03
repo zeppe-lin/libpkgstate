@@ -10,19 +10,17 @@ or apply a package, or how an obsolete database should be interpreted.
 
 ## Authority boundaries
 
-Source authority supplies a sealed source snapshot. The state source adapter
-retains exact source-owned release, profile, recipe, and snapshot identities.
+Source authority supplies a sealed source snapshot. The independently released `libpkgstate-source` adapter retains exact source-owned release, profile, recipe, and snapshot identities.
 The state core never recreates those identities from coordinates.
 
 Build authority supplies one sealed request, one successful result, exact
 artifact bytes, execution evidence, and an ordered payload manifest. Image
-authority independently inspects those bytes. The state build adapter admits the
-pair only when source projection, artifact content, inspection receipt, and every
+authority independently inspects those bytes. The independently released `libpkgstate-build` adapter admits the pair only when source projection, artifact content, inspection receipt, and every
 normalized payload field agree exactly.
 
 Application authority supplies one operation-specific libpkgapply 2.1 request,
 one caller-owned live target mutation lease, and completed target effects. Before
-mutation, the state application adapter performs exactly one canonical store read
+mutation, `libpkgstate-apply` performs exactly one canonical store read
 under that lease, validates the request's expected snapshot and ownership
 inventory, and derives the complete accepted-plan path-owner projection. The
 returned snapshot and projection are one value, and projection evidence is
@@ -30,7 +28,7 @@ computed from the exact authority universe rather than supplied by the caller.
 
 After application, application authority supplies the completed target effects. Installation and upgrade requests retain the
 complete successful build result and independent image inspection admitted by
-libpkgapply. The state application adapter projects source and build authority
+libpkgapply. `libpkgstate-apply` projects source and build authority
 from that exact request, validates the accepted plan and artifact-content
 identity, and creates a complete installation receipt. When an effectful
 transaction controller supplies exact transaction evidence, the adapter retains
@@ -45,7 +43,7 @@ identities.
 
 ## Application admission
 
-The destination-owned adapter has three typed entry points. Installation takes
+The independently released destination-owned `libpkgstate-apply` adapter has three typed entry points. Installation takes
 an installation request, completed evidence, and one initial installation
 reason. Upgrade takes an upgrade request and completed evidence, retaining the
 reason already present in canonical state. Removal takes a removal request and

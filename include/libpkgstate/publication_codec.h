@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -50,7 +52,7 @@ enum class state_publication_codec_error_code : std::uint8_t {
 };
 
 /*! \brief Reports malformed publication evidence or foreign decode authority. */
-class state_publication_codec_error final : public std::invalid_argument {
+class PKGSTATE_API state_publication_codec_error final : public std::invalid_argument {
 public:
   state_publication_codec_error(state_publication_codec_error_code code,
                                 std::string message);
@@ -65,7 +67,7 @@ using state_publication_request_encoding = std::vector<std::uint8_t>;
 using state_publication_receipt_encoding = std::vector<std::uint8_t>;
 
 /*! \brief Canonically encode one immutable publication request. */
-[[nodiscard]] state_publication_request_encoding
+[[nodiscard]] PKGSTATE_API state_publication_request_encoding
 encode_state_publication_request(const state_publication_request& request);
 
 /*!
@@ -75,13 +77,13 @@ encode_state_publication_request(const state_publication_request& request);
  * installed packages are retained as complete native state bodies and every
  * delta is rebuilt through its public invariant-enforcing factory.
  */
-[[nodiscard]] state_publication_request
+[[nodiscard]] PKGSTATE_API state_publication_request
 decode_state_publication_request(
     const state_publication_request_encoding& encoding,
     const snapshot& expected_snapshot);
 
 /*! \brief Canonically encode one immutable publication receipt. */
-[[nodiscard]] state_publication_receipt_encoding
+[[nodiscard]] PKGSTATE_API state_publication_receipt_encoding
 encode_state_publication_receipt(const state_publication_receipt& receipt);
 
 /*!
@@ -90,7 +92,7 @@ encode_state_publication_receipt(const state_publication_receipt& receipt);
  * Any resulting snapshot is derived from the request and actual prior state;
  * it is not accepted as a caller-authored replacement snapshot.
  */
-[[nodiscard]] state_publication_receipt
+[[nodiscard]] PKGSTATE_API state_publication_receipt
 decode_state_publication_receipt(
     const state_publication_receipt_encoding& encoding,
     const state_publication_request& request,

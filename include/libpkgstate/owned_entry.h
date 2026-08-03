@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -36,32 +38,32 @@ enum class rejected_object_side : std::uint8_t {
   prior_installed = 2,
 };
 
-class installed_object_timestamp final {
+class PKGSTATE_API installed_object_timestamp final {
 public:
   installed_object_timestamp(std::int64_t seconds, std::uint32_t nanoseconds);
   [[nodiscard]] std::int64_t seconds() const noexcept;
   [[nodiscard]] std::uint32_t nanoseconds() const noexcept;
-  friend bool operator==(const installed_object_timestamp& lhs,
+  friend PKGSTATE_API bool operator==(const installed_object_timestamp& lhs,
                          const installed_object_timestamp& rhs) noexcept;
-  friend bool operator!=(const installed_object_timestamp& lhs,
+  friend PKGSTATE_API bool operator!=(const installed_object_timestamp& lhs,
                          const installed_object_timestamp& rhs) noexcept;
-  friend bool operator<(const installed_object_timestamp& lhs,
+  friend PKGSTATE_API bool operator<(const installed_object_timestamp& lhs,
                         const installed_object_timestamp& rhs) noexcept;
 private:
   std::int64_t seconds_;
   std::uint32_t nanoseconds_;
 };
 
-class installed_device_number final {
+class PKGSTATE_API installed_device_number final {
 public:
   installed_device_number(std::uint64_t major, std::uint64_t minor) noexcept;
   [[nodiscard]] std::uint64_t major() const noexcept;
   [[nodiscard]] std::uint64_t minor() const noexcept;
-  friend bool operator==(const installed_device_number& lhs,
+  friend PKGSTATE_API bool operator==(const installed_device_number& lhs,
                          const installed_device_number& rhs) noexcept;
-  friend bool operator!=(const installed_device_number& lhs,
+  friend PKGSTATE_API bool operator!=(const installed_device_number& lhs,
                          const installed_device_number& rhs) noexcept;
-  friend bool operator<(const installed_device_number& lhs,
+  friend PKGSTATE_API bool operator<(const installed_device_number& lhs,
                         const installed_device_number& rhs) noexcept;
 private:
   std::uint64_t major_;
@@ -69,7 +71,7 @@ private:
 };
 
 /*! \brief Complete recorded metadata for one installed active object. */
-class installed_object_metadata final {
+class PKGSTATE_API installed_object_metadata final {
 public:
   installed_object_metadata(
       owned_object_kind kind,
@@ -99,11 +101,11 @@ public:
   [[nodiscard]] const std::optional<package_path>&
   hardlink_anchor() const noexcept;
 
-  friend bool operator==(const installed_object_metadata& lhs,
+  friend PKGSTATE_API bool operator==(const installed_object_metadata& lhs,
                          const installed_object_metadata& rhs) noexcept;
-  friend bool operator!=(const installed_object_metadata& lhs,
+  friend PKGSTATE_API bool operator!=(const installed_object_metadata& lhs,
                          const installed_object_metadata& rhs) noexcept;
-  friend bool operator<(const installed_object_metadata& lhs,
+  friend PKGSTATE_API bool operator<(const installed_object_metadata& lhs,
                         const installed_object_metadata& rhs) noexcept;
 
 private:
@@ -119,24 +121,24 @@ private:
   std::optional<package_path> hardlink_anchor_;
 };
 
-class rejected_object_reference final {
+class PKGSTATE_API rejected_object_reference final {
 public:
   rejected_object_reference(rejected_object_side side,
                             rejected_object_identity identity);
   [[nodiscard]] rejected_object_side side() const noexcept;
   [[nodiscard]] const rejected_object_identity& identity() const noexcept;
-  friend bool operator==(const rejected_object_reference& lhs,
+  friend PKGSTATE_API bool operator==(const rejected_object_reference& lhs,
                          const rejected_object_reference& rhs) noexcept;
-  friend bool operator!=(const rejected_object_reference& lhs,
+  friend PKGSTATE_API bool operator!=(const rejected_object_reference& lhs,
                          const rejected_object_reference& rhs) noexcept;
-  friend bool operator<(const rejected_object_reference& lhs,
+  friend PKGSTATE_API bool operator<(const rejected_object_reference& lhs,
                         const rejected_object_reference& rhs) noexcept;
 private:
   rejected_object_side side_;
   rejected_object_identity identity_;
 };
 
-class owned_entry final {
+class PKGSTATE_API owned_entry final {
 public:
   [[nodiscard]] static owned_entry make(
       package_path path,
@@ -149,11 +151,11 @@ public:
   [[nodiscard]] active_object_origin origin() const noexcept;
   [[nodiscard]] const std::optional<rejected_object_reference>&
   rejected() const noexcept;
-  friend bool operator==(const owned_entry& lhs,
+  friend PKGSTATE_API bool operator==(const owned_entry& lhs,
                          const owned_entry& rhs) noexcept;
-  friend bool operator!=(const owned_entry& lhs,
+  friend PKGSTATE_API bool operator!=(const owned_entry& lhs,
                          const owned_entry& rhs) noexcept;
-  friend bool operator<(const owned_entry& lhs,
+  friend PKGSTATE_API bool operator<(const owned_entry& lhs,
                         const owned_entry& rhs) noexcept;
 private:
   owned_entry(package_path path,

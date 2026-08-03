@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -37,7 +39,7 @@ inline constexpr std::uint16_t installed_state_schema_version = 3;
  * schema version, target binding, normalized installed packages, and that
  * ownership-inventory identity.  Neither identity is caller supplied.
  */
-class snapshot final {
+class PKGSTATE_API snapshot final {
 public:
   /*!
    * \brief Validate, identify, and construct complete installed state.

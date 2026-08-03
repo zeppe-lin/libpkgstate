@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <cstdint>
 #include <optional>
 #include <vector>
@@ -19,7 +21,7 @@ namespace pkgstate {
 
 inline constexpr std::uint16_t installation_receipt_schema_version = 2;
 
-class installation_receipt final {
+class PKGSTATE_API installation_receipt final {
 public:
   [[nodiscard]] static installation_receipt make(
       installed_control control,
@@ -39,11 +41,11 @@ public:
   [[nodiscard]] const application_evidence_identity& application_evidence() const noexcept;
   [[nodiscard]] const std::optional<transaction_evidence_identity>& transaction_evidence() const noexcept;
 
-  friend bool operator==(const installation_receipt& lhs,
+  friend PKGSTATE_API bool operator==(const installation_receipt& lhs,
                          const installation_receipt& rhs) noexcept;
-  friend bool operator!=(const installation_receipt& lhs,
+  friend PKGSTATE_API bool operator!=(const installation_receipt& lhs,
                          const installation_receipt& rhs) noexcept;
-  friend bool operator<(const installation_receipt& lhs,
+  friend PKGSTATE_API bool operator<(const installation_receipt& lhs,
                         const installation_receipt& rhs) noexcept;
 private:
   installation_receipt(

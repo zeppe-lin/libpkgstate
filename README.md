@@ -1,159 +1,34 @@
 # libpkgstate
 
-`libpkgstate` is the native installed-package state authority for Zeppe-Lin.
-Version 2.5.1 retains the generation-v3 installed-state representation
-introduced in 2.0 and corrects publication evidence framing to fixed eight-byte
-house identifiers. New request and receipt records use `ZLSPRQST` and
-`ZLSPRCPT`; decoders retain narrow compatibility with the just-published 2.5.0
-framing. The codecs reopen evidence only under exact snapshot and request
-authority; they do not turn stored identities into semantic bodies.
+`libpkgstate` is the native installed-package state authority for Zeppe-Lin package management.
 
-The library records complete immutable installed truth:
+It owns complete immutable snapshots for one exact target binding, path ownership, installation receipts, source/build/application provenance retained as typed references, durable publication requests and receipts, canonical publication records, compare-and-publish semantics, and the immutable generation-v3 storage backend.
 
-- exact source-authoritative package release, profile, recipe, and source
-  snapshot identities;
-- package metadata, runtime requirements, lifecycle programs, and
-  action-specific lifecycle requirements;
-- declared and selected build/target architectures;
-- installation reason and complete source-bound native build provenance;
-- completed ownership with mode, owner, size, timestamp, content, link, device,
-  hard-link, retained-object, and rejected-object evidence;
-- installation receipts and installed packages;
-- target-bound ownership and installed snapshots; and
-- immutable publication requests, receipts, and generations; and
-- canonical request and receipt encodings for restart-safe state publication.
+## Boundary
 
-The core library does not parse recipe syntax, inspect archives, build packages,
-resolve dependencies, execute lifecycle programs, mutate target filesystems, or
-import historical package databases.
+The core has one external implementation dependency: OpenSSL `libcrypto`, used privately for qualified SHA-256 operations. It does not depend on package source, build, image, planning, or application libraries.
 
-## Authority flow
+Foreign-authority translations live in independent repositories:
 
-```text
-libpkgsource sealed snapshot
-        |
-        v
-libpkgstate-source -> package_source_record
-        |
-libpkgbuild successful result + exact libpkgimage inspection
-        |
-        v
-libpkgstate-build -> build_authority
-        |
-caller-held libpkgapply 2.1 target mutation lease
-        |
-canonical_store -- one read --> libpkgstate-apply
-        |                           |
-        |                           v
-        |                 lease-bound application state
-        |
-libpkgapply request-bound incoming build + completed effects
-        |
-        v
-libpkgstate-apply -> source/build admission -> installation_receipt
-                  -> publication request
-        |
-        v
-canonical_store -> immutable state generation
-```
+- `libpkgstate-source` — sealed source authority to durable source records;
+- `libpkgstate-build` — successful build and image evidence to build authority;
+- `libpkgstate-plan` — installed state to planner-owned facts;
+- `libpkgstate-apply` — lease-bound application projection and completed-application admission.
 
-`libpkgstate-plan` provides the reverse projection needed by the current
-operation planner. It exposes only planner-owned runtime/removal/target facts;
-it does not flatten state-specific source, build, or application provenance into
-planner control.
+The publication codec and canonical generation store remain in the owner because they persist state-owned authority rather than translate another subsystem's model.
 
-## Native model
-
-A `package_source_record` is the durable projection of one sealed source
-snapshot. It retains source identities rather than recomputing them.
-
-A `build_authority` is admitted only from a complete successful native build
-result whose exact artifact bytes and normalized payload have been independently
-verified. Its `build_provenance` retains source material, materialized input,
-environment, build-policy, request, result, payload, artifact, execution, image,
-and inspection identities.
-
-An `installed_control` binds one source record, one typed installation reason,
-and build provenance that names that same source record.
-
-Before application, `libpkgstate-apply` reads the canonical store exactly once
-while the caller's target mutation lease is live. It returns the snapshot and
-its exact accepted-plan path-owner projection as one inseparable value and
-derives projection evidence rather than accepting an identity from the caller.
-
-`libpkgstate-apply` also receives the exact operation-specific libpkgapply request,
-completed application evidence, and expected native snapshot. For installation
-it also receives only the initial installation reason. It derives source and
-build authority from the request-bound incoming package, preserves the prior
-reason on upgrade, and accepts no incoming authority on removal. Additive
-overloads carry one exact transaction-evidence identity into the publication
-request and, for install or upgrade, the durable installation receipt.
-
-An `installation_receipt` binds installed control to one target, one completed
-ownership manifest, one operation plan, one application-evidence identity, and
-optional exact transaction evidence.
-`installed_package` can be constructed only from that complete receipt.
-
-A `snapshot` is complete installed package and ownership state for one exact
-`state_target_binding`. State-owned identities are derived with domain-separated
-canonical records; external identities remain typed references.
-
-## Publication
-
-`state_publication_request` expresses install, replace, and remove deltas against
-one expected snapshot. `canonical_store::compare_and_publish()` owns stale-state
-comparison and derives the resulting snapshot. Backends cannot silently rebase a
-request or accept a caller-authored replacement state.
-
-`encode_state_publication_request()` retains the complete delta bodies but not the
-expected snapshot authority. Decode requires that exact snapshot. Publication
-receipt decode likewise requires the exact request and actual prior snapshot;
-any resulting snapshot is derived from those bodies rather than accepted from
-record bytes as replacement state.
-
-Current publication evidence is schema version 2 with fixed eight-byte framing.
-Version-1 records from 2.5.0 remain decodeable, but public encoders never emit
-the legacy textual magic.
-
-`canonical_generation_store` persists complete immutable generations and
-atomically selects one current generation. The native storage identifier is
-`libpkgstate-generation-v3`.
-
-## Migration boundary
-
-The authoritative library contains no historical database parser, compatibility
-snapshot, mutable old-format transaction, or import entry point. It also does
-not reinterpret generation-v1 or generation-v2 bytes as generation-v3.
-Migration belongs to a separate program that must supply every native fact an
-older format did not retain.
+Read `docs/architecture.md` for placement rules and `docs/integration.md` for the dependency graph.
 
 ## Build
 
 ```sh
-meson setup build \
-  -Ddefault_library=shared \
-  -Dlink_mode=shared \
-  -Dsource_adapter=enabled \
-  -Dbuild_adapter=enabled \
-  -Dplanner_adapter=enabled \
-  -Dapplication_adapter=enabled
+meson setup build   -Ddefault_library=shared   -Dlink_mode=shared
 meson compile -C build
 meson test -C build --print-errorlogs
 ```
 
-Core requires C++17 and libcrypto. Optional adapters require their exact owning
-libraries. Shared and static builds are configured separately.
+Shared and static closures use separate build directories. Meson fallback subprojects are intentionally unsupported.
 
-## Documentation
+## License
 
-The normative contracts are documented in:
-
-- `pkgstate_authority(7)`;
-- `pkgstate_model(3)`;
-- `pkgstate_installation_receipt(3)`;
-- `pkgstate_build_adapter(3)`;
-- `pkgstate_publication(3)`;
-- `pkgstate_canonical_generation_store(3)`; and
-- `pkgstate-generation(5)`.
-
-License: GPL-3.0-or-later.
+GPL-3.0-or-later. See `COPYING` and `COPYRIGHT`.

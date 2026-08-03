@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <libpkgstate/digest.h>
 
 namespace pkgstate {
@@ -20,7 +22,7 @@ namespace pkgstate {
  * deliberately contains neither a root pathname nor an installed snapshot
  * identity.
  */
-class state_target_binding final {
+class PKGSTATE_API state_target_binding final {
 public:
   /*!
    * \brief Construct and identify one durable target-state binding.
@@ -58,11 +60,11 @@ public:
   [[nodiscard]] const publication_domain_identity&
   publication_domain() const noexcept;
 
-  friend bool operator==(const state_target_binding& lhs,
+  friend PKGSTATE_API bool operator==(const state_target_binding& lhs,
                          const state_target_binding& rhs) noexcept;
-  friend bool operator!=(const state_target_binding& lhs,
+  friend PKGSTATE_API bool operator!=(const state_target_binding& lhs,
                          const state_target_binding& rhs) noexcept;
-  friend bool operator<(const state_target_binding& lhs,
+  friend PKGSTATE_API bool operator<(const state_target_binding& lhs,
                         const state_target_binding& rhs) noexcept;
 
 private:

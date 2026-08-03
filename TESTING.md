@@ -1,56 +1,29 @@
 # Qualification
 
-The repository test suite covers:
+The core repository qualifies only state-owned behavior:
 
 - identity wire format and domain separation;
-- package/profile/architecture normalization;
-- source record, source-bound build provenance, installed control, ownership,
-  and receipt invariants;
-- exact build-result, artifact-byte, image-inspection, and payload admission;
-- deterministic snapshot and ownership identities;
-- publication request and receipt validation;
-- stale-safe immutable generation publication and recovery;
-- source, build, planner, and application adapter contracts against their exact
-  public APIs, including request-bound source/build derivation and rejection of
-  foreign incoming artifacts;
-- additive transaction-provenance projection for installation, upgrade, and
-  removal, including exact receipt/publication agreement and preservation of
-  the existing no-evidence identities;
-- public header independence;
-- generated pkg-config metadata;
-- read-only diagnostic behavior;
-- release and documentation source contracts; and
-- installed shared/static consumers in CI.
+- package, profile, architecture, source-record, build-provenance, installed-control, ownership, receipt, snapshot, and target-binding invariants;
+- publication request and receipt validation and durable evidence codecs;
+- stale-safe compare-and-publish behavior and immutable generation-v3 storage;
+- public-header independence, reviewed ELF exports, SONAME 3, and pkg-config closure;
+- read-only `pkgstate-check` diagnostics;
+- manual, Doxygen, documentation, repository, architecture, and release contracts; and
+- installed shared and static consumers.
 
-Run:
+Foreign-authority translation behavior is qualified in `libpkgstate-source`, `libpkgstate-build`, `libpkgstate-plan`, and `libpkgstate-apply`. The owner does not rebuild those adapters behind feature options.
+
+Run one closure per build directory:
 
 ```sh
 meson setup build \
   -Ddefault_library=shared \
   -Dlink_mode=shared \
-  -Dsource_adapter=enabled \
-  -Dbuild_adapter=enabled \
-  -Dplanner_adapter=enabled \
-  -Dapplication_adapter=enabled \
   -Dtools=enabled \
+  -Dinstall_tools=true \
   -Dwerror=true
 meson compile -C build
 meson test -C build --print-errorlogs
 ```
 
-Sanitizer qualification uses address and undefined-behavior sanitizers. Shared
-and static dependency closures are built separately.
-
-
-- publication request codecs round-trip install, replace, remove, and
-  transaction-bound evidence under the exact expected snapshot;
-- publication receipt codecs round-trip every typed outcome under the exact
-  request and actual-prior snapshot;
-- request and receipt encoders emit `ZLSPRQST` and `ZLSPRCPT` schema version 2;
-- canonical 2.5.0 version-1 request and receipt records remain decodeable and
-  are checked against their own legacy wire form before re-encoding as version 2;
-- request/receipt checksums, truncation, foreign snapshot/request authority,
-  impossible resulting state, and deterministic re-encoding are enforced;
-- lease-bound application-state projection performs one canonical read, rejects
-  absent, lost, foreign, stale, or target-mismatched authority, derives stable
-  evidence, and never enters publication;
+Sanitizer qualification uses address and undefined-behavior sanitizers. Shared and static closures are built separately. Installed-consumer qualification must confirm that no source, build, image, planning, application, or extracted-state-adapter dependency appears in the core pkg-config surface.

@@ -3,6 +3,18 @@
 
 public_inc = include_directories('../include')
 
+elf_export_generator = find_program(
+  meson.project_source_root() / 'tools/generate-elf-export-script.sh',
+)
+core_export_script_name = 'libpkgstate.exports.map'
+core_export_script_path = meson.current_build_dir() / core_export_script_name
+core_export_script = configure_file(
+  input: '../abi/libpkgstate.exports',
+  output: core_export_script_name,
+  command: [elf_export_generator, '@INPUT@'],
+  capture: true,
+)
+
 libpkgstate = library(
   'pkgstate',
   [
@@ -27,7 +39,13 @@ libpkgstate = library(
     'generation_codec.cpp',
     'canonical_generation_store.cpp',
   ],
-  cpp_args: ['-D_FILE_OFFSET_BITS=64'],
+  cpp_args: visibility_cpp_args + [
+    '-DPKGSTATE_BUILDING_LIBRARY',
+    '-D_FILE_OFFSET_BITS=64',
+  ],
+  gnu_symbol_visibility: 'hidden',
+  link_args: ['-Wl,--version-script=' + core_export_script_path],
+  link_depends: [core_export_script],
   include_directories: public_inc,
   dependencies: libcrypto_dep,
   install: true,
@@ -35,17 +53,24 @@ libpkgstate = library(
   soversion: '3',
 )
 
+libpkgstate_consumer_deps = []
+if want_static
+  libpkgstate_consumer_deps += [libcrypto_dep]
+endif
+
 libpkgstate_dep = declare_dependency(
   link_with: libpkgstate,
   include_directories: public_inc,
-  dependencies: libcrypto_dep,
+  dependencies: libpkgstate_consumer_deps,
   compile_args: ['-D_FILE_OFFSET_BITS=64'],
+  version: meson.project_version(),
 )
 
 meson.override_dependency('libpkgstate', libpkgstate_dep)
 
 install_headers(
   '../include/libpkgstate/libpkgstate.h',
+  '../include/libpkgstate/export.h',
   '../include/libpkgstate/error.h',
   '../include/libpkgstate/digest.h',
   '../include/libpkgstate/model.h',

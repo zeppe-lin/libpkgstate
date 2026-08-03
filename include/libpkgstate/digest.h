@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -32,7 +34,7 @@ enum class digest_error_code {
   invalid_hex,
 };
 
-class digest_error final : public identity_error {
+class PKGSTATE_API digest_error final : public identity_error {
 public:
   digest_error(digest_error_code code, std::string message);
   [[nodiscard]] digest_error_code code() const noexcept;
@@ -42,7 +44,7 @@ private:
 
 namespace detail {
 
-class digest_value final {
+class PKGSTATE_API digest_value final {
 public:
   [[nodiscard]] static digest_value from_sha256(sha256_digest_bytes bytes);
   [[nodiscard]] static digest_value parse(std::string_view input);
@@ -50,11 +52,11 @@ public:
   [[nodiscard]] digest_algorithm algorithm() const noexcept;
   [[nodiscard]] const digest_bytes& bytes() const noexcept;
   [[nodiscard]] std::string string() const;
-  friend bool operator==(const digest_value& lhs,
+  friend PKGSTATE_API bool operator==(const digest_value& lhs,
                          const digest_value& rhs) noexcept;
-  friend bool operator!=(const digest_value& lhs,
+  friend PKGSTATE_API bool operator!=(const digest_value& lhs,
                          const digest_value& rhs) noexcept;
-  friend bool operator<(const digest_value& lhs,
+  friend PKGSTATE_API bool operator<(const digest_value& lhs,
                         const digest_value& rhs) noexcept;
 private:
   digest_value(std::uint16_t representation_version,
@@ -66,7 +68,7 @@ private:
 };
 
 template<typename Domain>
-class typed_digest final {
+class PKGSTATE_API typed_digest final {
 public:
   [[nodiscard]] static typed_digest from_sha256(sha256_digest_bytes bytes)
   {
@@ -93,17 +95,17 @@ public:
     return value_.bytes();
   }
   [[nodiscard]] std::string string() const { return value_.string(); }
-  friend bool operator==(const typed_digest& lhs,
+  friend PKGSTATE_API bool operator==(const typed_digest& lhs,
                          const typed_digest& rhs) noexcept
   {
     return lhs.value_ == rhs.value_;
   }
-  friend bool operator!=(const typed_digest& lhs,
+  friend PKGSTATE_API bool operator!=(const typed_digest& lhs,
                          const typed_digest& rhs) noexcept
   {
     return !(lhs == rhs);
   }
-  friend bool operator<(const typed_digest& lhs,
+  friend PKGSTATE_API bool operator<(const typed_digest& lhs,
                         const typed_digest& rhs) noexcept
   {
     return lhs.value_ < rhs.value_;
@@ -114,7 +116,7 @@ private:
 };
 
 template<typename Domain>
-class referenced_digest final {
+class PKGSTATE_API referenced_digest final {
 public:
   [[nodiscard]] static referenced_digest from_sha256(sha256_digest_bytes bytes)
   {
@@ -137,17 +139,17 @@ public:
     return value_.bytes();
   }
   [[nodiscard]] std::string string() const { return value_.string(); }
-  friend bool operator==(const referenced_digest& lhs,
+  friend PKGSTATE_API bool operator==(const referenced_digest& lhs,
                          const referenced_digest& rhs) noexcept
   {
     return lhs.value_ == rhs.value_;
   }
-  friend bool operator!=(const referenced_digest& lhs,
+  friend PKGSTATE_API bool operator!=(const referenced_digest& lhs,
                          const referenced_digest& rhs) noexcept
   {
     return !(lhs == rhs);
   }
-  friend bool operator<(const referenced_digest& lhs,
+  friend PKGSTATE_API bool operator<(const referenced_digest& lhs,
                         const referenced_digest& rhs) noexcept
   {
     return lhs.value_ < rhs.value_;

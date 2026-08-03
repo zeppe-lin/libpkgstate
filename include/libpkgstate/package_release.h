@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <libpkgstate/export.h>
+
 #include <cstdint>
 #include <string>
 
@@ -14,7 +16,7 @@
 
 namespace pkgstate {
 
-class package_release final {
+class PKGSTATE_API package_release final {
 public:
   package_release(package_release_identity identity,
                   package_reference package,
@@ -26,11 +28,11 @@ public:
   [[nodiscard]] const std::string& version() const noexcept;
   [[nodiscard]] std::uint32_t release() const noexcept;
   [[nodiscard]] std::string version_release() const;
-  friend bool operator==(const package_release& lhs,
+  friend PKGSTATE_API bool operator==(const package_release& lhs,
                          const package_release& rhs) noexcept;
-  friend bool operator!=(const package_release& lhs,
+  friend PKGSTATE_API bool operator!=(const package_release& lhs,
                          const package_release& rhs) noexcept;
-  friend bool operator<(const package_release& lhs,
+  friend PKGSTATE_API bool operator<(const package_release& lhs,
                         const package_release& rhs) noexcept;
 private:
   package_release_identity identity_;
