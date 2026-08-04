@@ -11,3 +11,8 @@ grep -F 'pkgstate_generation_codec.3' "$root/ci/lint-manpages.sh" >/dev/null || 
   echo 'generation codec manual is absent from CI qualification' >&2
   exit 1
 }
+
+grep -F 'html: enabled' "$root/.github/workflows/ci.yml" >/dev/null || fail 'GCC shared HTML build is absent'
+grep -F 'pandoc' "$root/.github/workflows/ci.yml" >/dev/null || fail 'Pandoc qualification dependency is absent'
+grep -F -- '-Dhtml_docs=' "$root/.github/workflows/ci.yml" >/dev/null || fail 'HTML Meson feature is not configured'
+grep -F 'qualify-html-docs.sh' "$root/.github/workflows/ci.yml" >/dev/null || fail 'installed HTML qualification is absent'

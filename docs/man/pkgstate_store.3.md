@@ -1,0 +1,39 @@
+% PKGSTATE_STORE(3) libpkgstate | Version 3.0.0
+
+<!-- Generated from pkgstate_store.3.scdoc; do not edit. -->
+
+
+# NAME
+
+pkgstate_store - canonical installed-state storage interface
+
+# SYNOPSIS
+
+**#include <libpkgstate/canonical_store.h>**
+
+# DESCRIPTION
+
+**canonical_store** is the abstract native storage authority. It exposes:
+
+```
+snapshot read() const;
+state_publication_receipt compare_and_publish(
+    const state_publication_request& request);
+```
+
+A backend implements read, exclusive publication coordination, and publication
+of one derived complete snapshot. The base class owns request comparison and
+receipt classification so a backend cannot redefine stale-state semantics.
+
+There is no generic mutable write transaction and no interface for another
+package database format.
+
+# CONCURRENCY
+
+A backend must serialize compare-and-publish over its publication domain and
+must not invoke its publication primitive for a stale request. Read operations
+must return one complete immutable snapshot.
+
+# SEE ALSO
+
+**pkgstate_publication**(3), **libpkgstate-posix**(3)

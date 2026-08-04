@@ -12,3 +12,14 @@ for file in abi/libpkgstate.exports include/libpkgstate/export.h tools/generate-
 test -x "$root/tests/style_contract_test.sh" || fail 'style contract is absent'
 
 test -x "$root/tools/check-public-documentation.py" || fail 'public documentation checker is absent'
+
+for tool in \
+  build-html-docs.py check-html-docs.py install-html-docs.py \
+  render-man-markdown.py check-man-markdown.py check-html-manifest.py; do
+  test -x "$root/tools/$tool" || fail "missing executable tools/$tool"
+done
+
+for helper in \
+  ci/qualify-html-docs.sh ci/qualify-installed-documentation.py; do
+  test -x "$root/$helper" || fail "missing executable $helper"
+done

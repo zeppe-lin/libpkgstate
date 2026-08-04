@@ -23,11 +23,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {name: GCC shared, cc: gcc, cxx: g++, mode: shared, buildtype: debug, ndebug: false, man: enabled}
-          - {name: GCC static, cc: gcc, cxx: g++, mode: static, buildtype: debug, ndebug: false, man: disabled}
-          - {name: Clang shared, cc: clang, cxx: clang++, mode: shared, buildtype: debug, ndebug: false, man: disabled}
-          - {name: Clang static, cc: clang, cxx: clang++, mode: static, buildtype: debug, ndebug: false, man: disabled}
-          - {name: GCC release, cc: gcc, cxx: g++, mode: shared, buildtype: release, ndebug: true, man: disabled}
+          - {name: GCC shared, cc: gcc, cxx: g++, mode: shared, buildtype: debug, ndebug: false, man: enabled, html: enabled}
+          - {name: GCC static, cc: gcc, cxx: g++, mode: static, buildtype: debug, ndebug: false, man: disabled, html: disabled}
+          - {name: Clang shared, cc: clang, cxx: clang++, mode: shared, buildtype: debug, ndebug: false, man: disabled, html: disabled}
+          - {name: Clang static, cc: clang, cxx: clang++, mode: static, buildtype: debug, ndebug: false, man: disabled, html: disabled}
+          - {name: GCC release, cc: gcc, cxx: g++, mode: shared, buildtype: release, ndebug: true, man: disabled, html: disabled}
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
@@ -38,7 +38,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends \
-            binutils clang doxygen libssl-dev mandoc ninja-build pkg-config \
+            binutils clang doxygen libssl-dev mandoc pandoc ninja-build pkg-config \
             python3-venv scdoc
           python3 -m venv "$RUNNER_TEMP/meson"
           "$RUNNER_TEMP/meson/bin/pip" install 'meson==1.10.2'
@@ -48,7 +48,8 @@ jobs:
           ./ci/configure-and-test.sh build "${{ matrix.mode }}" \
             --buildtype="${{ matrix.buildtype }}" \
             -Db_ndebug="${{ matrix.ndebug }}" \
-            -Dman_pages="${{ matrix.man }}"
+            -Dman_pages="${{ matrix.man }}" \
+            -Dhtml_docs="${{ matrix.html }}"
       - name: Qualify public API documentation
         if: matrix.name == 'GCC shared'
         run: doxygen Doxyfile
@@ -57,6 +58,9 @@ jobs:
         run: ./ci/lint-manpages.sh build
       - name: Qualify installed consumer and dependency boundary
         run: ./ci/qualify-installed.sh build "${{ matrix.mode }}"
+      - name: Qualify installed HTML documentation
+        if: matrix.html == 'enabled'
+        run: ./ci/qualify-html-docs.sh build libpkgstate 3.0.0
 
   sanitizers:
     name: ${{ matrix.name }} sanitizers
@@ -86,4 +90,5 @@ jobs:
             --buildtype=debug \
             -Db_sanitize=address,undefined \
             -Db_lundef=false \
-            -Dman_pages=disabled
+            -Dman_pages=disabled \
+            -Dhtml_docs=disabled

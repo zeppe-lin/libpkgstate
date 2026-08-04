@@ -1,0 +1,78 @@
+% PKGSTATE_AUTHORITY(7) libpkgstate | Version 3.0.0
+
+<!-- Generated from pkgstate_authority.7.scdoc; do not edit. -->
+
+
+# NAME
+
+pkgstate_authority - authority and trust boundaries for installed package state
+
+# SOURCE AUTHORITY
+
+**libpkgsource** owns normalized package release, requirement, profile, recipe,
+and source snapshot identities. **libpkgstate** retains those exact identities in
+**package_source_record**. It does not derive them from an archive name, package
+filename, installed path, or current source tree.
+
+# BUILD AUTHORITY
+
+**libpkgbuild** owns the sealed build request, verified source materials,
+materialized package inputs, policies, result, payload manifest, exact artifact
+bytes, artifact binding, and execution evidence. **libpkgimage** independently
+owns normalized archive inspection. **libpkgstate-build** admits build authority
+only when source projection, exact artifact digest, inspection receipt, and every
+ordered payload field agree.
+
+State retains those identities through **build_provenance**. It does not inspect a
+build directory or accept planner candidate facts as substitutes.
+
+# APPLICATION AUTHORITY
+
+**libpkgapply** owns the target context, outer mutation-lease contract, accepted
+application request, completed target effects, and durable application evidence.
+Before mutation, **libpkgstate-apply** performs one canonical state read while the
+caller-owned lease is live and derives the exact path-owner projection required
+by that request. The snapshot and projection are returned as one value; the
+projection evidence identity is not caller supplied.
+
+After completed application, the same adapter validates the accepted plan,
+expected state, target, ownership projection, and completed path consequences.
+Install and upgrade authority is taken only from the request-bound successful
+build and independent image inspection retained by **libpkgapply**. The adapter
+never reconstructs build provenance from planner facts.
+
+# STATE AUTHORITY
+
+**libpkgstate** owns:
+
+- installed control identity;
+- installation receipt identity;
+- installed package identity;
+- ownership inventory identity;
+- installed snapshot identity;
+- publication request and receipt identities; and
+- durable target binding and generation semantics.
+
+A snapshot is complete state for exactly one target binding. Known empty facts are represented as empty typed collections. There is no
+incomplete native installed-package record.
+
+# PUBLICATION
+
+A caller submits deltas against one expected snapshot. **canonical_store** compares
+that expectation while holding the backend publication boundary. Stale input is
+a typed result and never causes silent rebase. The resulting snapshot is derived
+from the request and actual prior state; callers do not attach an arbitrary
+replacement snapshot.
+
+# MIGRATION BOUNDARY
+
+Import from the historical CRUX package database is not part of libpkgstate.
+A future standalone importer must observe the old source, require explicit facts
+that the old format did not retain, and emit native installation receipts or a
+separately defined bootstrap publication contract. The authoritative library
+contains no old-format parser, compatibility store, or import entry point.
+
+# SEE ALSO
+
+**libpkgstate**(3), **pkgstate_model**(3), **libpkgstate-build**(3),
+**pkgstate_publication**(3)

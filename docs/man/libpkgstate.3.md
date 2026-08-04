@@ -1,0 +1,71 @@
+% LIBPKGSTATE(3) libpkgstate | Version 3.0.0
+
+<!-- Generated from libpkgstate.3.scdoc; do not edit. -->
+
+
+# NAME
+
+libpkgstate - native installed-package state authority
+
+# SYNOPSIS
+
+**#include <libpkgstate/libpkgstate.h>**
+
+# DESCRIPTION
+
+**libpkgstate** defines complete immutable installed-package state. Its values
+retain source-authoritative package release and recipe identities, installed
+runtime and lifecycle control, build provenance, installation reason, target
+binding, ownership, reconciliation results, and publication evidence.
+
+The library does not parse recipe syntax, inspect package archives, execute
+builds or lifecycle programs, resolve dependencies, install payloads, or import
+another package database. Those responsibilities belong to separate authorities
+and adapters.
+
+# AUTHORITY
+
+A **package_source_record** is a durable projection of one sealed source snapshot.
+An **installation_receipt** combines that source record with build, application,
+target, and completed ownership facts. An **installed_package** is admitted only
+from a complete receipt. A **snapshot** is the authoritative package and ownership
+state for one exact **state_target_binding**.
+
+All state-owned identities use domain-separated canonical records. Identities
+owned by source, planning, building, image, or application authorities are
+retained as typed external references and are never recomputed by libpkgstate.
+
+# STORAGE
+
+**canonical_store** owns backend-neutral compare-and-publish semantics. Concrete
+storage implementations are selected independently by the composition root.
+Canonical generation-v3 target-binding and complete-snapshot record bytes are
+owned by **pkgstate_generation_codec**(3). The reference filesystem mechanism that
+persists those records is provided by **libpkgstate-posix**.
+
+# INDEPENDENT ADAPTERS
+
+Independent repositories provide explicit authority bridges:
+
+**libpkgstate-source**
+Projects a sealed **libpkgsource** snapshot into a **package_source_record**.
+
+**libpkgstate-build**
+Admits a successful native build only after exact artifact and payload
+inspection.
+
+**libpkgstate-plan**
+Projects complete installed state into the existing **libpkgplan** fact model.
+
+**libpkgstate-apply**
+Reads one exact canonical snapshot under a caller-held target mutation lease,
+projects the accepted application path-owner universe, and combines completed
+**libpkgapply** evidence with admitted **libpkgstate-build** authority to construct
+a publication request.
+
+# SEE ALSO
+
+**pkgstate_authority**(7), **pkgstate_model**(3),
+**pkgstate_installation_receipt**(3), **libpkgstate-build**(3),
+**pkgstate_publication**(3), **pkgstate_generation_codec**(3),
+**pkgstate_store**(3), **libpkgstate-posix**(3)

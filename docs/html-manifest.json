@@ -1,0 +1,115 @@
+{
+  "project": "libpkgstate",
+  "documents": [
+    {
+      "source": "README.md",
+      "output": "index.html",
+      "title": "libpkgstate"
+    },
+    {
+      "source": "CONTRIBUTING.md",
+      "output": "contributing.html",
+      "title": "Contributing"
+    },
+    {
+      "source": "DESIGN.md",
+      "output": "design.html",
+      "title": "Native installed-state design"
+    },
+    {
+      "source": "HISTORY.md",
+      "output": "history.html",
+      "title": "History"
+    },
+    {
+      "source": "MAINTAINING.md",
+      "output": "maintaining.html",
+      "title": "Maintaining libpkgstate"
+    },
+    {
+      "source": "MIGRATION.md",
+      "output": "migration.html",
+      "title": "Migration boundary"
+    },
+    {
+      "source": "TESTING.md",
+      "output": "test-doctrine.html",
+      "title": "Qualification"
+    },
+    {
+      "source": "docs/abi.md",
+      "output": "abi.html",
+      "title": "ABI and durable protocol policy"
+    },
+    {
+      "source": "docs/architecture.md",
+      "output": "architecture.html",
+      "title": "Architecture"
+    },
+    {
+      "source": "docs/code-style.md",
+      "output": "code-style.html",
+      "title": "Code style"
+    },
+    {
+      "source": "docs/history/3.0-adapter-extraction.md",
+      "output": "history/3.0-adapter-extraction.html",
+      "title": "3.0 adapter extraction"
+    },
+    {
+      "source": "docs/html.md",
+      "output": "html-documentation.html",
+      "title": "HTML documentation"
+    },
+    {
+      "source": "docs/integration.md",
+      "output": "integration.html",
+      "title": "Integration"
+    },
+    {
+      "source": "docs/man/libpkgstate.3.md",
+      "output": "manual/libpkgstate.3.html",
+      "title": "LIBPKGSTATE(3) libpkgstate"
+    },
+    {
+      "source": "docs/man/pkgstate_authority.7.md",
+      "output": "manual/pkgstate_authority.7.html",
+      "title": "PKGSTATE_AUTHORITY(7) libpkgstate"
+    },
+    {
+      "source": "docs/man/pkgstate_generation_codec.3.md",
+      "output": "manual/pkgstate_generation_codec.3.html",
+      "title": "PKGSTATE_GENERATION_CODEC(3) libpkgstate"
+    },
+    {
+      "source": "docs/man/pkgstate_installation_receipt.3.md",
+      "output": "manual/pkgstate_installation_receipt.3.html",
+      "title": "PKGSTATE_INSTALLATION_RECEIPT(3) libpkgstate"
+    },
+    {
+      "source": "docs/man/pkgstate_model.3.md",
+      "output": "manual/pkgstate_model.3.html",
+      "title": "PKGSTATE_MODEL(3) libpkgstate"
+    },
+    {
+      "source": "docs/man/pkgstate_publication.3.md",
+      "output": "manual/pkgstate_publication.3.html",
+      "title": "PKGSTATE_PUBLICATION(3) libpkgstate"
+    },
+    {
+      "source": "docs/man/pkgstate_store.3.md",
+      "output": "manual/pkgstate_store.3.html",
+      "title": "PKGSTATE_STORE(3) libpkgstate"
+    },
+    {
+      "source": "docs/manpage-markdown.md",
+      "output": "manpage-markdown.html",
+      "title": "Manual-page Markdown"
+    },
+    {
+      "source": "docs/testing.md",
+      "output": "testing.html",
+      "title": "Testing"
+    }
+  ]
+}
