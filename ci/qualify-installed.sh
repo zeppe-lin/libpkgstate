@@ -2,40 +2,122 @@
 # SPDX-FileCopyrightText: 2026 Alexandr Savca
 # SPDX-License-Identifier: GPL-3.0-or-later
 set -eu
-[ "$#" -eq 2 ] || exit 2
-build_dir=$1; link_mode=$2
+
+usage()
+{
+  echo "usage: $0 BUILD-DIR {shared|static}" >&2
+  exit 2
+}
+
+[ "$#" -eq 2 ] || usage
+build_dir=$1
+link_mode=$2
+case $link_mode in
+  shared|static) ;;
+  *) usage ;;
+esac
+
 install_prefix=$(cat "$build_dir/ci-install-prefix")
-rm -rf "$install_prefix"; meson install -C "$build_dir"
-export PKG_CONFIG_PATH=$install_prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
+rm -rf "$install_prefix"
+meson install -C "$build_dir"
+
+export PKG_CONFIG_PATH="$install_prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
 unset PKG_CONFIG_SYSROOT_DIR
-test "$(pkg-config --modversion libpkgstate)" = 3.0.0
-if { pkg-config --print-requires libpkgstate; pkg-config --print-requires-private libpkgstate; } | grep -E 'libpkg(source|build|image|plan|apply)|libpkgstate-' >/dev/null; then echo 'contaminated core metadata' >&2; exit 1; fi
-tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT HUP INT TERM
-flags=$(pkg-config --cflags --libs libpkgstate); [ "$link_mode" = shared ] || flags=$(pkg-config --static --cflags --libs libpkgstate)
-documentation_dir="$install_prefix/share/doc/libpkgstate"
-for document in README.md HISTORY.md DESIGN.md MIGRATION.md TESTING.md CONTRIBUTING.md MAINTAINING.md architecture.md integration.md testing.md code-style.md abi.md 3.0-adapter-extraction.md; do
-  test -s "$documentation_dir/$document" || {
+
+[ "$(pkg-config --modversion libpkgstate)" = 3.0.0 ] || {
+  echo 'installed libpkgstate version is not 3.0.0' >&2
+  exit 1
+}
+
+if {
+  pkg-config --print-requires libpkgstate
+  pkg-config --print-requires-private libpkgstate
+} | grep -E 'libpkg(source|build|image|plan|apply)|libpkgstate-' >/dev/null
+then
+  echo 'foreign package-management authority leaked into core metadata' >&2
+  exit 1
+fi
+
+public=$(pkg-config --print-requires libpkgstate)
+[ -z "$public" ] || {
+  echo 'libpkgstate unexpectedly exposes public pkg-config requirements' >&2
+  exit 1
+}
+private=$(pkg-config --print-requires-private libpkgstate)
+printf '%s\n' "$private" | grep -F libcrypto >/dev/null || {
+  echo 'private libcrypto requirement is absent' >&2
+  exit 1
+}
+
+case $link_mode in
+  shared) flags=$(pkg-config --cflags --libs libpkgstate) ;;
+  static) flags=$(pkg-config --static --cflags --libs libpkgstate) ;;
+esac
+case $link_mode in
+  shared)
+    if printf '%s\n' "$flags" | grep -F -- '-lcrypto' >/dev/null; then
+      echo 'private crypto edge leaked into shared consumer flags' >&2
+      exit 1
+    fi
+    ;;
+  static)
+    printf '%s\n' "$flags" | grep -F -- '-lcrypto' >/dev/null || {
+      echo 'static link closure omits libcrypto' >&2
+      exit 1
+    }
+    ;;
+esac
+
+temporary=$(mktemp -d)
+trap 'rm -rf "$temporary"' EXIT HUP INT TERM
+cxx=${CXX:-c++}
+# shellcheck disable=SC2086
+$cxx -std=c++17 -Wall -Wextra -Wpedantic -Werror \
+  "$(dirname "$0")/installed-core-consumer.cpp" $flags \
+  -o "$temporary/consumer"
+"$temporary/consumer"
+
+for header in "$install_prefix"/include/libpkgstate/*.h; do
+  unit=$temporary/$(basename "$header").cpp
+  printf '#include <libpkgstate/%s>\n' "$(basename "$header")" >"$unit"
+  # shellcheck disable=SC2046
+  $cxx -std=c++17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
+    $(pkg-config --cflags libpkgstate) "$unit"
+done
+
+case $link_mode in
+  shared)
+    "$(dirname "$0")/audit-shared-boundary.sh" \
+      "$install_prefix/lib/libpkgstate.so.4.0.0"
+    ;;
+  static)
+    [ -f "$install_prefix/lib/libpkgstate.a" ] || {
+      echo 'installed static archive is absent' >&2
+      exit 1
+    }
+    ;;
+esac
+
+documentation_dir=$install_prefix/share/doc/libpkgstate
+for document in \
+  README.md HISTORY.md DESIGN.md MIGRATION.md TESTING.md \
+  CONTRIBUTING.md MAINTAINING.md architecture.md integration.md testing.md \
+  code-style.md abi.md 3.0-adapter-extraction.md
+do
+  [ -s "$documentation_dir/$document" ] || {
     echo "installed documentation is absent: $document" >&2
     exit 1
   }
 done
-case $link_mode in
-  shared) if printf '%s\n' "$flags" | grep -F -- '-lcrypto' >/dev/null; then echo 'private link edge leaked into shared consumer flags: -lcrypto' >&2; exit 1; fi ;;
-  static) printf '%s\n' "$flags" | grep -F -- '-lcrypto' >/dev/null || { echo 'static link closure omits -lcrypto' >&2; exit 1; } ;;
-esac
-# shellcheck disable=SC2086
-${CXX:-c++} -std=c++17 -Wall -Wextra -Wpedantic -Werror "$(dirname "$0")/installed-core-consumer.cpp" $flags -o "$tmp/consumer"
-"$tmp/consumer"
-for header in "$install_prefix"/include/libpkgstate/*.h; do printf '#include <libpkgstate/%s>
-' "$(basename "$header")" >"$tmp/header.cpp"; ${CXX:-c++} -std=c++17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only $(pkg-config --cflags libpkgstate) "$tmp/header.cpp"; done
-case $link_mode in
-  shared) "$(dirname "$0")/audit-shared-boundary.sh" "$install_prefix/lib/libpkgstate.so.4.0.0" ;;
-  static) test -f "$install_prefix/lib/libpkgstate.a" ;;
-esac
+
 if [ -d "$build_dir/man" ]; then
   for page in "$build_dir"/man/*.[1357]; do
     [ -e "$page" ] || continue
     section=${page##*.}
-    test -s "$install_prefix/share/man/man$section/$(basename "$page")"
+    installed=$install_prefix/share/man/man$section/$(basename "$page")
+    [ -s "$installed" ] || {
+      echo "installed manual is absent: $installed" >&2
+      exit 1
+    }
   done
 fi
