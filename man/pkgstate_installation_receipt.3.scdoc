@@ -43,5 +43,5 @@ new receipt.
 
 # SEE ALSO
 
-*pkgstate_model*(3), *pkgstate_apply_adapter*(3),
+*pkgstate_model*(3), *libpkgstate-apply*(3),
 *pkgstate_publication*(3)

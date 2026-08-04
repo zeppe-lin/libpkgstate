@@ -71,5 +71,5 @@ contains no old-format parser, compatibility store, or import entry point.
 
 # SEE ALSO
 
-*libpkgstate*(3), *pkgstate_model*(3), *pkgstate_build_adapter*(3),
+*libpkgstate*(3), *pkgstate_model*(3), *libpkgstate-build*(3),
 *pkgstate_publication*(3)
