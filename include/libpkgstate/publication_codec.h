@@ -38,17 +38,17 @@ inline constexpr std::size_t maximum_state_publication_receipt_encoding_size =
 
 /*! \brief Typed publication-codec failure class. */
 enum class state_publication_codec_error_code : std::uint8_t {
-  limit_exceeded = 1,
-  invalid_magic = 2,
-  unsupported_version = 3,
-  truncated = 4,
-  trailing_data = 5,
-  checksum_mismatch = 6,
-  invalid_value = 7,
-  expected_snapshot_mismatch = 8,
-  request_mismatch = 9,
-  actual_prior_mismatch = 10,
-  identity_mismatch = 11,
+  limit_exceeded = 1, ///< Input exceeds the documented byte ceiling.
+  invalid_magic = 2, ///< The record does not carry the publication magic.
+  unsupported_version = 3, ///< The record uses an unsupported schema version.
+  truncated = 4, ///< The record ends before a complete value is available.
+  trailing_data = 5, ///< Bytes remain after the complete canonical record.
+  checksum_mismatch = 6, ///< The record checksum does not match its payload.
+  invalid_value = 7, ///< A decoded field violates its owner value contract.
+  expected_snapshot_mismatch = 8, ///< Expected-state authority is inconsistent.
+  request_mismatch = 9, ///< Receipt material does not match its request.
+  actual_prior_mismatch = 10, ///< Prior-state evidence is internally inconsistent.
+  identity_mismatch = 11, ///< A recomputed semantic identity does not match.
 };
 
 /*! \brief Reports malformed publication evidence or foreign decode authority. */

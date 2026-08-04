@@ -10,3 +10,5 @@ if find "$root" -path "$root/.git" -prune -o -type f -print | grep -E '/(build|_
 for file in abi/libpkgstate.exports include/libpkgstate/export.h tools/generate-elf-export-script.sh tests/check_abi_surface.sh ci/audit-shared-boundary.sh; do [ -s "$root/$file" ] || fail "missing $file"; done
 
 test -x "$root/tests/style_contract_test.sh" || fail 'style contract is absent'
+
+test -x "$root/tools/check-public-documentation.py" || fail 'public documentation checker is absent'
