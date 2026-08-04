@@ -54,20 +54,38 @@ enum class state_publication_codec_error_code : std::uint8_t {
 /*! \brief Reports malformed publication evidence or foreign decode authority. */
 class PKGSTATE_API state_publication_codec_error final : public std::invalid_argument {
 public:
+  /*!
+   * \brief Construct a typed publication-codec failure.
+   * \param code Stable codec failure category.
+   * \param message Human-readable diagnostic message.
+   */
   state_publication_codec_error(state_publication_codec_error_code code,
                                 std::string message);
+
+  /*! \brief Destroy the polymorphic publication-codec failure. */
   ~state_publication_codec_error() override;
 
+  /*!
+   * \brief Return the stable codec failure category.
+   * \return Category supplied at construction.
+   */
   [[nodiscard]] state_publication_codec_error_code code() const noexcept;
 
 private:
   state_publication_codec_error_code code_;
 };
 
+/*! \brief Canonical durable bytes for one publication request. */
 using state_publication_request_encoding = std::vector<std::uint8_t>;
+
+/*! \brief Canonical durable bytes for one publication receipt. */
 using state_publication_receipt_encoding = std::vector<std::uint8_t>;
 
-/*! \brief Canonically encode one immutable publication request. */
+/*!
+ * \brief Canonically encode one immutable publication request.
+ * \param request Exact publication request.
+ * \return Canonical publication-request bytes.
+ */
 [[nodiscard]] PKGSTATE_API state_publication_request_encoding
 encode_state_publication_request(const state_publication_request& request);
 
@@ -77,13 +95,21 @@ encode_state_publication_request(const state_publication_request& request);
  * The expected snapshot is not reconstructed from the record. Proposed
  * installed packages are retained as complete native state bodies and every
  * delta is rebuilt through its public invariant-enforcing factory.
+ * \param encoding Canonical encoded record to decode.
+ * \param expected_snapshot Exact expected-snapshot authority supplied by the
+ *                          caller.
+ * \return Decoded publication request bound to the supplied expected snapshot.
  */
 [[nodiscard]] PKGSTATE_API state_publication_request
 decode_state_publication_request(
     const state_publication_request_encoding& encoding,
     const snapshot& expected_snapshot);
 
-/*! \brief Canonically encode one immutable publication receipt. */
+/*!
+ * \brief Canonically encode one immutable publication receipt.
+ * \param receipt Publication receipt to encode.
+ * \return Canonical publication-receipt bytes.
+ */
 [[nodiscard]] PKGSTATE_API state_publication_receipt_encoding
 encode_state_publication_receipt(const state_publication_receipt& receipt);
 
@@ -92,6 +118,12 @@ encode_state_publication_receipt(const state_publication_receipt& receipt);
  *
  * Any resulting snapshot is derived from the request and actual prior state;
  * it is not accepted as a caller-authored replacement snapshot.
+ * \param encoding Canonical encoded record to decode.
+ * \param request Exact publication request.
+ * \param actual_prior Authoritative prior snapshot observed by the state
+ *                     store.
+ * \return Decoded publication receipt bound to the supplied request and prior
+ *         state.
  */
 [[nodiscard]] PKGSTATE_API state_publication_receipt
 decode_state_publication_receipt(

@@ -36,12 +36,16 @@ enum class installation_reason_kind : std::uint8_t {
  */
 class PKGSTATE_API installation_reason final {
 public:
-  /*! \brief Construct an explicit caller request without issuer payload. */
+  /*!
+   * \brief Construct an explicit caller request without issuer payload.
+   * \return Constructed validated value.
+   */
   [[nodiscard]] static installation_reason explicit_request();
 
   /*!
    * \brief Construct a runtime-dependency reason.
    * \param issuer Exact installed package whose runtime closure selected this.
+   * \return Constructed validated value.
    */
   [[nodiscard]] static installation_reason
   runtime_dependency(package_reference issuer);
@@ -50,6 +54,7 @@ public:
    * \brief Construct a source-profile membership reason.
    * \param profile Exact selected profile.
    * \param identity Source-owned identity of the sealed profile.
+   * \return Constructed validated value.
    */
   [[nodiscard]] static installation_reason profile_membership(
       profile_reference profile,
@@ -59,30 +64,61 @@ public:
    * \brief Construct a named system-policy reason.
    * \param policy Non-empty single-line policy identifier.
    * \throws state_error when \p policy is unsafe.
+   * \return Constructed validated value.
    */
   [[nodiscard]] static installation_reason system_policy(std::string policy);
 
-  /*! \brief Return the active reason kind. */
+  /*!
+   * \brief Return the active reason kind.
+   * \return The active reason kind.
+   */
   [[nodiscard]] installation_reason_kind kind() const noexcept;
-  /*! \brief Return issuer package only for runtime_dependency. */
+  /*!
+   * \brief Return issuer package only for runtime_dependency.
+   * \return Issuer package only for runtime_dependency.
+   */
   [[nodiscard]] const std::optional<package_reference>&
   issuer_package() const noexcept;
-  /*! \brief Return issuer profile only for profile_membership. */
+  /*!
+   * \brief Return issuer profile only for profile_membership.
+   * \return Issuer profile only for profile_membership.
+   */
   [[nodiscard]] const std::optional<profile_reference>&
   issuer_profile() const noexcept;
-  /*! \brief Return issuer profile identity only for profile_membership. */
+  /*!
+   * \brief Return issuer profile identity only for profile_membership.
+   * \return Issuer profile identity only for profile_membership.
+   */
   [[nodiscard]] const std::optional<source_profile_identity>&
   issuer_profile_identity() const noexcept;
-  /*! \brief Return policy identifier only for system_policy. */
+  /*!
+   * \brief Return policy identifier only for system_policy.
+   * \return Policy identifier only for system_policy.
+   */
   [[nodiscard]] const std::optional<std::string>& policy() const noexcept;
 
-  /*! \brief Compare complete installation reasons for equality. */
+  /*!
+   * \brief Compare complete installation reasons for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const installation_reason& lhs,
                                       const installation_reason& rhs) noexcept;
-  /*! \brief Compare complete installation reasons for inequality. */
+  /*!
+   * \brief Compare complete installation reasons for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const installation_reason& lhs,
                                       const installation_reason& rhs) noexcept;
-  /*! \brief Order installation reasons canonically. */
+  /*!
+   * \brief Order installation reasons canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const installation_reason& lhs,
                                      const installation_reason& rhs) noexcept;
 
@@ -143,50 +179,107 @@ public:
       artifact_image_identity artifact_image,
       artifact_inspection_identity artifact_inspection);
 
-  /*! \brief Return the admitted native source-record identity. */
+  /*!
+   * \brief Return the admitted native source-record identity.
+   * \return The admitted native source-record identity.
+   */
   [[nodiscard]] const package_source_record_identity&
   source_record() const noexcept;
-  /*! \brief Return the exact build-request identity. */
+  /*!
+   * \brief Return the exact build-request identity.
+   * \return The exact build-request identity.
+   */
   [[nodiscard]] const build_request_identity& request() const noexcept;
-  /*! \brief Return the admitted source-material-set identity. */
+  /*!
+   * \brief Return the admitted source-material-set identity.
+   * \return The admitted source-material-set identity.
+   */
   [[nodiscard]] const source_material_set_identity&
   source_materials() const noexcept;
-  /*! \brief Return the exact build-input-set identity. */
+  /*!
+   * \brief Return the exact build-input-set identity.
+   * \return The exact build-input-set identity.
+   */
   [[nodiscard]] const build_input_set_identity& build_inputs() const noexcept;
-  /*! \brief Return the environment-policy identity. */
+  /*!
+   * \brief Return the environment-policy identity.
+   * \return The environment-policy identity.
+   */
   [[nodiscard]] const environment_policy_identity&
   environment_policy() const noexcept;
-  /*! \brief Return the build-policy identity. */
+  /*!
+   * \brief Return the build-policy identity.
+   * \return The build-policy identity.
+   */
   [[nodiscard]] const build_policy_identity& build_policy() const noexcept;
-  /*! \brief Return the complete build-result identity. */
+  /*!
+   * \brief Return the complete build-result identity.
+   * \return The complete build-result identity.
+   */
   [[nodiscard]] const build_result_identity& build_result() const noexcept;
-  /*! \brief Return the payload-manifest identity. */
+  /*!
+   * \brief Return the payload-manifest identity.
+   * \return The payload-manifest identity.
+   */
   [[nodiscard]] const payload_manifest_identity&
   payload_manifest() const noexcept;
-  /*! \brief Return the exact artifact authority identity. */
+  /*!
+   * \brief Return the exact artifact authority identity.
+   * \return The exact artifact authority identity.
+   */
   [[nodiscard]] const build_artifact_identity& artifact() const noexcept;
-  /*! \brief Return the exact artifact-content identity. */
+  /*!
+   * \brief Return the exact artifact-content identity.
+   * \return The exact artifact-content identity.
+   */
   [[nodiscard]] const artifact_content_identity&
   artifact_content() const noexcept;
-  /*! \brief Return the artifact-binding identity. */
+  /*!
+   * \brief Return the artifact-binding identity.
+   * \return The artifact-binding identity.
+   */
   [[nodiscard]] const artifact_binding_identity&
   artifact_binding() const noexcept;
-  /*! \brief Return build-execution evidence identity. */
+  /*!
+   * \brief Return build-execution evidence identity.
+   * \return Build-execution evidence identity.
+   */
   [[nodiscard]] const execution_evidence_identity&
   execution_evidence() const noexcept;
-  /*! \brief Return normalized package-image identity. */
+  /*!
+   * \brief Return normalized package-image identity.
+   * \return Normalized package-image identity.
+   */
   [[nodiscard]] const artifact_image_identity& artifact_image() const noexcept;
-  /*! \brief Return image-inspection receipt identity. */
+  /*!
+   * \brief Return image-inspection receipt identity.
+   * \return Image-inspection receipt identity.
+   */
   [[nodiscard]] const artifact_inspection_identity&
   artifact_inspection() const noexcept;
 
-  /*! \brief Compare complete build provenance for equality. */
+  /*!
+   * \brief Compare complete build provenance for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const build_provenance& lhs,
                                       const build_provenance& rhs) noexcept;
-  /*! \brief Compare complete build provenance for inequality. */
+  /*!
+   * \brief Compare complete build provenance for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const build_provenance& lhs,
                                       const build_provenance& rhs) noexcept;
-  /*! \brief Order build provenance canonically. */
+  /*!
+   * \brief Order build provenance canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const build_provenance& lhs,
                                      const build_provenance& rhs) noexcept;
 
@@ -223,24 +316,54 @@ public:
       installation_reason reason,
       build_provenance build);
 
-  /*! \brief Return canonical installed-control identity. */
+  /*!
+   * \brief Return canonical installed-control identity.
+   * \return Canonical installed-control identity.
+   */
   [[nodiscard]] const installed_control_identity& identity() const noexcept;
-  /*! \brief Return complete durable source authority. */
+  /*!
+   * \brief Return complete durable source authority.
+   * \return Complete durable source authority.
+   */
   [[nodiscard]] const package_source_record& source() const noexcept;
-  /*! \brief Return source-authoritative package release. */
+  /*!
+   * \brief Return source-authoritative package release.
+   * \return Source-authoritative package release.
+   */
   [[nodiscard]] const package_release& release() const noexcept;
-  /*! \brief Return exact installation reason. */
+  /*!
+   * \brief Return exact installation reason.
+   * \return Exact installation reason.
+   */
   [[nodiscard]] const installation_reason& reason() const noexcept;
-  /*! \brief Return complete build provenance. */
+  /*!
+   * \brief Return complete build provenance.
+   * \return Complete build provenance.
+   */
   [[nodiscard]] const build_provenance& build() const noexcept;
 
-  /*! \brief Compare complete installed control for equality. */
+  /*!
+   * \brief Compare complete installed control for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const installed_control& lhs,
                                       const installed_control& rhs) noexcept;
-  /*! \brief Compare complete installed control for inequality. */
+  /*!
+   * \brief Compare complete installed control for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const installed_control& lhs,
                                       const installed_control& rhs) noexcept;
-  /*! \brief Order installed control canonically. */
+  /*!
+   * \brief Order installed control canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const installed_control& lhs,
                                      const installed_control& rhs) noexcept;
 

@@ -42,11 +42,13 @@ public:
 
   /*!
    * \brief Return the canonical path spelling.
+   * \return The canonical path spelling.
    */
   [[nodiscard]] const std::string& string() const noexcept;
 
   /*!
    * \brief Return the final path component.
+   * \return The final path component.
    */
   [[nodiscard]] std::string_view filename() const noexcept;
 
@@ -58,23 +60,34 @@ public:
 
   /*!
    * \brief Test whether this path is a strict ancestor of another path.
+   * \param other Canonical path to test against this path.
+   * \return Whether this path is a strict ancestor of another path.
    */
   [[nodiscard]] bool is_ancestor_of(const package_path& other) const noexcept;
 
   /*!
    * \brief Compare two canonical paths for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
    */
   friend PKGSTATE_API bool operator==(const package_path& lhs,
                          const package_path& rhs) noexcept;
 
   /*!
    * \brief Compare two canonical paths for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
    */
   friend PKGSTATE_API bool operator!=(const package_path& lhs,
                          const package_path& rhs) noexcept;
 
   /*!
    * \brief Order canonical paths lexicographically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
    */
   friend PKGSTATE_API bool operator<(const package_path& lhs,
                         const package_path& rhs) noexcept;

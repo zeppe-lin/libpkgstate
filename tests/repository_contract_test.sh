@@ -12,6 +12,7 @@ for file in abi/libpkgstate.exports include/libpkgstate/export.h tools/generate-
 test -x "$root/tests/style_contract_test.sh" || fail 'style contract is absent'
 
 test -x "$root/tools/check-public-documentation.py" || fail 'public documentation checker is absent'
+test -x "$root/tools/check-doxygen-contract.py" || fail 'Doxygen AST contract checker is absent'
 
 for tool in \
   build-html-docs.py check-html-docs.py install-html-docs.py \

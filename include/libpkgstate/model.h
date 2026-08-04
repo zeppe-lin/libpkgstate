@@ -38,11 +38,19 @@ enum class requirement_member_kind : std::uint8_t {
   profile = 2, //!< Expansion step names another profile.
 };
 
-/*! \brief Return canonical protocol spelling for a lifecycle action. */
+/*!
+ * \brief Return canonical protocol spelling for a lifecycle action.
+ * \param value Enumeration value to name.
+ * \return Canonical protocol spelling for a lifecycle action.
+ */
 [[nodiscard]] PKGSTATE_API std::string_view
 to_string(lifecycle_action value) noexcept;
 
-/*! \brief Return canonical protocol spelling for a program language. */
+/*!
+ * \brief Return canonical protocol spelling for a program language.
+ * \param value Enumeration value to name.
+ * \return Canonical protocol spelling for a program language.
+ */
 [[nodiscard]] PKGSTATE_API std::string_view
 to_string(program_language value) noexcept;
 
@@ -56,16 +64,34 @@ public:
    */
   explicit package_reference(std::string name);
 
-  /*! \brief Return the canonical package name. */
+  /*!
+   * \brief Return the canonical package name.
+   * \return The canonical package name.
+   */
   [[nodiscard]] const std::string& name() const noexcept;
 
-  /*! \brief Compare package references for equality. */
+  /*!
+   * \brief Compare package references for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const package_reference& lhs,
                                       const package_reference& rhs) noexcept;
-  /*! \brief Compare package references for inequality. */
+  /*!
+   * \brief Compare package references for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const package_reference& lhs,
                                       const package_reference& rhs) noexcept;
-  /*! \brief Order package references lexicographically. */
+  /*!
+   * \brief Order package references lexicographically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const package_reference& lhs,
                                      const package_reference& rhs) noexcept;
 
@@ -83,16 +109,34 @@ public:
    */
   explicit profile_reference(std::string name);
 
-  /*! \brief Return the canonical profile name including `@`. */
+  /*!
+   * \brief Return the canonical profile name including `@`.
+   * \return The canonical profile name including `@`.
+   */
   [[nodiscard]] const std::string& name() const noexcept;
 
-  /*! \brief Compare profile references for equality. */
+  /*!
+   * \brief Compare profile references for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const profile_reference& lhs,
                                       const profile_reference& rhs) noexcept;
-  /*! \brief Compare profile references for inequality. */
+  /*!
+   * \brief Compare profile references for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const profile_reference& lhs,
                                       const profile_reference& rhs) noexcept;
-  /*! \brief Order profile references lexicographically. */
+  /*!
+   * \brief Order profile references lexicographically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const profile_reference& lhs,
                                      const profile_reference& rhs) noexcept;
 
@@ -110,18 +154,36 @@ public:
    */
   explicit architecture_reference(std::string name);
 
-  /*! \brief Return the canonical architecture name. */
+  /*!
+   * \brief Return the canonical architecture name.
+   * \return The canonical architecture name.
+   */
   [[nodiscard]] const std::string& name() const noexcept;
 
-  /*! \brief Compare architecture references for equality. */
+  /*!
+   * \brief Compare architecture references for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(
       const architecture_reference& lhs,
       const architecture_reference& rhs) noexcept;
-  /*! \brief Compare architecture references for inequality. */
+  /*!
+   * \brief Compare architecture references for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(
       const architecture_reference& lhs,
       const architecture_reference& rhs) noexcept;
-  /*! \brief Order architecture references lexicographically. */
+  /*!
+   * \brief Order architecture references lexicographically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(
       const architecture_reference& lhs,
       const architecture_reference& rhs) noexcept;
@@ -146,24 +208,51 @@ public:
                          std::uint32_t line,
                          std::uint32_t column);
 
-  /*! \brief Return the source document identifier. */
+  /*!
+   * \brief Return the source document identifier.
+   * \return The source document identifier.
+   */
   [[nodiscard]] const std::string& document() const noexcept;
-  /*! \brief Return the field or schema path. */
+  /*!
+   * \brief Return the field or schema path.
+   * \return The field or schema path.
+   */
   [[nodiscard]] const std::string& path() const noexcept;
-  /*! \brief Return the one-based source line. */
+  /*!
+   * \brief Return the one-based source line.
+   * \return The one-based source line.
+   */
   [[nodiscard]] std::uint32_t line() const noexcept;
-  /*! \brief Return the one-based source column. */
+  /*!
+   * \brief Return the one-based source column.
+   * \return The one-based source column.
+   */
   [[nodiscard]] std::uint32_t column() const noexcept;
 
-  /*! \brief Compare complete declaration provenance for equality. */
+  /*!
+   * \brief Compare complete declaration provenance for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(
       const declaration_provenance& lhs,
       const declaration_provenance& rhs) noexcept;
-  /*! \brief Compare complete declaration provenance for inequality. */
+  /*!
+   * \brief Compare complete declaration provenance for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(
       const declaration_provenance& lhs,
       const declaration_provenance& rhs) noexcept;
-  /*! \brief Order provenance by document, path, line, and column. */
+  /*!
+   * \brief Order provenance by document, path, line, and column.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(
       const declaration_provenance& lhs,
       const declaration_provenance& rhs) noexcept;
@@ -191,24 +280,51 @@ public:
                          std::string member,
                          declaration_provenance provenance);
 
-  /*! \brief Return the profile traversed by this step. */
+  /*!
+   * \brief Return the profile traversed by this step.
+   * \return The profile traversed by this step.
+   */
   [[nodiscard]] const profile_reference& profile() const noexcept;
-  /*! \brief Return whether the retained member is a package or profile. */
+  /*!
+   * \brief Return whether the retained member is a package or profile.
+   * \return Whether the retained member is a package or profile.
+   */
   [[nodiscard]] requirement_member_kind member_kind() const noexcept;
-  /*! \brief Return canonical member text. */
+  /*!
+   * \brief Return canonical member text.
+   * \return Canonical member text.
+   */
   [[nodiscard]] const std::string& member() const noexcept;
-  /*! \brief Return the exact member declaration site. */
+  /*!
+   * \brief Return the exact member declaration site.
+   * \return The exact member declaration site.
+   */
   [[nodiscard]] const declaration_provenance& provenance() const noexcept;
 
-  /*! \brief Compare complete expansion steps for equality. */
+  /*!
+   * \brief Compare complete expansion steps for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(
       const profile_expansion_step& lhs,
       const profile_expansion_step& rhs) noexcept;
-  /*! \brief Compare complete expansion steps for inequality. */
+  /*!
+   * \brief Compare complete expansion steps for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(
       const profile_expansion_step& lhs,
       const profile_expansion_step& rhs) noexcept;
-  /*! \brief Order expansion steps canonically. */
+  /*!
+   * \brief Order expansion steps canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(
       const profile_expansion_step& lhs,
       const profile_expansion_step& rhs) noexcept;
@@ -232,19 +348,40 @@ public:
       declaration_provenance declaration,
       std::vector<profile_expansion_step> expansion = {});
 
-  /*! \brief Return the direct requirement declaration site. */
+  /*!
+   * \brief Return the direct requirement declaration site.
+   * \return The direct requirement declaration site.
+   */
   [[nodiscard]] const declaration_provenance& declaration() const noexcept;
-  /*! \brief Return the exact profile expansion from declaration to package. */
+  /*!
+   * \brief Return the exact profile expansion from declaration to package.
+   * \return The exact profile expansion from declaration to package.
+   */
   [[nodiscard]] const std::vector<profile_expansion_step>&
   expansion() const noexcept;
 
-  /*! \brief Compare complete requirement origins for equality. */
+  /*!
+   * \brief Compare complete requirement origins for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const requirement_origin& lhs,
                                       const requirement_origin& rhs) noexcept;
-  /*! \brief Compare complete requirement origins for inequality. */
+  /*!
+   * \brief Compare complete requirement origins for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const requirement_origin& lhs,
                                       const requirement_origin& rhs) noexcept;
-  /*! \brief Order requirement origins canonically. */
+  /*!
+   * \brief Order requirement origins canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const requirement_origin& lhs,
                                      const requirement_origin& rhs) noexcept;
 
@@ -266,18 +403,39 @@ public:
   package_requirement(package_reference package,
                       std::vector<requirement_origin> origins);
 
-  /*! \brief Return the exact required package. */
+  /*!
+   * \brief Return the exact required package.
+   * \return The exact required package.
+   */
   [[nodiscard]] const package_reference& package() const noexcept;
-  /*! \brief Return canonical issuing origins. */
+  /*!
+   * \brief Return canonical issuing origins.
+   * \return Canonical issuing origins.
+   */
   [[nodiscard]] const std::vector<requirement_origin>& origins() const noexcept;
 
-  /*! \brief Compare complete package requirements for equality. */
+  /*!
+   * \brief Compare complete package requirements for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const package_requirement& lhs,
                                       const package_requirement& rhs) noexcept;
-  /*! \brief Compare complete package requirements for inequality. */
+  /*!
+   * \brief Compare complete package requirements for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const package_requirement& lhs,
                                       const package_requirement& rhs) noexcept;
-  /*! \brief Order package requirements canonically. */
+  /*!
+   * \brief Order package requirements canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const package_requirement& lhs,
                                      const package_requirement& rhs) noexcept;
 
@@ -297,18 +455,39 @@ public:
    */
   program(program_language language, std::string material);
 
-  /*! \brief Return the retained program language. */
+  /*!
+   * \brief Return the retained program language.
+   * \return The retained program language.
+   */
   [[nodiscard]] program_language language() const noexcept;
-  /*! \brief Return exact program material. */
+  /*!
+   * \brief Return exact program material.
+   * \return Exact program material.
+   */
   [[nodiscard]] const std::string& material() const noexcept;
 
-  /*! \brief Compare exact programs for equality. */
+  /*!
+   * \brief Compare exact programs for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const program& lhs,
                                       const program& rhs) noexcept;
-  /*! \brief Compare exact programs for inequality. */
+  /*!
+   * \brief Compare exact programs for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const program& lhs,
                                       const program& rhs) noexcept;
-  /*! \brief Order exact programs canonically. */
+  /*!
+   * \brief Order exact programs canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const program& lhs,
                                      const program& rhs) noexcept;
 
@@ -328,18 +507,39 @@ public:
    */
   lifecycle_program(lifecycle_action action, program value);
 
-  /*! \brief Return the exact lifecycle action. */
+  /*!
+   * \brief Return the exact lifecycle action.
+   * \return The exact lifecycle action.
+   */
   [[nodiscard]] lifecycle_action action() const noexcept;
-  /*! \brief Return exact program material and language. */
+  /*!
+   * \brief Return exact program material and language.
+   * \return Exact program material and language.
+   */
   [[nodiscard]] const program& value() const noexcept;
 
-  /*! \brief Compare lifecycle programs for equality. */
+  /*!
+   * \brief Compare lifecycle programs for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const lifecycle_program& lhs,
                                       const lifecycle_program& rhs) noexcept;
-  /*! \brief Compare lifecycle programs for inequality. */
+  /*!
+   * \brief Compare lifecycle programs for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const lifecycle_program& lhs,
                                       const lifecycle_program& rhs) noexcept;
-  /*! \brief Order lifecycle programs by action and program. */
+  /*!
+   * \brief Order lifecycle programs by action and program.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const lifecycle_program& lhs,
                                      const lifecycle_program& rhs) noexcept;
 
@@ -360,20 +560,41 @@ public:
   lifecycle_requirement(lifecycle_action action,
                         package_requirement requirement);
 
-  /*! \brief Return the exact lifecycle action. */
+  /*!
+   * \brief Return the exact lifecycle action.
+   * \return The exact lifecycle action.
+   */
   [[nodiscard]] lifecycle_action action() const noexcept;
-  /*! \brief Return the resolved package requirement. */
+  /*!
+   * \brief Return the resolved package requirement.
+   * \return The resolved package requirement.
+   */
   [[nodiscard]] const package_requirement& requirement() const noexcept;
 
-  /*! \brief Compare lifecycle requirements for equality. */
+  /*!
+   * \brief Compare lifecycle requirements for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(
       const lifecycle_requirement& lhs,
       const lifecycle_requirement& rhs) noexcept;
-  /*! \brief Compare lifecycle requirements for inequality. */
+  /*!
+   * \brief Compare lifecycle requirements for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(
       const lifecycle_requirement& lhs,
       const lifecycle_requirement& rhs) noexcept;
-  /*! \brief Order lifecycle requirements canonically. */
+  /*!
+   * \brief Order lifecycle requirements canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(
       const lifecycle_requirement& lhs,
       const lifecycle_requirement& rhs) noexcept;
@@ -399,22 +620,49 @@ public:
                    std::optional<std::string> homepage,
                    std::vector<std::string> licenses);
 
-  /*! \brief Return the package summary. */
+  /*!
+   * \brief Return the package summary.
+   * \return The package summary.
+   */
   [[nodiscard]] const std::string& summary() const noexcept;
-  /*! \brief Return the optional package description. */
+  /*!
+   * \brief Return the optional package description.
+   * \return The optional package description.
+   */
   [[nodiscard]] const std::optional<std::string>& description() const noexcept;
-  /*! \brief Return the optional package homepage. */
+  /*!
+   * \brief Return the optional package homepage.
+   * \return The optional package homepage.
+   */
   [[nodiscard]] const std::optional<std::string>& homepage() const noexcept;
-  /*! \brief Return canonical package license declarations. */
+  /*!
+   * \brief Return canonical package license declarations.
+   * \return Canonical package license declarations.
+   */
   [[nodiscard]] const std::vector<std::string>& licenses() const noexcept;
 
-  /*! \brief Compare complete package metadata for equality. */
+  /*!
+   * \brief Compare complete package metadata for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const package_metadata& lhs,
                                       const package_metadata& rhs) noexcept;
-  /*! \brief Compare complete package metadata for inequality. */
+  /*!
+   * \brief Compare complete package metadata for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const package_metadata& lhs,
                                       const package_metadata& rhs) noexcept;
-  /*! \brief Order package metadata canonically. */
+  /*!
+   * \brief Order package metadata canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const package_metadata& lhs,
                                      const package_metadata& rhs) noexcept;
 
@@ -439,21 +687,45 @@ public:
                    source_profile_identity identity,
                    std::vector<declaration_provenance> declarations);
 
-  /*! \brief Return the selected profile. */
+  /*!
+   * \brief Return the selected profile.
+   * \return The selected profile.
+   */
   [[nodiscard]] const profile_reference& profile() const noexcept;
-  /*! \brief Return the source-owned profile identity. */
+  /*!
+   * \brief Return the source-owned profile identity.
+   * \return The source-owned profile identity.
+   */
   [[nodiscard]] const source_profile_identity& identity() const noexcept;
-  /*! \brief Return canonical issuing declarations. */
+  /*!
+   * \brief Return canonical issuing declarations.
+   * \return Canonical issuing declarations.
+   */
   [[nodiscard]] const std::vector<declaration_provenance>&
   declarations() const noexcept;
 
-  /*! \brief Compare selected profiles for equality. */
+  /*!
+   * \brief Compare selected profiles for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const selected_profile& lhs,
                                       const selected_profile& rhs) noexcept;
-  /*! \brief Compare selected profiles for inequality. */
+  /*!
+   * \brief Compare selected profiles for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const selected_profile& lhs,
                                       const selected_profile& rhs) noexcept;
-  /*! \brief Order selected profiles canonically. */
+  /*!
+   * \brief Order selected profiles canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const selected_profile& lhs,
                                      const selected_profile& rhs) noexcept;
 
@@ -481,24 +753,51 @@ public:
       architecture_reference selected_build,
       architecture_reference selected_target);
 
-  /*! \brief Return canonical declared build architectures. */
+  /*!
+   * \brief Return canonical declared build architectures.
+   * \return Canonical declared build architectures.
+   */
   [[nodiscard]] const std::vector<architecture_reference>&
   declared_build() const noexcept;
-  /*! \brief Return canonical declared target architectures. */
+  /*!
+   * \brief Return canonical declared target architectures.
+   * \return Canonical declared target architectures.
+   */
   [[nodiscard]] const std::vector<architecture_reference>&
   declared_target() const noexcept;
-  /*! \brief Return the exact selected build architecture. */
+  /*!
+   * \brief Return the exact selected build architecture.
+   * \return The exact selected build architecture.
+   */
   [[nodiscard]] const architecture_reference& selected_build() const noexcept;
-  /*! \brief Return the exact selected target architecture. */
+  /*!
+   * \brief Return the exact selected target architecture.
+   * \return The exact selected target architecture.
+   */
   [[nodiscard]] const architecture_reference& selected_target() const noexcept;
 
-  /*! \brief Compare complete architecture bindings for equality. */
+  /*!
+   * \brief Compare complete architecture bindings for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const architecture_binding& lhs,
                                       const architecture_binding& rhs) noexcept;
-  /*! \brief Compare complete architecture bindings for inequality. */
+  /*!
+   * \brief Compare complete architecture bindings for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const architecture_binding& lhs,
                                       const architecture_binding& rhs) noexcept;
-  /*! \brief Order architecture bindings canonically. */
+  /*!
+   * \brief Order architecture bindings canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const architecture_binding& lhs,
                                      const architecture_binding& rhs) noexcept;
 

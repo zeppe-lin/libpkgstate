@@ -11,6 +11,7 @@
 - Added explicit architecture, integration, repository, documentation, and release contracts for the pure owner boundary.
 - Anchored every public failure hierarchy with out-of-line destruction so exception RTTI and vtables remain core-owned.
 - Completed public API contracts for native identities, source records, installed control, object ownership, receipts, packages, and snapshots.
+- Made strict Doxygen completeness executable: every public parameter and non-void return is checked from Clang's parsed documentation AST before rendering.
 
 ## 2.5.1
 

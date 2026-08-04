@@ -41,32 +41,65 @@ public:
        state_backend_identity state_backend,
        publication_domain_identity publication_domain);
 
-  /*! \brief Return the computed target-binding identity. */
+  /*!
+   * \brief Return the computed target-binding identity.
+   * \return The computed target-binding identity.
+   */
   [[nodiscard]] const state_target_binding_identity& identity() const noexcept;
 
-  /*! \brief Return the managed package-target identity. */
+  /*!
+   * \brief Return the managed package-target identity.
+   * \return The managed package-target identity.
+   */
   [[nodiscard]] const managed_target_identity& managed_target() const noexcept;
 
-  /*! \brief Return the durable installed-state store identity. */
+  /*!
+   * \brief Return the durable installed-state store identity.
+   * \return The durable installed-state store identity.
+   */
   [[nodiscard]] const state_store_identity& state_store() const noexcept;
 
-  /*! \brief Return the logical target root-view identity. */
+  /*!
+   * \brief Return the logical target root-view identity.
+   * \return The logical target root-view identity.
+   */
   [[nodiscard]] const root_view_identity& root_view() const noexcept;
 
-  /*! \brief Return the installed-state backend identity. */
+  /*!
+   * \brief Return the installed-state backend identity.
+   * \return The installed-state backend identity.
+   */
   [[nodiscard]] const state_backend_identity& state_backend() const noexcept;
 
-  /*! \brief Return the publication and locking-domain identity. */
+  /*!
+   * \brief Return the publication and locking-domain identity.
+   * \return The publication and locking-domain identity.
+   */
   [[nodiscard]] const publication_domain_identity&
   publication_domain() const noexcept;
 
-  /*! \brief Compare complete target-state bindings for equality. */
+  /*!
+   * \brief Compare complete target-state bindings for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const state_target_binding& lhs,
                                       const state_target_binding& rhs) noexcept;
-  /*! \brief Compare complete target-state bindings for inequality. */
+  /*!
+   * \brief Compare complete target-state bindings for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const state_target_binding& lhs,
                                       const state_target_binding& rhs) noexcept;
-  /*! \brief Order target-state bindings by canonical identity. */
+  /*!
+   * \brief Order target-state bindings by canonical identity.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const state_target_binding& lhs,
                                      const state_target_binding& rhs) noexcept;
 

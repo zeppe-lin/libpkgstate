@@ -60,7 +60,20 @@ enum class state_storage_atomicity_boundary : std::uint8_t {
  */
 class PKGSTATE_API state_publication_receipt final {
 public:
-  /*! \brief Record confirmed successful state publication. */
+  /*!
+   * \brief Record confirmed successful state publication.
+   * \param request Exact publication request.
+   * \param actual_prior Authoritative prior snapshot observed by the state
+   *                     store.
+   * \param resulting_snapshot Exact resulting snapshot derived from the
+   *                           validated request.
+   * \param storage_format Canonical storage-format identifier reported by the
+   *                       backend.
+   * \param atomicity Backend-reported state-storage atomicity boundary.
+   * \param subordinate_evidence Subordinate backend evidence identities
+   *                             retained by the receipt.
+   * \return Result of the documented operation.
+   */
   [[nodiscard]] static state_publication_receipt
   published(const state_publication_request& request,
             const snapshot& actual_prior,
@@ -70,7 +83,17 @@ public:
             std::vector<state_publication_evidence_identity>
                 subordinate_evidence = {});
 
-  /*! \brief Record an ordinary stale-expected-state refusal. */
+  /*!
+   * \brief Record an ordinary stale-expected-state refusal.
+   * \param request Exact publication request.
+   * \param actual_prior Authoritative prior snapshot observed by the state
+   *                     store.
+   * \param storage_format Canonical storage-format identifier reported by the
+   *                       backend.
+   * \param subordinate_evidence Subordinate backend evidence identities
+   *                             retained by the receipt.
+   * \return Result of the documented operation.
+   */
   [[nodiscard]] static state_publication_receipt
   stale_expected_state(
       const state_publication_request& request,
@@ -79,7 +102,17 @@ public:
       std::vector<state_publication_evidence_identity>
           subordinate_evidence = {});
 
-  /*! \brief Record semantic request rejection before publication. */
+  /*!
+   * \brief Record semantic request rejection before publication.
+   * \param request Exact publication request.
+   * \param actual_prior Authoritative prior snapshot observed by the state
+   *                     store.
+   * \param storage_format Canonical storage-format identifier reported by the
+   *                       backend.
+   * \param subordinate_evidence Subordinate backend evidence identities
+   *                             retained by the receipt.
+   * \return Result of the documented operation.
+   */
   [[nodiscard]] static state_publication_receipt
   request_rejected(
       const state_publication_request& request,
@@ -88,7 +121,17 @@ public:
       std::vector<state_publication_evidence_identity>
           subordinate_evidence = {});
 
-  /*! \brief Record failure after comparison but before publication. */
+  /*!
+   * \brief Record failure after comparison but before publication.
+   * \param request Exact publication request.
+   * \param actual_prior Authoritative prior snapshot observed by the state
+   *                     store.
+   * \param storage_format Canonical storage-format identifier reported by the
+   *                       backend.
+   * \param subordinate_evidence Subordinate backend evidence identities
+   *                             retained by the receipt.
+   * \return Result of the documented operation.
+   */
   [[nodiscard]] static state_publication_receipt
   failed_before_publication(
       const state_publication_request& request,
@@ -97,7 +140,20 @@ public:
       std::vector<state_publication_evidence_identity>
           subordinate_evidence = {});
 
-  /*! \brief Record publication whose durability confirmation failed. */
+  /*!
+   * \brief Record publication whose durability confirmation failed.
+   * \param request Exact publication request.
+   * \param actual_prior Authoritative prior snapshot observed by the state
+   *                     store.
+   * \param resulting_snapshot Exact resulting snapshot derived from the
+   *                           validated request.
+   * \param storage_format Canonical storage-format identifier reported by the
+   *                       backend.
+   * \param atomicity Backend-reported state-storage atomicity boundary.
+   * \param subordinate_evidence Subordinate backend evidence identities
+   *                             retained by the receipt.
+   * \return Result of the documented operation.
+   */
   [[nodiscard]] static state_publication_receipt
   published_but_durability_unconfirmed(
       const state_publication_request& request,
@@ -108,7 +164,20 @@ public:
       std::vector<state_publication_evidence_identity>
           subordinate_evidence = {});
 
-  /*! \brief Record an attempt whose authoritative state requires rereading. */
+  /*!
+   * \brief Record an attempt whose authoritative state requires rereading.
+   * \param request Exact publication request.
+   * \param actual_prior Authoritative prior snapshot observed by the state
+   *                     store.
+   * \param resulting_snapshot Exact resulting snapshot derived from the
+   *                           validated request.
+   * \param storage_format Canonical storage-format identifier reported by the
+   *                       backend.
+   * \param atomicity Backend-reported state-storage atomicity boundary.
+   * \param subordinate_evidence Subordinate backend evidence identities
+   *                             retained by the receipt.
+   * \return Result of the documented operation.
+   */
   [[nodiscard]] static state_publication_receipt
   indeterminate(
       const state_publication_request& request,
@@ -119,63 +188,120 @@ public:
       std::vector<state_publication_evidence_identity>
           subordinate_evidence = {});
 
-  /*! \brief Return the canonical receipt schema version. */
+  /*!
+   * \brief Return the canonical receipt schema version.
+   * \return The canonical receipt schema version.
+   */
   [[nodiscard]] std::uint16_t schema_version() const noexcept;
 
-  /*! \brief Return the state-computed publication-receipt identity. */
+  /*!
+   * \brief Return the state-computed publication-receipt identity.
+   * \return The state-computed publication-receipt identity.
+   */
   [[nodiscard]] const state_publication_receipt_identity&
   identity() const noexcept;
 
-  /*! \brief Return the immutable request represented by this outcome. */
+  /*!
+   * \brief Return the immutable request represented by this outcome.
+   * \return The immutable request represented by this outcome.
+   */
   [[nodiscard]] const state_publication_request_identity&
   request() const noexcept;
 
-  /*! \brief Return the prior snapshot required by the request. */
+  /*!
+   * \brief Return the prior snapshot required by the request.
+   * \return The prior snapshot required by the request.
+   */
   [[nodiscard]] const installed_state_snapshot_identity&
   expected_prior_snapshot() const noexcept;
 
-  /*! \brief Return the actual prior snapshot observed by the backend. */
+  /*!
+   * \brief Return the actual prior snapshot observed by the backend.
+   * \return The actual prior snapshot observed by the backend.
+   */
   [[nodiscard]] const installed_state_snapshot_identity&
   actual_prior_snapshot() const noexcept;
 
-  /*! \brief Return the durable target and store binding. */
+  /*!
+   * \brief Return the durable target and store binding.
+   * \return The durable target and store binding.
+   */
   [[nodiscard]] const state_target_binding&
   target_binding() const noexcept;
 
-  /*! \brief Return the durable state-store identity. */
+  /*!
+   * \brief Return the durable state-store identity.
+   * \return The durable state-store identity.
+   */
   [[nodiscard]] const state_store_identity& state_store() const noexcept;
 
-  /*! \brief Return the state-backend identity. */
+  /*!
+   * \brief Return the state-backend identity.
+   * \return The state-backend identity.
+   */
   [[nodiscard]] const state_backend_identity& backend() const noexcept;
 
-  /*! \brief Return the backend storage-format identifier. */
+  /*!
+   * \brief Return the backend storage-format identifier.
+   * \return The backend storage-format identifier.
+   */
   [[nodiscard]] const std::string& storage_format() const noexcept;
 
-  /*! \brief Return the typed publication outcome. */
+  /*!
+   * \brief Return the typed publication outcome.
+   * \return The typed publication outcome.
+   */
   [[nodiscard]] state_publication_outcome outcome() const noexcept;
 
-  /*! \brief Return the established durability knowledge. */
+  /*!
+   * \brief Return the established durability knowledge.
+   * \return The established durability knowledge.
+   */
   [[nodiscard]] state_publication_durability durability() const noexcept;
 
-  /*! \brief Return the actual state-storage atomicity boundary. */
+  /*!
+   * \brief Return the actual state-storage atomicity boundary.
+   * \return The actual state-storage atomicity boundary.
+   */
   [[nodiscard]] state_storage_atomicity_boundary
   atomicity_boundary() const noexcept;
 
-  /*! \brief Return the resulting snapshot identity, when established. */
+  /*!
+   * \brief Return the resulting snapshot identity, when established.
+   * \return The resulting snapshot identity, when established.
+   */
   [[nodiscard]] const std::optional<installed_state_snapshot_identity>&
   resulting_snapshot() const noexcept;
 
-  /*! \brief Return subordinate evidence in canonical identity order. */
+  /*!
+   * \brief Return subordinate evidence in canonical identity order.
+   * \return Subordinate evidence in canonical identity order.
+   */
   [[nodiscard]] const std::vector<state_publication_evidence_identity>&
   subordinate_evidence() const noexcept;
 
-  /*! \brief Compare complete publication receipts for equality. */
+  /*!
+   * \brief Compare complete publication receipts for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const state_publication_receipt& lhs,
                                       const state_publication_receipt& rhs) noexcept;
-  /*! \brief Compare complete publication receipts for inequality. */
+  /*!
+   * \brief Compare complete publication receipts for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const state_publication_receipt& lhs,
                                       const state_publication_receipt& rhs) noexcept;
-  /*! \brief Order publication receipts by canonical identity. */
+  /*!
+   * \brief Order publication receipts by canonical identity.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const state_publication_receipt& lhs,
                                      const state_publication_receipt& rhs) noexcept;
 

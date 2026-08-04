@@ -54,16 +54,31 @@ public:
       source_recipe_identity recipe,
       source_snapshot_identity snapshot);
 
-  /*! \brief Return the canonical native source-record identity. */
+  /*!
+   * \brief Return the canonical native source-record identity.
+   * \return The canonical native source-record identity.
+   */
   [[nodiscard]] const package_source_record_identity& identity() const noexcept;
-  /*! \brief Return source-authoritative package release coordinates. */
+  /*!
+   * \brief Return source-authoritative package release coordinates.
+   * \return Source-authoritative package release coordinates.
+   */
   [[nodiscard]] const package_release& release() const noexcept;
-  /*! \brief Return durable package metadata. */
+  /*!
+   * \brief Return durable package metadata.
+   * \return Durable package metadata.
+   */
   [[nodiscard]] const package_metadata& metadata() const noexcept;
-  /*! \brief Return canonical runtime requirements. */
+  /*!
+   * \brief Return canonical runtime requirements.
+   * \return Canonical runtime requirements.
+   */
   [[nodiscard]] const std::vector<package_requirement>&
   runtime_requirements() const noexcept;
-  /*! \brief Return canonical action-bound lifecycle programs. */
+  /*!
+   * \brief Return canonical action-bound lifecycle programs.
+   * \return Canonical action-bound lifecycle programs.
+   */
   [[nodiscard]] const std::vector<lifecycle_program>&
   lifecycle_programs() const noexcept;
 
@@ -76,7 +91,10 @@ public:
   [[nodiscard]] const lifecycle_program*
   lifecycle(lifecycle_action action) const noexcept;
 
-  /*! \brief Return all canonical action-bound lifecycle requirements. */
+  /*!
+   * \brief Return all canonical action-bound lifecycle requirements.
+   * \return All canonical action-bound lifecycle requirements.
+   */
   [[nodiscard]] const std::vector<lifecycle_requirement>&
   lifecycle_requirements() const noexcept;
 
@@ -88,23 +106,50 @@ public:
   [[nodiscard]] std::vector<package_requirement>
   lifecycle_requirements(lifecycle_action action) const;
 
-  /*! \brief Return declared and selected architecture authority. */
+  /*!
+   * \brief Return declared and selected architecture authority.
+   * \return Declared and selected architecture authority.
+   */
   [[nodiscard]] const architecture_binding& architectures() const noexcept;
-  /*! \brief Return exact selected profile evidence. */
+  /*!
+   * \brief Return exact selected profile evidence.
+   * \return Exact selected profile evidence.
+   */
   [[nodiscard]] const std::vector<selected_profile>&
   selected_profiles() const noexcept;
-  /*! \brief Return the foreign sealed-recipe identity. */
+  /*!
+   * \brief Return the foreign sealed-recipe identity.
+   * \return The foreign sealed-recipe identity.
+   */
   [[nodiscard]] const source_recipe_identity& recipe() const noexcept;
-  /*! \brief Return the foreign sealed-source-snapshot identity. */
+  /*!
+   * \brief Return the foreign sealed-source-snapshot identity.
+   * \return The foreign sealed-source-snapshot identity.
+   */
   [[nodiscard]] const source_snapshot_identity& snapshot() const noexcept;
 
-  /*! \brief Compare complete source records for equality. */
+  /*!
+   * \brief Compare complete source records for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const package_source_record& lhs,
                                       const package_source_record& rhs) noexcept;
-  /*! \brief Compare complete source records for inequality. */
+  /*!
+   * \brief Compare complete source records for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const package_source_record& lhs,
                                       const package_source_record& rhs) noexcept;
-  /*! \brief Order source records by canonical identity. */
+  /*!
+   * \brief Order source records by canonical identity.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const package_source_record& lhs,
                                      const package_source_record& rhs) noexcept;
 

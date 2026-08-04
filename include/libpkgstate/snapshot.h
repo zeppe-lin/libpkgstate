@@ -47,42 +47,73 @@ public:
    * \param packages Complete installed package records in arbitrary order.
    * \throws state_error on duplicate names, target-binding mismatch, duplicate
    *         ownership claims, or canonical identity failure.
+   * \return Validated immutable value.
    */
   [[nodiscard]] static snapshot
   make(state_target_binding target_binding,
        std::vector<installed_package> packages = {});
 
-  /*! \brief Return the canonical snapshot schema version. */
+  /*!
+   * \brief Return the canonical snapshot schema version.
+   * \return The canonical snapshot schema version.
+   */
   [[nodiscard]] std::uint16_t schema_version() const noexcept;
 
-  /*! \brief Return the computed path-to-owner inventory identity. */
+  /*!
+   * \brief Return the computed path-to-owner inventory identity.
+   * \return The computed path-to-owner inventory identity.
+   */
   [[nodiscard]] const ownership_inventory_identity&
   ownership_identity() const noexcept;
 
-  /*! \brief Return the computed installed-state snapshot identity. */
+  /*!
+   * \brief Return the computed installed-state snapshot identity.
+   * \return The computed installed-state snapshot identity.
+   */
   [[nodiscard]] const installed_state_snapshot_identity&
   identity() const noexcept;
 
-  /*! \brief Return the target-state binding shared by every package. */
+  /*!
+   * \brief Return the target-state binding shared by every package.
+   * \return The target-state binding shared by every package.
+   */
   [[nodiscard]] const state_target_binding&
   target_binding() const noexcept;
 
-  /*! \brief Return all packages in package-name order. */
+  /*!
+   * \brief Return all packages in package-name order.
+   * \return All packages in package-name order.
+   */
   [[nodiscard]] const std::vector<installed_package>&
   packages() const noexcept;
 
-  /*! \brief Return the number of installed package records. */
+  /*!
+   * \brief Return the number of installed package records.
+   * \return The number of installed package records.
+   */
   [[nodiscard]] std::size_t size() const noexcept;
 
-  /*! \brief Find an installed package by canonical package name. */
+  /*!
+   * \brief Find an installed package by canonical package name.
+   * \param name Canonical package name to locate.
+   * \return Matching installed package, or `nullptr` when absent.
+   */
   [[nodiscard]] const installed_package*
   find_package(std::string_view name) const noexcept;
 
-  /*! \brief Return every package that owns one canonical path. */
+  /*!
+   * \brief Return every package that owns one canonical path.
+   * \param path Canonical package path to query.
+   * \return Canonical owner set for the path.
+   */
   [[nodiscard]] std::vector<const installed_package*>
   owners(const package_path& path) const;
 
-  /*! \brief Test whether any package owns one canonical path. */
+  /*!
+   * \brief Test whether any package owns one canonical path.
+   * \param path Canonical package path to query.
+   * \return Whether the path has at least one owner.
+   */
   [[nodiscard]] bool
   is_owned(const package_path& path) const noexcept;
 

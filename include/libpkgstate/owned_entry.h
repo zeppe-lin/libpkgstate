@@ -53,18 +53,39 @@ public:
    */
   installed_object_timestamp(std::int64_t seconds, std::uint32_t nanoseconds);
 
-  /*! \brief Return the signed seconds component. */
+  /*!
+   * \brief Return the signed seconds component.
+   * \return The signed seconds component.
+   */
   [[nodiscard]] std::int64_t seconds() const noexcept;
-  /*! \brief Return the normalized nanoseconds component. */
+  /*!
+   * \brief Return the normalized nanoseconds component.
+   * \return The normalized nanoseconds component.
+   */
   [[nodiscard]] std::uint32_t nanoseconds() const noexcept;
 
-  /*! \brief Compare complete timestamps for equality. */
+  /*!
+   * \brief Compare complete timestamps for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const installed_object_timestamp& lhs,
                                       const installed_object_timestamp& rhs) noexcept;
-  /*! \brief Compare complete timestamps for inequality. */
+  /*!
+   * \brief Compare complete timestamps for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const installed_object_timestamp& lhs,
                                       const installed_object_timestamp& rhs) noexcept;
-  /*! \brief Order timestamps by seconds and nanoseconds. */
+  /*!
+   * \brief Order timestamps by seconds and nanoseconds.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const installed_object_timestamp& lhs,
                                      const installed_object_timestamp& rhs) noexcept;
 
@@ -76,21 +97,46 @@ private:
 /*! \brief Portable major and minor components of one installed device node. */
 class PKGSTATE_API installed_device_number final {
 public:
-  /*! \brief Construct exact device-number components. */
+  /*!
+   * \brief Construct exact device-number components.
+   * \param major Device major number.
+   * \param minor Device minor number.
+   */
   installed_device_number(std::uint64_t major, std::uint64_t minor) noexcept;
 
-  /*! \brief Return the major device number. */
+  /*!
+   * \brief Return the major device number.
+   * \return The major device number.
+   */
   [[nodiscard]] std::uint64_t major() const noexcept;
-  /*! \brief Return the minor device number. */
+  /*!
+   * \brief Return the minor device number.
+   * \return The minor device number.
+   */
   [[nodiscard]] std::uint64_t minor() const noexcept;
 
-  /*! \brief Compare complete device numbers for equality. */
+  /*!
+   * \brief Compare complete device numbers for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const installed_device_number& lhs,
                                       const installed_device_number& rhs) noexcept;
-  /*! \brief Compare complete device numbers for inequality. */
+  /*!
+   * \brief Compare complete device numbers for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const installed_device_number& lhs,
                                       const installed_device_number& rhs) noexcept;
-  /*! \brief Order device numbers by major and minor components. */
+  /*!
+   * \brief Order device numbers by major and minor components.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const installed_device_number& lhs,
                                      const installed_device_number& rhs) noexcept;
 
@@ -137,38 +183,83 @@ public:
       std::optional<installed_device_number> device = std::nullopt,
       std::optional<package_path> hardlink_anchor = std::nullopt);
 
-  /*! \brief Return the durable object class. */
+  /*!
+   * \brief Return the durable object class.
+   * \return The durable object class.
+   */
   [[nodiscard]] owned_object_kind kind() const noexcept;
-  /*! \brief Return permission and special mode bits. */
+  /*!
+   * \brief Return permission and special mode bits.
+   * \return Permission and special mode bits.
+   */
   [[nodiscard]] std::uint32_t mode() const noexcept;
-  /*! \brief Return the numeric owner identifier. */
+  /*!
+   * \brief Return the numeric owner identifier.
+   * \return The numeric owner identifier.
+   */
   [[nodiscard]] std::uint64_t uid() const noexcept;
-  /*! \brief Return the numeric group identifier. */
+  /*!
+   * \brief Return the numeric group identifier.
+   * \return The numeric group identifier.
+   */
   [[nodiscard]] std::uint64_t gid() const noexcept;
-  /*! \brief Return the exact recorded modification time. */
+  /*!
+   * \brief Return the exact recorded modification time.
+   * \return The exact recorded modification time.
+   */
   [[nodiscard]] const installed_object_timestamp& mtime() const noexcept;
-  /*! \brief Return regular-object size, or an empty value otherwise. */
+  /*!
+   * \brief Return regular-object size, or an empty value otherwise.
+   * \return Regular-object size, or an empty value otherwise.
+   */
   [[nodiscard]] const std::optional<std::uint64_t>& size() const noexcept;
-  /*! \brief Return regular-content identity, or an empty value otherwise. */
+  /*!
+   * \brief Return regular-content identity, or an empty value otherwise.
+   * \return Regular-content identity, or an empty value otherwise.
+   */
   [[nodiscard]] const std::optional<installed_regular_content_identity>&
   regular_content() const noexcept;
-  /*! \brief Return symbolic-link target, or an empty value otherwise. */
+  /*!
+   * \brief Return symbolic-link target, or an empty value otherwise.
+   * \return Symbolic-link target, or an empty value otherwise.
+   */
   [[nodiscard]] const std::optional<std::string>&
   symlink_target() const noexcept;
-  /*! \brief Return device-number components, or an empty value otherwise. */
+  /*!
+   * \brief Return device-number components, or an empty value otherwise.
+   * \return Device-number components, or an empty value otherwise.
+   */
   [[nodiscard]] const std::optional<installed_device_number>&
   device() const noexcept;
-  /*! \brief Return regular hard-link anchor, when this object is a link peer. */
+  /*!
+   * \brief Return regular hard-link anchor, when this object is a link peer.
+   * \return Regular hard-link anchor, when this object is a link peer.
+   */
   [[nodiscard]] const std::optional<package_path>&
   hardlink_anchor() const noexcept;
 
-  /*! \brief Compare complete installed object metadata for equality. */
+  /*!
+   * \brief Compare complete installed object metadata for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const installed_object_metadata& lhs,
                                       const installed_object_metadata& rhs) noexcept;
-  /*! \brief Compare complete installed object metadata for inequality. */
+  /*!
+   * \brief Compare complete installed object metadata for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const installed_object_metadata& lhs,
                                       const installed_object_metadata& rhs) noexcept;
-  /*! \brief Order complete installed object metadata canonically. */
+  /*!
+   * \brief Order complete installed object metadata canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const installed_object_metadata& lhs,
                                      const installed_object_metadata& rhs) noexcept;
 
@@ -197,18 +288,39 @@ public:
   rejected_object_reference(rejected_object_side side,
                             rejected_object_identity identity);
 
-  /*! \brief Return the rejected side. */
+  /*!
+   * \brief Return the rejected side.
+   * \return The rejected side.
+   */
   [[nodiscard]] rejected_object_side side() const noexcept;
-  /*! \brief Return the exact rejected-object identity. */
+  /*!
+   * \brief Return the exact rejected-object identity.
+   * \return The exact rejected-object identity.
+   */
   [[nodiscard]] const rejected_object_identity& identity() const noexcept;
 
-  /*! \brief Compare complete rejected references for equality. */
+  /*!
+   * \brief Compare complete rejected references for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const rejected_object_reference& lhs,
                                       const rejected_object_reference& rhs) noexcept;
-  /*! \brief Compare complete rejected references for inequality. */
+  /*!
+   * \brief Compare complete rejected references for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const rejected_object_reference& lhs,
                                       const rejected_object_reference& rhs) noexcept;
-  /*! \brief Order rejected references by side and identity. */
+  /*!
+   * \brief Order rejected references by side and identity.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const rejected_object_reference& lhs,
                                      const rejected_object_reference& rhs) noexcept;
 
@@ -241,25 +353,55 @@ public:
       active_object_origin origin,
       std::optional<rejected_object_reference> rejected = std::nullopt);
 
-  /*! \brief Return the canonical owned path. */
+  /*!
+   * \brief Return the canonical owned path.
+   * \return The canonical owned path.
+   */
   [[nodiscard]] const package_path& path() const noexcept;
-  /*! \brief Return the active object class. */
+  /*!
+   * \brief Return the active object class.
+   * \return The active object class.
+   */
   [[nodiscard]] owned_object_kind kind() const noexcept;
-  /*! \brief Return complete active object metadata. */
+  /*!
+   * \brief Return complete active object metadata.
+   * \return Complete active object metadata.
+   */
   [[nodiscard]] const installed_object_metadata& object() const noexcept;
-  /*! \brief Return authority for the active object. */
+  /*!
+   * \brief Return authority for the active object.
+   * \return Authority for the active object.
+   */
   [[nodiscard]] active_object_origin origin() const noexcept;
-  /*! \brief Return optional rejected-object evidence. */
+  /*!
+   * \brief Return optional rejected-object evidence.
+   * \return Optional rejected-object evidence.
+   */
   [[nodiscard]] const std::optional<rejected_object_reference>&
   rejected() const noexcept;
 
-  /*! \brief Compare complete owned entries for equality. */
+  /*!
+   * \brief Compare complete owned entries for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const owned_entry& lhs,
                                       const owned_entry& rhs) noexcept;
-  /*! \brief Compare complete owned entries for inequality. */
+  /*!
+   * \brief Compare complete owned entries for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const owned_entry& lhs,
                                       const owned_entry& rhs) noexcept;
-  /*! \brief Order owned entries canonically, beginning with path. */
+  /*!
+   * \brief Order owned entries canonically, beginning with path.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const owned_entry& lhs,
                                      const owned_entry& rhs) noexcept;
 

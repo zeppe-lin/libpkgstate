@@ -37,6 +37,17 @@ def doxygen_setting(text: str, name: str) -> str | None:
     return match.group(1) if match else None
 
 
+def check_macro_documentation(path: Path, lines: list[str], root: Path) -> None:
+    for index, line in enumerate(lines):
+        if not re.match(r"^\s*#define\s+[A-Z][A-Z0-9_]*\s*\(", line):
+            continue
+        if not documented_before(lines, index):
+            fail(
+                "undocumented function-like macro: "
+                f"{path.relative_to(root)}:{index + 1}"
+            )
+
+
 def check_enum_documentation(path: Path, lines: list[str], root: Path) -> None:
     inside = False
     depth = 0
@@ -105,6 +116,7 @@ def main() -> int:
                     "undocumented deleted operation: "
                     f"{path.relative_to(root)}:{start + 1}"
                 )
+        check_macro_documentation(path, lines, root)
         check_enum_documentation(path, lines, root)
 
     umbrella = include_dir / args.umbrella
@@ -131,10 +143,48 @@ def main() -> int:
     if not doxyfile.is_file():
         fail("missing Doxyfile")
     configuration = doxyfile.read_text(encoding="utf-8")
+    if re.search(r"^\s*HTML_TIMESTAMP\s*=", configuration, re.MULTILINE):
+        fail("Doxyfile contains obsolete HTML_TIMESTAMP")
+
+    builder_path = root / "tools" / "build-html-docs.py"
+    if not builder_path.is_file():
+        fail("missing HTML documentation builder")
+    builder_namespace: dict[str, object] = {
+        "__name__": "house_html_builder_contract",
+        "__file__": str(builder_path),
+    }
+    builder_code = compile(
+        builder_path.read_text(encoding="utf-8"),
+        str(builder_path),
+        "exec",
+    )
+    exec(builder_code, builder_namespace)
+    compose = builder_namespace.get("compose_doxygen_configuration")
+    if not callable(compose):
+        fail("HTML builder exposes no Doxygen configuration composer")
+    generated = compose(root, root / "build" / "docs" / "html-contract", "0")
+    if not isinstance(generated, str):
+        fail("HTML builder returned a non-text Doxygen configuration")
+    input_values = re.findall(r"^INPUT\s*=\s*(.*)$", generated, re.MULTILINE)
+    if not input_values:
+        fail("HTML builder emits no Doxygen INPUT override")
+    final_input = input_values[-1]
+    expected_include = str((root / "include").resolve())
+    if f'"{expected_include}"' not in final_input:
+        fail("HTML builder drops the public include tree")
+    mainpage = doxygen_setting(configuration, "USE_MDFILE_AS_MAINPAGE")
+    if mainpage is not None:
+        expected_mainpage = str((root / mainpage).resolve())
+        if f'"{expected_mainpage}"' not in final_input:
+            fail("HTML builder drops USE_MDFILE_AS_MAINPAGE from INPUT")
+
     for name, expected_value in (
         ("EXTRACT_PRIVATE", "NO"),
         ("WARN_IF_UNDOCUMENTED", "YES"),
+        ("WARN_IF_DOC_ERROR", "YES"),
+        ("WARN_IF_INCOMPLETE_DOC", "YES"),
         ("WARN_NO_PARAMDOC", "YES"),
+        ("WARN_IF_UNDOC_ENUM_VAL", "YES"),
     ):
         if doxygen_setting(configuration, name) != expected_value:
             fail(f"Doxyfile must set {name} = {expected_value}")

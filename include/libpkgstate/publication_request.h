@@ -44,55 +44,113 @@ enum class package_state_delta_kind : std::uint8_t {
  */
 class PKGSTATE_API package_state_delta final {
 public:
-  /*! \brief Construct an installation delta. */
+  /*!
+   * \brief Construct an installation delta.
+   * \param proposed Complete proposed installed package.
+   * \param operation_plan Identity of the exact operation plan.
+   * \param application_evidence Identity of the exact completed application
+   *                             evidence.
+   * \return Validated installation delta.
+   */
   [[nodiscard]] static package_state_delta
   install(installed_package proposed,
           operation_plan_identity operation_plan,
           application_evidence_identity application_evidence);
 
-  /*! \brief Construct an exact replacement delta. */
+  /*!
+   * \brief Construct an exact replacement delta.
+   * \param expected_package Installed-package identity expected before the
+   *                         delta.
+   * \param proposed Complete proposed installed package.
+   * \param operation_plan Identity of the exact operation plan.
+   * \param application_evidence Identity of the exact completed application
+   *                             evidence.
+   * \return Validated replacement delta.
+   */
   [[nodiscard]] static package_state_delta
   replace(installed_package_identity expected_package,
           installed_package proposed,
           operation_plan_identity operation_plan,
           application_evidence_identity application_evidence);
 
-  /*! \brief Construct an exact removal delta. */
+  /*!
+   * \brief Construct an exact removal delta.
+   * \param package_name Canonical package name to remove.
+   * \param expected_package Installed-package identity expected before the
+   *                         delta.
+   * \param operation_plan Identity of the exact operation plan.
+   * \param application_evidence Identity of the exact completed application
+   *                             evidence.
+   * \return Validated removal delta.
+   */
   [[nodiscard]] static package_state_delta
   remove(std::string_view package_name,
          installed_package_identity expected_package,
          operation_plan_identity operation_plan,
          application_evidence_identity application_evidence);
 
-  /*! \brief Return the transition class. */
+  /*!
+   * \brief Return the transition class.
+   * \return The transition class.
+   */
   [[nodiscard]] package_state_delta_kind kind() const noexcept;
 
-  /*! \brief Return the affected canonical package name. */
+  /*!
+   * \brief Return the affected canonical package name.
+   * \return The affected canonical package name.
+   */
   [[nodiscard]] const std::string& package_name() const noexcept;
 
-  /*! \brief Return the required old installed-package identity, when any. */
+  /*!
+   * \brief Return the required old installed-package identity, when any.
+   * \return The required old installed-package identity, when any.
+   */
   [[nodiscard]] const std::optional<installed_package_identity>&
   expected_package() const noexcept;
 
-  /*! \brief Return the proposed complete installed package, when any. */
+  /*!
+   * \brief Return the proposed complete installed package, when any.
+   * \return The proposed complete installed package, when any.
+   */
   [[nodiscard]] const std::optional<installed_package>&
   proposed_package() const noexcept;
 
-  /*! \brief Return the accepted operation-plan identity. */
+  /*!
+   * \brief Return the accepted operation-plan identity.
+   * \return The accepted operation-plan identity.
+   */
   [[nodiscard]] const operation_plan_identity&
   operation_plan() const noexcept;
 
-  /*! \brief Return the completed application-evidence identity. */
+  /*!
+   * \brief Return the completed application-evidence identity.
+   * \return The completed application-evidence identity.
+   */
   [[nodiscard]] const application_evidence_identity&
   application_evidence() const noexcept;
 
-  /*! \brief Compare complete package-state deltas for equality. */
+  /*!
+   * \brief Compare complete package-state deltas for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const package_state_delta& lhs,
                                       const package_state_delta& rhs) noexcept;
-  /*! \brief Compare complete package-state deltas for inequality. */
+  /*!
+   * \brief Compare complete package-state deltas for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const package_state_delta& lhs,
                                       const package_state_delta& rhs) noexcept;
-  /*! \brief Order package-state deltas canonically. */
+  /*!
+   * \brief Order package-state deltas canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const package_state_delta& lhs,
                                      const package_state_delta& rhs) noexcept;
 
@@ -124,33 +182,58 @@ private:
  */
 class PKGSTATE_API state_publication_request final {
 public:
-  /*! \brief Validate, normalize, identify, and construct a request. */
+  /*!
+   * \brief Validate, normalize, identify, and construct a request.
+   * \param expected_snapshot Exact expected-snapshot authority supplied by the
+   *                          caller.
+   * \param deltas Complete normalized package-delta sequence.
+   * \param transaction_evidence Optional transaction-level evidence identity.
+   * \return Validated immutable value.
+   */
   [[nodiscard]] static state_publication_request
   make(const snapshot& expected_snapshot,
        std::vector<package_state_delta> deltas,
        std::optional<transaction_evidence_identity>
            transaction_evidence = std::nullopt);
 
-  /*! \brief Return the canonical request schema version. */
+  /*!
+   * \brief Return the canonical request schema version.
+   * \return The canonical request schema version.
+   */
   [[nodiscard]] std::uint16_t schema_version() const noexcept;
 
-  /*! \brief Return the state-computed publication-request identity. */
+  /*!
+   * \brief Return the state-computed publication-request identity.
+   * \return The state-computed publication-request identity.
+   */
   [[nodiscard]] const state_publication_request_identity&
   identity() const noexcept;
 
-  /*! \brief Return the exact prior snapshot required by the request. */
+  /*!
+   * \brief Return the exact prior snapshot required by the request.
+   * \return The exact prior snapshot required by the request.
+   */
   [[nodiscard]] const installed_state_snapshot_identity&
   expected_snapshot() const noexcept;
 
-  /*! \brief Return the target-state binding of the expected snapshot. */
+  /*!
+   * \brief Return the target-state binding of the expected snapshot.
+   * \return The target-state binding of the expected snapshot.
+   */
   [[nodiscard]] const state_target_binding&
   target_binding() const noexcept;
 
-  /*! \brief Return package deltas in canonical package-name order. */
+  /*!
+   * \brief Return package deltas in canonical package-name order.
+   * \return Package deltas in canonical package-name order.
+   */
   [[nodiscard]] const std::vector<package_state_delta>&
   deltas() const noexcept;
 
-  /*! \brief Return transaction evidence, when the request carries it. */
+  /*!
+   * \brief Return transaction evidence, when the request carries it.
+   * \return Transaction evidence, when the request carries it.
+   */
   [[nodiscard]] const std::optional<transaction_evidence_identity>&
   transaction_evidence() const noexcept;
 

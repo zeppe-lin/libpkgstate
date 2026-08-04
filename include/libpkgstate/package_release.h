@@ -39,26 +39,59 @@ public:
                   std::string version,
                   std::uint32_t release);
 
-  /*! \brief Return the source-owned package-release identity. */
+  /*!
+   * \brief Return the source-owned package-release identity.
+   * \return The source-owned package-release identity.
+   */
   [[nodiscard]] const package_release_identity& identity() const noexcept;
-  /*! \brief Return the canonical package reference. */
+  /*!
+   * \brief Return the canonical package reference.
+   * \return The canonical package reference.
+   */
   [[nodiscard]] const package_reference& package() const noexcept;
-  /*! \brief Return the canonical package name. */
+  /*!
+   * \brief Return the canonical package name.
+   * \return The canonical package name.
+   */
   [[nodiscard]] const std::string& name() const noexcept;
-  /*! \brief Return the exact package version. */
+  /*!
+   * \brief Return the exact package version.
+   * \return The exact package version.
+   */
   [[nodiscard]] const std::string& version() const noexcept;
-  /*! \brief Return the positive package release number. */
+  /*!
+   * \brief Return the positive package release number.
+   * \return The positive package release number.
+   */
   [[nodiscard]] std::uint32_t release() const noexcept;
-  /*! \brief Return canonical `version-release` text. */
+  /*!
+   * \brief Return canonical `version-release` text.
+   * \return Canonical `version-release` text.
+   */
   [[nodiscard]] std::string version_release() const;
 
-  /*! \brief Compare complete package release values for equality. */
+  /*!
+   * \brief Compare complete package release values for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const package_release& lhs,
                                       const package_release& rhs) noexcept;
-  /*! \brief Compare complete package release values for inequality. */
+  /*!
+   * \brief Compare complete package release values for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const package_release& lhs,
                                       const package_release& rhs) noexcept;
-  /*! \brief Order releases by package, version, release, and identity. */
+  /*!
+   * \brief Order releases by package, version, release, and identity.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const package_release& lhs,
                                      const package_release& rhs) noexcept;
 

@@ -22,6 +22,7 @@ class PKGSTATE_API error : public std::runtime_error {
 public:
   /*!
    * \brief Construct an error with a human-readable diagnostic.
+   * \param message Human-readable diagnostic message.
    */
   explicit error(std::string message);
 

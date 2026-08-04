@@ -29,46 +29,90 @@ namespace pkgstate {
  */
 class PKGSTATE_API state_publication_backend_result final {
 public:
-  /*! \brief Report confirmed publication and durability. */
+  /*!
+   * \brief Report confirmed publication and durability.
+   * \param atomicity Backend-reported state-storage atomicity boundary.
+   * \param evidence Subordinate backend evidence identities retained by the
+   *                 result.
+   * \return Value representing confirmed publication and durability.
+   */
   [[nodiscard]] static state_publication_backend_result
   published(
       state_storage_atomicity_boundary atomicity,
       std::vector<state_publication_evidence_identity> evidence = {});
 
-  /*! \brief Report semantic rejection before crossing publication boundary. */
+  /*!
+   * \brief Report semantic rejection before crossing publication boundary.
+   * \param evidence Subordinate backend evidence identities retained by the
+   *                 result.
+   * \return Value representing semantic rejection before crossing publication
+   *         boundary.
+   */
   [[nodiscard]] static state_publication_backend_result
   request_rejected(
       std::vector<state_publication_evidence_identity> evidence = {});
 
-  /*! \brief Report failure before crossing publication boundary. */
+  /*!
+   * \brief Report failure before crossing publication boundary.
+   * \param evidence Subordinate backend evidence identities retained by the
+   *                 result.
+   * \return Value representing failure before crossing publication boundary.
+   */
   [[nodiscard]] static state_publication_backend_result
   failed_before_publication(
       std::vector<state_publication_evidence_identity> evidence = {});
 
-  /*! \brief Report visible publication without durable confirmation. */
+  /*!
+   * \brief Report visible publication without durable confirmation.
+   * \param atomicity Backend-reported state-storage atomicity boundary.
+   * \param evidence Subordinate backend evidence identities retained by the
+   *                 result.
+   * \return Value representing visible publication without durable
+   *         confirmation.
+   */
   [[nodiscard]] static state_publication_backend_result
   published_but_durability_unconfirmed(
       state_storage_atomicity_boundary atomicity,
       std::vector<state_publication_evidence_identity> evidence = {});
 
-  /*! \brief Report an attempt requiring an authoritative reread. */
+  /*!
+   * \brief Report an attempt requiring an authoritative reread.
+   * \param atomicity Backend-reported state-storage atomicity boundary.
+   * \param resulting_snapshot_established Whether authoritative reread
+   *                                       established the requested result.
+   * \param evidence Subordinate backend evidence identities retained by the
+   *                 result.
+   * \return Value representing an attempt requiring an authoritative reread.
+   */
   [[nodiscard]] static state_publication_backend_result
   indeterminate(
       state_storage_atomicity_boundary atomicity,
       bool resulting_snapshot_established,
       std::vector<state_publication_evidence_identity> evidence = {});
 
-  /*! \brief Return the semantic publication outcome. */
+  /*!
+   * \brief Return the semantic publication outcome.
+   * \return The semantic publication outcome.
+   */
   [[nodiscard]] state_publication_outcome outcome() const noexcept;
 
-  /*! \brief Return the actual state-storage atomicity boundary. */
+  /*!
+   * \brief Return the actual state-storage atomicity boundary.
+   * \return The actual state-storage atomicity boundary.
+   */
   [[nodiscard]] state_storage_atomicity_boundary
   atomicity_boundary() const noexcept;
 
-  /*! \brief Return whether the requested result is established. */
+  /*!
+   * \brief Return whether the requested result is established.
+   * \return Whether the requested result is established.
+   */
   [[nodiscard]] bool resulting_snapshot_established() const noexcept;
 
-  /*! \brief Return subordinate backend evidence in identity order. */
+  /*!
+   * \brief Return subordinate backend evidence in identity order.
+   * \return Subordinate backend evidence in identity order.
+   */
   [[nodiscard]] const std::vector<state_publication_evidence_identity>&
   subordinate_evidence() const noexcept;
 
@@ -97,10 +141,16 @@ public:
   /*! \brief Release the publication lock. */
   virtual ~canonical_publication_transaction();
 
-  /*! \brief Return actual durable state observed under the lock. */
+  /*!
+   * \brief Return actual durable state observed under the lock.
+   * \return Actual durable state observed under the lock.
+   */
   [[nodiscard]] virtual const snapshot& current() const noexcept = 0;
 
-  /*! \brief Return the line-safe canonical storage-format identifier. */
+  /*!
+   * \brief Return the line-safe canonical storage-format identifier.
+   * \return The line-safe canonical storage-format identifier.
+   */
   [[nodiscard]] virtual const std::string& storage_format() const noexcept = 0;
 
   /*!
@@ -109,6 +159,9 @@ public:
    * The method must not reinterpret or replace \p resulting_snapshot.  Every
    * ordinary attempt outcome after the prior snapshot was observed is returned
    * as state_publication_backend_result.
+   * \param resulting_snapshot Exact resulting snapshot derived from the
+   *                           validated request.
+   * \return Backend result describing the publication attempt.
    */
   [[nodiscard]] virtual state_publication_backend_result
   publish(const snapshot& resulting_snapshot) = 0;
@@ -127,10 +180,17 @@ public:
   /*! \brief Destroy the canonical store backend. */
   virtual ~canonical_store();
 
-  /*! \brief Read and validate one complete immutable installed snapshot. */
+  /*!
+   * \brief Read and validate one complete immutable installed snapshot.
+   * \return Complete validated installed-state snapshot.
+   */
   [[nodiscard]] virtual snapshot read() const = 0;
 
-  /*! \brief Compare under lock, publish when current, and return a receipt. */
+  /*!
+   * \brief Compare under lock, publish when current, and return a receipt.
+   * \param request Exact publication request.
+   * \return Typed receipt describing the stale check and publication attempt.
+   */
   [[nodiscard]] PKGSTATE_API state_publication_receipt
   compare_and_publish(const state_publication_request& request) const;
 
@@ -138,6 +198,7 @@ protected:
   /*!
    * \brief Acquire the exclusive publication lock and reread durable state.
    * \throws store_error when locking or authoritative reread fails.
+   * \return Exclusive lock-scoped publication transaction.
    */
   [[nodiscard]] virtual std::unique_ptr<canonical_publication_transaction>
   begin_publication() const = 0;

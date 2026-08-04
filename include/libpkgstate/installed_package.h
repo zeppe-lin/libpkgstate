@@ -32,19 +32,40 @@ public:
    */
   [[nodiscard]] static installed_package make(installation_receipt receipt);
 
-  /*! \brief Return the canonical installed-package identity. */
+  /*!
+   * \brief Return the canonical installed-package identity.
+   * \return The canonical installed-package identity.
+   */
   [[nodiscard]] const installed_package_identity& identity() const noexcept;
-  /*! \brief Return the complete issuing installation receipt. */
+  /*!
+   * \brief Return the complete issuing installation receipt.
+   * \return The complete issuing installation receipt.
+   */
   [[nodiscard]] const installation_receipt& receipt() const noexcept;
-  /*! \brief Return source-authoritative package release coordinates. */
+  /*!
+   * \brief Return source-authoritative package release coordinates.
+   * \return Source-authoritative package release coordinates.
+   */
   [[nodiscard]] const package_release& release() const noexcept;
-  /*! \brief Return complete installed source and build control. */
+  /*!
+   * \brief Return complete installed source and build control.
+   * \return Complete installed source and build control.
+   */
   [[nodiscard]] const installed_control& control() const noexcept;
-  /*! \brief Return the exact managed target-state binding. */
+  /*!
+   * \brief Return the exact managed target-state binding.
+   * \return The exact managed target-state binding.
+   */
   [[nodiscard]] const state_target_binding& target_binding() const noexcept;
-  /*! \brief Return the canonical installed object manifest. */
+  /*!
+   * \brief Return the canonical installed object manifest.
+   * \return The canonical installed object manifest.
+   */
   [[nodiscard]] const std::vector<owned_entry>& manifest() const noexcept;
-  /*! \brief Return the number of owned manifest entries. */
+  /*!
+   * \brief Return the number of owned manifest entries.
+   * \return The number of owned manifest entries.
+   */
   [[nodiscard]] std::size_t size() const noexcept;
 
   /*!
@@ -62,13 +83,28 @@ public:
    */
   [[nodiscard]] bool owns(const package_path& path) const noexcept;
 
-  /*! \brief Compare complete installed packages for equality. */
+  /*!
+   * \brief Compare complete installed packages for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const installed_package& lhs,
                                       const installed_package& rhs) noexcept;
-  /*! \brief Compare complete installed packages for inequality. */
+  /*!
+   * \brief Compare complete installed packages for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const installed_package& lhs,
                                       const installed_package& rhs) noexcept;
-  /*! \brief Order installed packages by canonical package reference. */
+  /*!
+   * \brief Order installed packages by canonical package reference.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const installed_package& lhs,
                                      const installed_package& rhs) noexcept;
 

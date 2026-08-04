@@ -50,6 +50,14 @@ jobs:
             -Db_ndebug="${{ matrix.ndebug }}" \
             -Dman_pages="${{ matrix.man }}" \
             -Dhtml_docs="${{ matrix.html }}"
+      - name: Qualify public API documentation contract
+        if: matrix.name == 'GCC shared'
+        run: |
+          python3 tools/check-doxygen-contract.py \
+            --root . \
+            --include-subdir libpkgstate \
+            --namespace pkgstate \
+            --clang clang++
       - name: Qualify public API documentation
         if: matrix.name == 'GCC shared'
         run: doxygen Doxyfile

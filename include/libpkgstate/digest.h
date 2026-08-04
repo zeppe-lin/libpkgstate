@@ -60,7 +60,10 @@ public:
   /*! \brief Destroy the polymorphic digest failure. */
   ~digest_error() override;
 
-  /*! \brief Return the stable refusal category. */
+  /*!
+   * \brief Return the stable refusal category.
+   * \return The stable refusal category.
+   */
   [[nodiscard]] digest_error_code code() const noexcept;
 
 private:
@@ -93,27 +96,54 @@ public:
    */
   [[nodiscard]] static digest_value parse(std::string_view input);
 
-  /*! \brief Return the represented wire-format version. */
+  /*!
+   * \brief Return the represented wire-format version.
+   * \return The represented wire-format version.
+   */
   [[nodiscard]] std::uint16_t representation_version() const noexcept;
 
-  /*! \brief Return the represented digest algorithm. */
+  /*!
+   * \brief Return the represented digest algorithm.
+   * \return The represented digest algorithm.
+   */
   [[nodiscard]] digest_algorithm algorithm() const noexcept;
 
-  /*! \brief Return the exact digest result bytes. */
+  /*!
+   * \brief Return the exact digest result bytes.
+   * \return The exact digest result bytes.
+   */
   [[nodiscard]] const digest_bytes& bytes() const noexcept;
 
-  /*! \brief Return canonical `v1:sha256:<lowercase-hex>` text. */
+  /*!
+   * \brief Return canonical `v1:sha256:<lowercase-hex>` text.
+   * \return Canonical `v1:sha256:<lowercase-hex>` text.
+   */
   [[nodiscard]] std::string string() const;
 
-  /*! \brief Compare complete represented values for equality. */
+  /*!
+   * \brief Compare complete represented values for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const digest_value& lhs,
                                       const digest_value& rhs) noexcept;
 
-  /*! \brief Compare complete represented values for inequality. */
+  /*!
+   * \brief Compare complete represented values for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const digest_value& lhs,
                                       const digest_value& rhs) noexcept;
 
-  /*! \brief Order represented values by version, algorithm, and bytes. */
+  /*!
+   * \brief Order represented values by version, algorithm, and bytes.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const digest_value& lhs,
                                      const digest_value& rhs) noexcept;
 
@@ -137,60 +167,98 @@ private:
 template<typename Domain>
 class PKGSTATE_API typed_digest final {
 public:
-  /*! \brief Construct this identity domain from exact SHA-256 bytes. */
+  /*!
+   * \brief Construct this identity domain from exact SHA-256 bytes.
+   * \param bytes Exact SHA-256 result bytes.
+   * \return Typed digest containing the supplied SHA-256 bytes.
+   */
   [[nodiscard]] static typed_digest from_sha256(sha256_digest_bytes bytes)
   {
     return typed_digest(digest_value::from_sha256(std::move(bytes)));
   }
 
-  /*! \brief Parse canonical text into this exact identity domain. */
+  /*!
+   * \brief Parse canonical text into this exact identity domain.
+   * \param input Canonical textual representation to parse.
+   * \return Parsed canonical digest value.
+   */
   [[nodiscard]] static typed_digest parse(std::string_view input)
   {
     return typed_digest(digest_value::parse(input));
   }
 
-  /*! \brief Return the canonical protocol-domain identifier. */
+  /*!
+   * \brief Return the canonical protocol-domain identifier.
+   * \return The canonical protocol-domain identifier.
+   */
   [[nodiscard]] static constexpr std::string_view canonical_domain() noexcept
   {
     return Domain::canonical_domain;
   }
 
-  /*! \brief Return the represented wire-format version. */
+  /*!
+   * \brief Return the represented wire-format version.
+   * \return The represented wire-format version.
+   */
   [[nodiscard]] std::uint16_t representation_version() const noexcept
   {
     return value_.representation_version();
   }
 
-  /*! \brief Return the represented digest algorithm. */
+  /*!
+   * \brief Return the represented digest algorithm.
+   * \return The represented digest algorithm.
+   */
   [[nodiscard]] digest_algorithm algorithm() const noexcept
   {
     return value_.algorithm();
   }
 
-  /*! \brief Return exact digest result bytes. */
+  /*!
+   * \brief Return exact digest result bytes.
+   * \return Exact digest result bytes.
+   */
   [[nodiscard]] const digest_bytes& bytes() const noexcept
   {
     return value_.bytes();
   }
 
-  /*! \brief Return canonical algorithm-qualified text. */
+  /*!
+   * \brief Return canonical algorithm-qualified text.
+   * \return Canonical algorithm-qualified text.
+   */
   [[nodiscard]] std::string string() const { return value_.string(); }
 
-  /*! \brief Compare values in this exact identity domain for equality. */
+  /*!
+   * \brief Compare values in this exact identity domain for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const typed_digest& lhs,
                                       const typed_digest& rhs) noexcept
   {
     return lhs.value_ == rhs.value_;
   }
 
-  /*! \brief Compare values in this exact identity domain for inequality. */
+  /*!
+   * \brief Compare values in this exact identity domain for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const typed_digest& lhs,
                                       const typed_digest& rhs) noexcept
   {
     return !(lhs == rhs);
   }
 
-  /*! \brief Order values in this exact identity domain canonically. */
+  /*!
+   * \brief Order values in this exact identity domain canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const typed_digest& lhs,
                                      const typed_digest& rhs) noexcept
   {
@@ -213,54 +281,89 @@ private:
 template<typename Domain>
 class PKGSTATE_API referenced_digest final {
 public:
-  /*! \brief Construct this reference domain from exact SHA-256 bytes. */
+  /*!
+   * \brief Construct this reference domain from exact SHA-256 bytes.
+   * \param bytes Exact SHA-256 result bytes.
+   * \return Typed digest containing the supplied SHA-256 bytes.
+   */
   [[nodiscard]] static referenced_digest from_sha256(sha256_digest_bytes bytes)
   {
     return referenced_digest(digest_value::from_sha256(std::move(bytes)));
   }
 
-  /*! \brief Parse canonical text into this exact reference domain. */
+  /*!
+   * \brief Parse canonical text into this exact reference domain.
+   * \param input Canonical textual representation to parse.
+   * \return Parsed canonical digest value.
+   */
   [[nodiscard]] static referenced_digest parse(std::string_view input)
   {
     return referenced_digest(digest_value::parse(input));
   }
 
-  /*! \brief Return the represented wire-format version. */
+  /*!
+   * \brief Return the represented wire-format version.
+   * \return The represented wire-format version.
+   */
   [[nodiscard]] std::uint16_t representation_version() const noexcept
   {
     return value_.representation_version();
   }
 
-  /*! \brief Return the represented digest algorithm. */
+  /*!
+   * \brief Return the represented digest algorithm.
+   * \return The represented digest algorithm.
+   */
   [[nodiscard]] digest_algorithm algorithm() const noexcept
   {
     return value_.algorithm();
   }
 
-  /*! \brief Return exact digest result bytes. */
+  /*!
+   * \brief Return exact digest result bytes.
+   * \return Exact digest result bytes.
+   */
   [[nodiscard]] const digest_bytes& bytes() const noexcept
   {
     return value_.bytes();
   }
 
-  /*! \brief Return canonical algorithm-qualified text. */
+  /*!
+   * \brief Return canonical algorithm-qualified text.
+   * \return Canonical algorithm-qualified text.
+   */
   [[nodiscard]] std::string string() const { return value_.string(); }
 
-  /*! \brief Compare values in this exact reference domain for equality. */
+  /*!
+   * \brief Compare values in this exact reference domain for equality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands are equal.
+   */
   friend PKGSTATE_API bool operator==(const referenced_digest& lhs,
                                       const referenced_digest& rhs) noexcept
   {
     return lhs.value_ == rhs.value_;
   }
 
-  /*! \brief Compare values in this exact reference domain for inequality. */
+  /*!
+   * \brief Compare values in this exact reference domain for inequality.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the operands differ.
+   */
   friend PKGSTATE_API bool operator!=(const referenced_digest& lhs,
                                       const referenced_digest& rhs) noexcept
   {
     return !(lhs == rhs);
   }
 
-  /*! \brief Order values in this exact reference domain canonically. */
+  /*!
+   * \brief Order values in this exact reference domain canonically.
+   * \param lhs Left operand.
+   * \param rhs Right operand.
+   * \return Whether the left operand precedes the right operand.
+   */
   friend PKGSTATE_API bool operator<(const referenced_digest& lhs,
                                      const referenced_digest& rhs) noexcept
   {
@@ -273,50 +376,103 @@ private:
   digest_value value_;
 };
 
-#define PKGSTATE_STATE_DOMAIN(name, text)                                      \
-  struct name##_domain final {                                                 \
-    static constexpr std::string_view canonical_domain = text;                 \
-  }
-
 /*! \brief Domain tag for package_source_record_identity. */
-PKGSTATE_STATE_DOMAIN(package_source_record_identity,
-                      "pkgstate/package-source-record/1");
+struct package_source_record_identity_domain final {
+  /*! \brief Canonical package-source-record identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/package-source-record/1";
+};
+
 /*! \brief Domain tag for installed_control_identity. */
-PKGSTATE_STATE_DOMAIN(installed_control_identity,
-                      "pkgstate/installed-control/3");
+struct installed_control_identity_domain final {
+  /*! \brief Canonical installed-control identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/installed-control/3";
+};
+
 /*! \brief Domain tag for installation_receipt_identity. */
-PKGSTATE_STATE_DOMAIN(installation_receipt_identity,
-                      "pkgstate/installation-receipt/2");
+struct installation_receipt_identity_domain final {
+  /*! \brief Canonical installation-receipt identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/installation-receipt/2";
+};
+
 /*! \brief Domain tag for installed_package_identity. */
-PKGSTATE_STATE_DOMAIN(installed_package_identity,
-                      "pkgstate/installed-package/3");
+struct installed_package_identity_domain final {
+  /*! \brief Canonical installed-package identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/installed-package/3";
+};
+
 /*! \brief Domain tag for ownership_inventory_identity. */
-PKGSTATE_STATE_DOMAIN(ownership_inventory_identity,
-                      "pkgstate/ownership-inventory/3");
+struct ownership_inventory_identity_domain final {
+  /*! \brief Canonical ownership-inventory identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/ownership-inventory/3";
+};
+
 /*! \brief Domain tag for managed_target_identity. */
-PKGSTATE_STATE_DOMAIN(managed_target_identity, "pkgstate/managed-target/1");
+struct managed_target_identity_domain final {
+  /*! \brief Canonical managed-target identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/managed-target/1";
+};
+
 /*! \brief Domain tag for state_store_identity. */
-PKGSTATE_STATE_DOMAIN(state_store_identity, "pkgstate/state-store/1");
+struct state_store_identity_domain final {
+  /*! \brief Canonical state-store identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/state-store/1";
+};
+
 /*! \brief Domain tag for root_view_identity. */
-PKGSTATE_STATE_DOMAIN(root_view_identity, "pkgstate/root-view/1");
+struct root_view_identity_domain final {
+  /*! \brief Canonical root-view identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/root-view/1";
+};
+
 /*! \brief Domain tag for state_backend_identity. */
-PKGSTATE_STATE_DOMAIN(state_backend_identity, "pkgstate/state-backend/1");
+struct state_backend_identity_domain final {
+  /*! \brief Canonical state-backend identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/state-backend/1";
+};
+
 /*! \brief Domain tag for publication_domain_identity. */
-PKGSTATE_STATE_DOMAIN(publication_domain_identity,
-                      "pkgstate/publication-domain/1");
+struct publication_domain_identity_domain final {
+  /*! \brief Canonical publication-domain identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/publication-domain/1";
+};
+
 /*! \brief Domain tag for state_target_binding_identity. */
-PKGSTATE_STATE_DOMAIN(state_target_binding_identity,
-                      "pkgstate/target-binding/1");
+struct state_target_binding_identity_domain final {
+  /*! \brief Canonical target-binding identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/target-binding/1";
+};
+
 /*! \brief Domain tag for installed_state_snapshot_identity. */
-PKGSTATE_STATE_DOMAIN(installed_state_snapshot_identity,
-                      "pkgstate/installed-snapshot/3");
+struct installed_state_snapshot_identity_domain final {
+  /*! \brief Canonical installed-snapshot identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/installed-snapshot/3";
+};
+
 /*! \brief Domain tag for state_publication_request_identity. */
-PKGSTATE_STATE_DOMAIN(state_publication_request_identity,
-                      "pkgstate/publication-request/3");
+struct state_publication_request_identity_domain final {
+  /*! \brief Canonical publication-request identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/publication-request/3";
+};
+
 /*! \brief Domain tag for state_publication_receipt_identity. */
-PKGSTATE_STATE_DOMAIN(state_publication_receipt_identity,
-                      "pkgstate/publication-receipt/3");
-#undef PKGSTATE_STATE_DOMAIN
+struct state_publication_receipt_identity_domain final {
+  /*! \brief Canonical publication-receipt identity protocol separator. */
+  static constexpr std::string_view canonical_domain =
+      "pkgstate/publication-receipt/3";
+};
 
 /*! \brief Domain tag for package_release_identity. */
 struct package_release_reference_domain final {};
