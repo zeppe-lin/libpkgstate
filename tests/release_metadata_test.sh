@@ -20,4 +20,4 @@ grep -F "'-DPKGSTATE_BUILDING_LIBRARY'" "$root/src/meson.build" >/dev/null || fa
 
 grep -F "'generation_codec.cpp'" "$root/src/meson.build" >/dev/null || fail 'core source omits generation codec'
 grep -F "'../include/libpkgstate/generation_codec.h'" "$root/src/meson.build" >/dev/null || fail 'core install omits generation codec'
-test "$(wc -l < "$root/abi/libpkgstate.exports")" -eq 540 || fail 'unexpected core export count'
+! grep -v '8pkgstate' "$root/abi/libpkgstate.exports" >/dev/null || fail 'core ABI manifest contains foreign implementation exports'

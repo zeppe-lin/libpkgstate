@@ -92,6 +92,7 @@ if get_option('tests').allowed()
   endforeach
 
   foreach contract : [
+    'abi_manifest_contract_test.sh',
     'publication_codec_source_test.sh',
     'documentation_source_test.sh',
     'ci_qualification_source_test.sh',

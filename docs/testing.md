@@ -14,3 +14,12 @@ comment AST before invoking Doxygen. That gate requires every public function,
 friend operator, constructor, and accessor to document every named parameter
 and every non-void return value. Doxygen then remains the authoritative
 renderer and final warnings-as-errors check.
+
+## ABI manifest qualification
+
+The reviewed ELF manifest is C-locale sorted and contains only mangled symbols
+whose identity carries the `pkgstate` namespace. The version-script generator
+rejects foreign implementation exports and non-canonical ordering at configure
+time. Shared-library qualification independently extracts the dynamic surface
+with `nm`, normalizes it under the C locale, and compares it byte-for-byte with
+the reviewed manifest.

@@ -6,12 +6,12 @@ also gives `canonical_store` and `canonical_publication_transaction` stable
 out-of-line virtual destructors and publishes the generation-v3 record codec as
 state-owned protocol authority.
 
-The exact 540-symbol ELF surface is stored in `abi/libpkgstate.exports`.
-Shared builds use hidden visibility and a generated version script. The 3.0
-surface deliberately removes four accidental libstdc++ template exports from
-the prior manifest. Export additions, removals, signature changes, exception
-hierarchy changes, or public value-layout changes require an explicit ABI
-decision.
+The exact reviewed ELF surface is stored in `abi/libpkgstate.exports`. Shared
+builds use hidden visibility and a generated version script. The 3.0 surface
+contains only symbols whose mangled identity carries the `pkgstate` namespace;
+pure libstdc++ implementation instantiations remain local to the shared object.
+Export additions, removals, signature changes, exception hierarchy changes, or
+public value-layout changes require an explicit ABI decision.
 
 The pkg-config surface has no public requirements and one private implementation
 requirement: `libcrypto`. Ordinary shared-consumer flags must not expose crypto;
