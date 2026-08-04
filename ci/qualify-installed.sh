@@ -12,6 +12,13 @@ test "$(pkg-config --modversion libpkgstate)" = 3.0.0
 if { pkg-config --print-requires libpkgstate; pkg-config --print-requires-private libpkgstate; } | grep -E 'libpkg(source|build|image|plan|apply)|libpkgstate-' >/dev/null; then echo 'contaminated core metadata' >&2; exit 1; fi
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 flags=$(pkg-config --cflags --libs libpkgstate); [ "$link_mode" = shared ] || flags=$(pkg-config --static --cflags --libs libpkgstate)
+documentation_dir="$install_prefix/share/doc/libpkgstate"
+for document in README.md HISTORY.md DESIGN.md STORAGE.md MIGRATION.md TESTING.md CONTRIBUTING.md MAINTAINING.md architecture.md integration.md testing.md code-style.md abi.md 3.0-adapter-extraction.md; do
+  test -s "$documentation_dir/$document" || {
+    echo "installed documentation is absent: $document" >&2
+    exit 1
+  }
+done
 case $link_mode in
   shared) if printf '%s\n' "$flags" | grep -F -- '-lcrypto' >/dev/null; then echo 'private link edge leaked into shared consumer flags: -lcrypto' >&2; exit 1; fi ;;
   static) printf '%s\n' "$flags" | grep -F -- '-lcrypto' >/dev/null || { echo 'static link closure omits -lcrypto' >&2; exit 1; } ;;

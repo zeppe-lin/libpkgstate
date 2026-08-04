@@ -12,7 +12,7 @@ library=$1
 manifest=$2
 nm=$3
 
-tmp=${TMPDIR:-/tmp}/libpkgcatalog-abi.$$
+tmp=${TMPDIR:-/tmp}/libpkgstate-abi.$$
 trap 'rm -f "$tmp"' EXIT HUP INT TERM
 
 LC_ALL=C "$nm" -D --defined-only "$library" |

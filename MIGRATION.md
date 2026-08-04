@@ -1,5 +1,7 @@
 # Migration boundary
 
+This document records the explicit migration boundary and historical release transitions. Version-specific sections describe the named releases; they are not claims about the current 3.0 repository surface.
+
 `libpkgstate` 2.0.0 does not read or write the historical CRUX package database.
 It does not contain a compatibility model or a legacy import API.
 

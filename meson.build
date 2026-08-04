@@ -36,6 +36,7 @@ pkgconf = import('pkgconfig')
 libcrypto_dep = dependency('libcrypto', required: true, static: want_static)
 
 subdir('src')
+subdir('docs')
 subdir('tools')
 subdir('man')
 subdir('tests')

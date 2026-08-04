@@ -1,33 +1,107 @@
 # libpkgstate
 
-`libpkgstate` is the native installed-package state authority for Zeppe-Lin package management.
+`libpkgstate` is the native durable installed-package state authority for Zeppe-Lin package management.
 
-It owns complete immutable snapshots for one exact target binding, path ownership, installation receipts, source/build/application provenance retained as typed references, durable publication requests and receipts, canonical publication records, compare-and-publish semantics, and the immutable generation-v3 storage backend.
+It answers one question:
+
+```text
+what complete package state is durably installed for this exact managed target?
+```
+
+## Owned authority
+
+The library owns immutable state-domain values and their identities:
+
+- exact target binding and canonical snapshot epochs;
+- package releases, source records, build provenance, installed control, installation receipts, installed packages, and complete ownership;
+- state-publication requests and receipts with stale-safe compare-and-publish semantics;
+- canonical publication evidence encoding; and
+- immutable generation-v3 storage plus the read-only `pkgstate-check` diagnostic client.
+
+There is no incomplete native installed package. Construction requires complete source, build, application, target, ownership, plan, and receipt evidence as represented by the state model. Missing historical facts are migration input, not optional fields silently filled from current ambient state.
 
 ## Boundary
 
-The core has one external implementation dependency: OpenSSL `libcrypto`, used privately for qualified SHA-256 operations. It does not depend on package source, build, image, planning, or application libraries.
+The core accepts already admitted state values. It does not parse source syntax, select architectures, execute builds, inspect archives, resolve dependencies, plan operations, execute lifecycle programs, mutate target filesystems, acquire application leases, or import historical databases.
 
 Foreign-authority translations live in independent repositories:
 
-- `libpkgstate-source` — sealed source authority to durable source records;
-- `libpkgstate-build` — successful build and image evidence to build authority;
-- `libpkgstate-plan` — installed state to planner-owned facts;
-- `libpkgstate-apply` — lease-bound application projection and completed-application admission.
+```text
+libpkgsource ------> libpkgstate-source --+
+                                           |
+libpkgbuild/image -> libpkgstate-build -----+--> libpkgstate values
+                                           |
+libpkgstate -------> libpkgstate-plan ------+--> libpkgplan facts
+                                           |
+libpkgapply -------> libpkgstate-apply -----+--> publication request
+```
 
-The publication codec and canonical generation store remain in the owner because they persist state-owned authority rather than translate another subsystem's model.
+Those repositories depend inward on `libpkgstate`; the owner depends on none of them. The core build, installed headers, pkg-config metadata, and dynamic linkage have one external implementation dependency: OpenSSL `libcrypto`, used privately for qualified SHA-256 operations.
 
-Read `docs/architecture.md` for placement rules and `docs/integration.md` for the dependency graph.
+The publication codec and canonical generation store remain in the owner because they serialize and persist state-owned authority. They are not adapters to another semantic model.
+
+## Native model
+
+A `package_source_record` retains exact source-owned release, recipe, profile, architecture, and source-snapshot identities together with state-relevant metadata, runtime requirements, and lifecycle authority.
+
+`build_provenance` retains request, verified materials, materialized inputs, environment and build policies, successful result, payload, artifact, exact artifact bytes, binding, execution, normalized image, and independent inspection identities. `installed_control` binds that provenance to its exact source record and typed installation reason.
+
+An `installation_receipt` binds installed control to one target, complete object ownership, one accepted operation plan, completed application evidence, and optional exact transaction evidence. `installed_package` exists only from a complete receipt.
+
+A `snapshot` is the complete package and ownership state for one `state_target_binding`. State-owned identities are derived from domain-separated canonical records; external identities remain typed references and are never re-derived from coordinates or filenames.
+
+## Publication
+
+Callers submit deltas against one expected snapshot. `canonical_store::compare_and_publish()` reads the actual prior state, refuses stale authority before backend publication, and derives the only admissible resulting snapshot. A backend cannot silently rebase a request or accept a caller-authored replacement state.
+
+Publication request decode requires the exact expected snapshot. Receipt decode requires the exact request and actual prior snapshot. Durable records may retain identities and complete delta bodies, but they never promote a digest string into missing semantic authority.
+
+Current request and receipt encoders emit schema version 2 with fixed eight-byte house framing:
+
+```text
+ZLSPRQST  state-publication request
+ZLSPRCPT  state-publication receipt
+```
+
+Decode retains narrow compatibility with canonical version-1 evidence emitted by 2.5.0. This is evidence compatibility, not a store migrator or dual-write policy.
+
+## Storage
+
+`canonical_generation_store` writes complete immutable generations and atomically selects one current generation. The storage identifier is `libpkgstate-generation-v3`. Generation-v1 and generation-v2 bytes are not reinterpreted as version 3.
+
+See `STORAGE.md` and `pkgstate-generation(5)` for the on-disk authority boundary. Historical import belongs to a separate observation and admission program described in `MIGRATION.md`.
 
 ## Build
 
 ```sh
-meson setup build   -Ddefault_library=shared   -Dlink_mode=shared
-meson compile -C build
-meson test -C build --print-errorlogs
+meson setup build-shared \
+  -Ddefault_library=shared \
+  -Dlink_mode=shared \
+  -Dtools=enabled \
+  -Dinstall_tools=true
+meson compile -C build-shared
+meson test -C build-shared --print-errorlogs
+
+meson setup build-static \
+  -Ddefault_library=static \
+  -Dlink_mode=static \
+  -Dtools=enabled
+meson compile -C build-static
+meson test -C build-static --print-errorlogs
 ```
 
-Shared and static closures use separate build directories. Meson fallback subprojects are intentionally unsupported.
+Shared and static closures require separate build directories. Fallback subprojects and `default_library=both` are intentionally unsupported.
+
+## Documentation
+
+- `DESIGN.md` — semantic and publication invariants;
+- `STORAGE.md` — canonical generation storage;
+- `MIGRATION.md` — explicit non-native import boundary;
+- `TESTING.md` — qualification matrix;
+- `docs/architecture.md` — repository ownership;
+- `docs/integration.md` — adapter graph;
+- `docs/abi.md` — ABI and durable protocol policy;
+- `MAINTAINING.md` — release gate.
 
 ## License
 

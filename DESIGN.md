@@ -18,7 +18,7 @@ artifact bytes, execution evidence, and an ordered payload manifest. Image
 authority independently inspects those bytes. The independently released `libpkgstate-build` adapter admits the pair only when source projection, artifact content, inspection receipt, and every
 normalized payload field agree exactly.
 
-Application authority supplies one operation-specific libpkgapply 2.1 request,
+Application authority supplies one operation-specific `libpkgapply` request,
 one caller-owned live target mutation lease, and completed target effects. Before
 mutation, `libpkgstate-apply` performs exactly one canonical store read
 under that lease, validates the request's expected snapshot and ownership
@@ -126,7 +126,7 @@ State-publication requests use `ZLSPRQST`; receipts use `ZLSPRCPT`. A big-endian
 16-bit schema version follows the magic. Human-readable format names belong in
 diagnostics and documentation rather than variable-length magic strings.
 
-Version 2.5.1 emits only schema version 2. Decode retains narrow compatibility
+Current encoders emit only schema version 2. Decode retains narrow compatibility
 with the published 2.5.0 textual version-1 framing and checks canonical bytes
 against that original version. This compatibility does not introduce a store
 migrator, dual-write policy, or another semantic authority.
