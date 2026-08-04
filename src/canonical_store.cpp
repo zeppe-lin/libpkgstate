@@ -55,6 +55,10 @@ require_boundary(state_storage_atomicity_boundary atomicity)
 
 } // namespace
 
+canonical_publication_transaction::~canonical_publication_transaction() = default;
+
+canonical_store::~canonical_store() = default;
+
 state_publication_backend_result::state_publication_backend_result(
     state_publication_outcome outcome,
     state_storage_atomicity_boundary atomicity,

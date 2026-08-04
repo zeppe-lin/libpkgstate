@@ -1,11 +1,17 @@
 # ABI and durable protocol policy
 
 `libpkgstate` 3.0.0 advances the core SONAME from 3 to 4 because the exported
-`canonical_generation_store` class moves to `libpkgstate-posix`. The reviewed
-ELF export set is stored in `abi/libpkgstate.exports`; shared builds use hidden
-visibility and a generated version script. Export additions, removals, signature
-changes, exception hierarchy changes, or public value-layout changes require an
-explicit ABI decision.
+`canonical_generation_store` mechanism moves to `libpkgstate-posix`. The core
+also gives `canonical_store` and `canonical_publication_transaction` stable
+out-of-line virtual destructors and publishes the generation-v3 record codec as
+state-owned protocol authority.
+
+The exact 540-symbol ELF surface is stored in `abi/libpkgstate.exports`.
+Shared builds use hidden visibility and a generated version script. The 3.0
+surface deliberately removes four accidental libstdc++ template exports from
+the prior manifest. Export additions, removals, signature changes, exception
+hierarchy changes, or public value-layout changes require an explicit ABI
+decision.
 
 The pkg-config surface has no public requirements and one private implementation
 requirement: `libcrypto`. Ordinary shared-consumer flags must not expose crypto;
@@ -16,9 +22,10 @@ Four version axes are independent:
 1. repository and source release;
 2. C++ ABI and SONAME;
 3. durable publication-evidence protocols; and
-4. independently released storage-provider protocols.
+4. canonical generation records and independently released storage mechanisms.
 
 Release 3.0 extracts adapters and the concrete generation provider. It advances
-only the core C++ SONAME, preserves publication-evidence schema 2, and preserves
-generation-v3 bytes in `libpkgstate-posix`. Future work must not infer one
-version decision from another.
+the core C++ SONAME, preserves publication-evidence schema 2, and preserves
+canonical generation-v3 bytes under one state-owned encoder and decoder.
+`libpkgstate-posix` consumes those bytes without owning a competing codec.
+Future work must not infer one version decision from another.

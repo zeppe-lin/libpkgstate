@@ -3,7 +3,7 @@
 
 #include <libpkgstate/publication_codec.h>
 
-#include "generation_codec.h"
+#include <libpkgstate/generation_codec.h>
 #include "publication_projection.h"
 
 #include <algorithm>
@@ -473,7 +473,7 @@ std::uint8_t encode_atomicity(state_storage_atomicity_boundary value)
 std::vector<std::uint8_t> encode_proposed_package(
     const installed_package& package)
 {
-  return detail::encode_generation_snapshot(
+  return encode_generation_snapshot(
       snapshot::make(package.target_binding(), {package}));
 }
 
@@ -482,7 +482,7 @@ installed_package decode_proposed_package(
     const state_target_binding& expected_binding,
     std::string_view expected_name)
 {
-  const snapshot proposed = detail::decode_generation_snapshot(bytes);
+  const snapshot proposed = decode_generation_snapshot(bytes);
   if (proposed.target_binding() != expected_binding || proposed.size() != 1)
     fail(state_publication_codec_error_code::invalid_value,
          "proposed package record has invalid target or cardinality");

@@ -17,3 +17,7 @@ grep -F 'state_publication_request_encoding_version = 2' "$root/include/libpkgst
 grep -F 'state_publication_receipt_encoding_version = 2' "$root/include/libpkgstate/publication_codec.h" >/dev/null || fail 'receipt codec version is not 2'
 test -s "$root/abi/libpkgstate.exports" || fail 'reviewed core ABI manifest is absent'
 grep -F "'-DPKGSTATE_BUILDING_LIBRARY'" "$root/src/meson.build" >/dev/null || fail 'core export build contract is absent'
+
+grep -F "'generation_codec.cpp'" "$root/src/meson.build" >/dev/null || fail 'core source omits generation codec'
+grep -F "'../include/libpkgstate/generation_codec.h'" "$root/src/meson.build" >/dev/null || fail 'core install omits generation codec'
+test "$(wc -l < "$root/abi/libpkgstate.exports")" -eq 540 || fail 'unexpected core export count'

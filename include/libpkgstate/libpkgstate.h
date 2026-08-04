@@ -11,6 +11,7 @@
 #include <libpkgstate/canonical_store.h>
 #include <libpkgstate/digest.h>
 #include <libpkgstate/error.h>
+#include <libpkgstate/generation_codec.h>
 #include <libpkgstate/installation_receipt.h>
 #include <libpkgstate/installed_control.h>
 #include <libpkgstate/installed_package.h>

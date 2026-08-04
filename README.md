@@ -15,7 +15,8 @@ The library owns immutable state-domain values and their identities:
 - exact target binding and canonical snapshot epochs;
 - package releases, source records, build provenance, installed control, installation receipts, installed packages, and complete ownership;
 - state-publication requests and receipts with stale-safe compare-and-publish semantics;
-- canonical publication evidence encoding; and
+- canonical publication evidence encoding;
+- canonical generation-v3 target-binding and complete-snapshot records; and
 - the backend-neutral stale-safe `canonical_store` contract.
 
 There is no incomplete native installed package. Construction requires complete source, build, application, target, ownership, plan, and receipt evidence as represented by the state model. Missing historical facts are migration input, not optional fields silently filled from current ambient state.
@@ -38,7 +39,7 @@ libpkgapply -------> libpkgstate-apply -----+--> publication request
 
 Those repositories depend inward on `libpkgstate`; the owner depends on none of them. The core build, installed headers, pkg-config metadata, and dynamic linkage have one external implementation dependency: OpenSSL `libcrypto`, used privately for qualified SHA-256 operations. They contain no concrete storage provider.
 
-Concrete persistence mechanisms are independent providers. The reference generation-v3 filesystem backend and read-only diagnostics live in `libpkgstate-posix`; the state owner does not select, open, or depend on that provider.
+Canonical generation-v3 record bytes are a state-owned durable protocol exposed by `generation_codec.h`. Concrete persistence mechanisms are independent providers. The reference filesystem layout, locking, selector replacement, durability, recovery refusal, and read-only diagnostics live in `libpkgstate-posix`; the state owner does not select, open, or depend on that provider.
 
 ## Native model
 
@@ -67,9 +68,11 @@ Decode retains narrow compatibility with canonical version-1 evidence emitted by
 
 ## Storage providers
 
-`canonical_store` owns the backend-neutral stale-safe publication sequence. A
-concrete provider owns storage layout, locking, durability, recovery, and
-diagnostics. The reference generation-v3 filesystem provider is
+`canonical_store` owns the backend-neutral stale-safe publication sequence.
+The canonical generation codec owns the portable binding and complete-snapshot
+record bytes used by publication evidence and storage providers. A concrete
+provider owns storage layout, locking, selector publication, durability,
+recovery, and diagnostics. The reference filesystem provider is
 `libpkgstate-posix`; this repository does not link or instantiate it.
 
 Historical import remains a separate observation and admission problem described

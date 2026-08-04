@@ -95,7 +95,7 @@ private:
 class PKGSTATE_API canonical_publication_transaction {
 public:
   /*! \brief Release the publication lock. */
-  virtual ~canonical_publication_transaction() = default;
+  virtual ~canonical_publication_transaction();
 
   /*! \brief Return actual durable state observed under the lock. */
   [[nodiscard]] virtual const snapshot& current() const noexcept = 0;
@@ -125,7 +125,7 @@ public:
 class PKGSTATE_API canonical_store {
 public:
   /*! \brief Destroy the canonical store backend. */
-  virtual ~canonical_store() = default;
+  virtual ~canonical_store();
 
   /*! \brief Read and validate one complete immutable installed snapshot. */
   [[nodiscard]] virtual snapshot read() const = 0;

@@ -64,6 +64,18 @@ identity semantics. Evidence cannot be attached after projection because that
 would permit the publication request and durable package receipt to name
 different transactions.
 
+## Canonical generation protocol
+
+`libpkgstate` owns the canonical generation-v3 binding and complete-snapshot
+record codec because those bytes encode state authority, not filesystem policy.
+Decode verifies framing, version, normalized structure, every state-owned
+identity, target binding, and canonical re-encoding. The codec performs no I/O
+and chooses no path, lock, selector, retry, recovery, or durability mechanism.
+
+A storage provider may persist those exact records. It must not fork or
+reinterpret their encoding. `libpkgstate-posix` supplies the reference
+immutable-generation filesystem mechanism and depends inward on this protocol.
+
 ## Complete native records
 
 There is no incomplete native installed package. A package must have:

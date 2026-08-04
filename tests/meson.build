@@ -28,6 +28,7 @@ if get_option('tests').allowed()
     ['publication_request', 'validate immutable publication requests'],
     ['publication_receipt', 'classify typed publication receipts'],
     ['publication_codec', 'reopen durable publication evidence'],
+    ['generation_codec', 'reopen canonical generation records'],
     ['canonical_store', 'enforce canonical compare and publish'],
     ['umbrella_header', 'compile the native umbrella header'],
   ]
@@ -67,6 +68,7 @@ if get_option('tests').allowed()
     ['publication-request', 'libpkgstate/publication_request.h'],
     ['publication-receipt', 'libpkgstate/publication_receipt.h'],
     ['publication-codec', 'libpkgstate/publication_codec.h'],
+    ['generation-codec', 'libpkgstate/generation_codec.h'],
     ['canonical-store', 'libpkgstate/canonical_store.h'],
   ]
   foreach header : public_headers

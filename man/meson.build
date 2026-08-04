@@ -9,6 +9,7 @@ if scdoc.found()
     ['pkgstate_model.3', '3'],
     ['pkgstate_installation_receipt.3', '3'],
     ['pkgstate_publication.3', '3'],
+    ['pkgstate_generation_codec.3', '3'],
     ['pkgstate_store.3', '3'],
   ]
 

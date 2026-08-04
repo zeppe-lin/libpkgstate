@@ -35,6 +35,7 @@ libpkgstate = library(
     'publication_projection.cpp',
     'publication_receipt.cpp',
     'publication_codec.cpp',
+    'generation_codec.cpp',
     'canonical_store.cpp',
   ],
   cpp_args: visibility_cpp_args + [
@@ -84,6 +85,7 @@ install_headers(
   '../include/libpkgstate/publication_request.h',
   '../include/libpkgstate/publication_receipt.h',
   '../include/libpkgstate/publication_codec.h',
+  '../include/libpkgstate/generation_codec.h',
   '../include/libpkgstate/canonical_store.h',
   subdir: 'libpkgstate',
 )
