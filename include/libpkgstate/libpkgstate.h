@@ -8,7 +8,6 @@
 
 #include <libpkgstate/export.h>
 
-#include <libpkgstate/canonical_generation_store.h>
 #include <libpkgstate/canonical_store.h>
 #include <libpkgstate/digest.h>
 #include <libpkgstate/error.h>

@@ -3,8 +3,9 @@
 ## 3.0.0 (2026-08-04)
 
 - Extracted source, build, plan, and apply translations into independent role-qualified repositories.
-- Removed every foreign package-management dependency and adapter option from the durable state owner.
-- Retained publication codecs, compare-and-publish semantics, canonical generation-v3 storage, and `pkgstate-check` as state-owned products.
+- Extracted the concrete generation-v3 filesystem backend and `pkgstate-check` into `libpkgstate-posix`.
+- Removed every foreign package-management dependency, adapter option, storage syscall, concrete backend, and diagnostic tool from the durable state owner.
+- Retained state values, publication codecs, and the backend-neutral non-virtual compare-and-publish sequence.
 - Added explicit architecture, integration, repository, documentation, and release contracts for the pure owner boundary.
 
 ## 2.5.1

@@ -131,8 +131,14 @@ with the published 2.5.0 textual version-1 framing and checks canonical bytes
 against that original version. This compatibility does not introduce a store
 migrator, dual-write policy, or another semantic authority.
 
-## Storage
+## Storage-provider boundary
 
-The generation backend writes complete immutable state objects and atomically
-selects one. Storage version 3 is not a reinterpretation of version 1 or version
-2. A separate migration utility is required for any older storage.
+The core defines `canonical_store`, its lock-scoped publication transaction,
+and the non-virtual stale-safe compare-and-publish sequence. It does not select
+a filesystem layout, open a lock, encode a provider generation, replace a
+selector, synchronize directories, or inspect a concrete store.
+
+`libpkgstate-posix` supplies the reference immutable-generation-v3 provider.
+Other providers must preserve the same semantic store contract without becoming
+second owners of publication policy. Storage migration remains an explicit
+provider-side admission problem.

@@ -36,8 +36,6 @@ libpkgstate = library(
     'publication_receipt.cpp',
     'publication_codec.cpp',
     'canonical_store.cpp',
-    'generation_codec.cpp',
-    'canonical_generation_store.cpp',
   ],
   cpp_args: visibility_cpp_args + [
     '-DPKGSTATE_BUILDING_LIBRARY',
@@ -87,7 +85,6 @@ install_headers(
   '../include/libpkgstate/publication_receipt.h',
   '../include/libpkgstate/publication_codec.h',
   '../include/libpkgstate/canonical_store.h',
-  '../include/libpkgstate/canonical_generation_store.h',
   subdir: 'libpkgstate',
 )
 

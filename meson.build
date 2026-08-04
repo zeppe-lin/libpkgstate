@@ -22,10 +22,6 @@ want_static = get_option('link_mode') == 'static'
 if (library_kind == 'static') != want_static
   error('default_library and link_mode must both select shared or static')
 endif
-if get_option('install_tools') and get_option('tools').disabled()
-  error('install_tools requires tools to be enabled')
-endif
-
 cpp = meson.get_compiler('cpp')
 visibility_cpp_args = []
 if cpp.has_argument('-fvisibility-inlines-hidden')
@@ -37,6 +33,5 @@ libcrypto_dep = dependency('libcrypto', required: true, static: want_static)
 
 subdir('src')
 subdir('docs')
-subdir('tools')
 subdir('man')
 subdir('tests')

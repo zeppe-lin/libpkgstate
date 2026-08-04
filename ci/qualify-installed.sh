@@ -13,7 +13,7 @@ if { pkg-config --print-requires libpkgstate; pkg-config --print-requires-privat
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 flags=$(pkg-config --cflags --libs libpkgstate); [ "$link_mode" = shared ] || flags=$(pkg-config --static --cflags --libs libpkgstate)
 documentation_dir="$install_prefix/share/doc/libpkgstate"
-for document in README.md HISTORY.md DESIGN.md STORAGE.md MIGRATION.md TESTING.md CONTRIBUTING.md MAINTAINING.md architecture.md integration.md testing.md code-style.md abi.md 3.0-adapter-extraction.md; do
+for document in README.md HISTORY.md DESIGN.md MIGRATION.md TESTING.md CONTRIBUTING.md MAINTAINING.md architecture.md integration.md testing.md code-style.md abi.md 3.0-adapter-extraction.md; do
   test -s "$documentation_dir/$document" || {
     echo "installed documentation is absent: $document" >&2
     exit 1

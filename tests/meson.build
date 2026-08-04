@@ -28,7 +28,6 @@ if get_option('tests').allowed()
     ['publication_request', 'validate immutable publication requests'],
     ['publication_receipt', 'classify typed publication receipts'],
     ['publication_codec', 'reopen durable publication evidence'],
-    ['canonical_generation_store', 'publish immutable canonical generations'],
     ['canonical_store', 'enforce canonical compare and publish'],
     ['umbrella_header', 'compile the native umbrella header'],
   ]
@@ -69,7 +68,6 @@ if get_option('tests').allowed()
     ['publication-receipt', 'libpkgstate/publication_receipt.h'],
     ['publication-codec', 'libpkgstate/publication_codec.h'],
     ['canonical-store', 'libpkgstate/canonical_store.h'],
-    ['canonical-generation-store', 'libpkgstate/canonical_generation_store.h'],
   ]
   foreach header : public_headers
     target = executable(
@@ -113,9 +111,4 @@ if get_option('tests').allowed()
     sh,
     args: [join_paths(meson.current_source_dir(), 'release_metadata_test.sh'), meson.project_source_root()],
   )
-  if get_option('tools').allowed()
-    pkgstate_check_fixture = executable('pkgstate-check-fixture', 'pkgstate_check_fixture.cpp', dependencies: libpkgstate_dep)
-    test('exercise read-only native state diagnostics', sh, args: [join_paths(meson.current_source_dir(), 'pkgstate_check_cli_test.sh'), pkgstate_check_tool, pkgstate_check_fixture])
-    test('verify pkgstate-check manual contract', sh, args: [join_paths(meson.current_source_dir(), 'pkgstate_check_manual_test.sh'), meson.project_source_root(), pkgstate_check_tool])
-  endif
 endif

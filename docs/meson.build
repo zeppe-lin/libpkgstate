@@ -7,7 +7,6 @@ install_data(
   '../README.md',
   '../HISTORY.md',
   '../DESIGN.md',
-  '../STORAGE.md',
   '../MIGRATION.md',
   '../TESTING.md',
   '../CONTRIBUTING.md',

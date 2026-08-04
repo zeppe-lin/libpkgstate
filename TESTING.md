@@ -5,9 +5,8 @@ The core repository qualifies only state-owned behavior:
 - identity wire format and domain separation;
 - package, profile, architecture, source-record, build-provenance, installed-control, ownership, receipt, snapshot, and target-binding invariants;
 - publication request and receipt validation and durable evidence codecs;
-- stale-safe compare-and-publish behavior and immutable generation-v3 storage;
+- stale-safe backend-neutral compare-and-publish behavior;
 - public-header independence, reviewed ELF exports, SONAME 3, and pkg-config closure;
-- read-only `pkgstate-check` diagnostics;
 - manual, Doxygen, documentation, repository, architecture, and release contracts; and
 - installed shared and static consumers.
 
@@ -19,11 +18,9 @@ Run one closure per build directory:
 meson setup build \
   -Ddefault_library=shared \
   -Dlink_mode=shared \
-  -Dtools=enabled \
-  -Dinstall_tools=true \
   -Dwerror=true
 meson compile -C build
 meson test -C build --print-errorlogs
 ```
 
-Sanitizer qualification uses address and undefined-behavior sanitizers. Shared and static closures are built separately. Installed-consumer qualification must confirm that no source, build, image, planning, application, or extracted-state-adapter dependency appears in the core pkg-config surface.
+Sanitizer qualification uses address and undefined-behavior sanitizers. Shared and static closures are built separately. Installed-consumer qualification must confirm that no source, build, image, planning, application, concrete storage provider, or extracted-state-adapter dependency appears in the core pkg-config surface.

@@ -16,7 +16,7 @@ The library owns immutable state-domain values and their identities:
 - package releases, source records, build provenance, installed control, installation receipts, installed packages, and complete ownership;
 - state-publication requests and receipts with stale-safe compare-and-publish semantics;
 - canonical publication evidence encoding; and
-- immutable generation-v3 storage plus the read-only `pkgstate-check` diagnostic client.
+- the backend-neutral stale-safe `canonical_store` contract.
 
 There is no incomplete native installed package. Construction requires complete source, build, application, target, ownership, plan, and receipt evidence as represented by the state model. Missing historical facts are migration input, not optional fields silently filled from current ambient state.
 
@@ -36,9 +36,9 @@ libpkgstate -------> libpkgstate-plan ------+--> libpkgplan facts
 libpkgapply -------> libpkgstate-apply -----+--> publication request
 ```
 
-Those repositories depend inward on `libpkgstate`; the owner depends on none of them. The core build, installed headers, pkg-config metadata, and dynamic linkage have one external implementation dependency: OpenSSL `libcrypto`, used privately for qualified SHA-256 operations.
+Those repositories depend inward on `libpkgstate`; the owner depends on none of them. The core build, installed headers, pkg-config metadata, and dynamic linkage have one external implementation dependency: OpenSSL `libcrypto`, used privately for qualified SHA-256 operations. They contain no concrete storage provider.
 
-The publication codec and canonical generation store remain in the owner because they serialize and persist state-owned authority. They are not adapters to another semantic model.
+Concrete persistence mechanisms are independent providers. The reference generation-v3 filesystem backend and read-only diagnostics live in `libpkgstate-posix`; the state owner does not select, open, or depend on that provider.
 
 ## Native model
 

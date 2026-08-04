@@ -33,4 +33,4 @@ must return one complete immutable snapshot.
 
 # SEE ALSO
 
-*pkgstate_publication*(3), *pkgstate_canonical_generation_store*(3)
+*pkgstate_publication*(3), *libpkgstate-posix*(3)

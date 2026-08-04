@@ -10,4 +10,4 @@ Three version axes are independent:
 2. the C++ ABI and SONAME;
 3. durable publication-evidence and generation-storage protocols.
 
-Release 3.0 changes repository ownership by extracting adapters. It preserves core SONAME 3, publication evidence schema 2, and generation-v3 storage. Future work must not infer one version decision from another.
+Release 3.0 changes repository ownership by extracting adapters. It preserves core SONAME 3 and publication evidence schema 2. Generation-v3 storage continues in the independently released `libpkgstate-posix` provider. Future work must not infer one version decision from another.

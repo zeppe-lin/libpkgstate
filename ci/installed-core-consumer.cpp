@@ -3,7 +3,6 @@
 
 #include <libpkgstate/libpkgstate.h>
 
-#include <filesystem>
 #include <string>
 
 namespace {
@@ -29,10 +28,8 @@ target_binding()
 } // namespace
 
 int
-main(int argc, char** argv)
+main()
 {
-  if (argc != 1 && argc != 2)
-    return 2;
 
   const auto request_encoder = &pkgstate::encode_state_publication_request;
   const auto request_decoder = &pkgstate::decode_state_publication_request;
@@ -55,13 +52,6 @@ main(int argc, char** argv)
     return 1;
   }
 
-  if (argc == 2)
-  {
-    pkgstate::canonical_generation_store store(
-        std::filesystem::path(argv[1]), target);
-    if (store.read().identity().string() != state.identity().string())
-      return 1;
-  }
 
   return 0;
 }
