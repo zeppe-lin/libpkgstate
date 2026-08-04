@@ -33,12 +33,21 @@ if get_option('tests').allowed()
     ['canonical_store', 'enforce canonical compare and publish'],
     ['umbrella_header', 'compile the native umbrella header'],
   ]
+  direct_libcrypto_tests = [
+    'canonical_record',
+    'publication_codec',
+  ]
   foreach item : core_tests
     test_dependencies = [libpkgstate_dep]
-    if item[0] == 'publication_codec'
+    test_sources = [item[0] + '_test.cpp']
+
+    # publication_codec-test computes an independent OpenSSL fixture digest.
+    # canonical_record-test recompiles the hidden implementation so it can
+    # exercise the private record protocol without exporting that helper.
+    # Both targets therefore own a direct libcrypto dependency.
+    if item[0] in direct_libcrypto_tests
       test_dependencies += libcrypto_dep
     endif
-    test_sources = [item[0] + '_test.cpp']
     if item[0] == 'canonical_record'
       test_sources += '../src/canonical_record.cpp'
     endif
