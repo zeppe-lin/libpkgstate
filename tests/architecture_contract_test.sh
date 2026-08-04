@@ -10,5 +10,6 @@ for token in libpkgsource libpkgbuild libpkgimage libpkgplan libpkgapply libpkgs
 done
 grep -F 'Concrete storage, lock, selector, durability, and diagnostic mechanisms are provider authority' "$root/docs/architecture.md" >/dev/null || fail 'provider placement is undocumented'
 grep -F "gnu_symbol_visibility: 'hidden'" "$root/src/meson.build" >/dev/null || fail 'hidden core visibility is not enforced'
+if grep -R -E '#include <(fcntl|unistd|sys/|linux/)|\b(openat|renameat|unlinkat|mkdirat|flock|fsync)\b' "$root/src" "$root/include/libpkgstate" >/dev/null; then fail 'core retains host storage mechanism'; fi
 test -s "$root/abi/libpkgstate.exports" || fail 'reviewed core export manifest is absent'
 grep -F "libpkgstate/export.h" "$root/src/meson.build" >/dev/null || fail 'export contract is not installed'

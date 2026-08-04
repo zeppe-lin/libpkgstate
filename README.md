@@ -65,11 +65,15 @@ ZLSPRCPT  state-publication receipt
 
 Decode retains narrow compatibility with canonical version-1 evidence emitted by 2.5.0. This is evidence compatibility, not a store migrator or dual-write policy.
 
-## Storage
+## Storage providers
 
-`canonical_generation_store` writes complete immutable generations and atomically selects one current generation. The storage identifier is `libpkgstate-generation-v3`. Generation-v1 and generation-v2 bytes are not reinterpreted as version 3.
+`canonical_store` owns the backend-neutral stale-safe publication sequence. A
+concrete provider owns storage layout, locking, durability, recovery, and
+diagnostics. The reference generation-v3 filesystem provider is
+`libpkgstate-posix`; this repository does not link or instantiate it.
 
-See `STORAGE.md` and `pkgstate-generation(5)` for the on-disk authority boundary. Historical import belongs to a separate observation and admission program described in `MIGRATION.md`.
+Historical import remains a separate observation and admission problem described
+in `MIGRATION.md`.
 
 ## Build
 
@@ -77,15 +81,12 @@ See `STORAGE.md` and `pkgstate-generation(5)` for the on-disk authority boundary
 meson setup build-shared \
   -Ddefault_library=shared \
   -Dlink_mode=shared \
-  -Dtools=enabled \
-  -Dinstall_tools=true
 meson compile -C build-shared
 meson test -C build-shared --print-errorlogs
 
 meson setup build-static \
   -Ddefault_library=static \
   -Dlink_mode=static \
-  -Dtools=enabled
 meson compile -C build-static
 meson test -C build-static --print-errorlogs
 ```
@@ -95,11 +96,10 @@ Shared and static closures require separate build directories. Fallback subproje
 ## Documentation
 
 - `DESIGN.md` — semantic and publication invariants;
-- `STORAGE.md` — canonical generation storage;
 - `MIGRATION.md` — explicit non-native import boundary;
 - `TESTING.md` — qualification matrix;
 - `docs/architecture.md` — repository ownership;
-- `docs/integration.md` — adapter graph;
+- `docs/integration.md` — adapter and provider graph;
 - `docs/abi.md` — ABI and durable protocol policy;
 - `MAINTAINING.md` — release gate.
 

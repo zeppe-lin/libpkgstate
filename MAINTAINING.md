@@ -8,7 +8,7 @@ Before tagging:
 2. build clean GCC and Clang shared and static configurations separately;
 3. run the optimized release and ASan/UBSan configurations;
 4. compile every installed public header independently;
-5. compare exports with `abi/libpkgstate.exports` and verify SONAME 3;
+5. compare exports with `abi/libpkgstate.exports` and verify SONAME 4;
 6. inspect pkg-config and `DT_NEEDED`; only private `libcrypto` is permitted;
 7. exercise publication codecs, stale comparison, indeterminate publication, and backend-contract refusal;
 8. lint all manuals and run strict Doxygen;

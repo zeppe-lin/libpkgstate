@@ -76,5 +76,4 @@ typed states.
 
 # SEE ALSO
 
-*pkgstate_store*(3), *pkgstate_canonical_generation_store*(3),
-*pkgstate-generation*(5)
+*pkgstate_store*(3), *libpkgstate-posix*(3), *pkgstate_canonical_generation_store*(3)

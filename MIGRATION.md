@@ -119,8 +119,8 @@ bytes and allow a later semantic rewrite to encode version 2.
 
 ## 2.5.1 to 3.0.0 repository extraction
 
-No installed-state migration is required. Core SONAME 3, publication evidence schema 2, and canonical generation-v3 storage remain unchanged.
+No installed-state migration is required. Core SONAME advances from 3 to 4 because the concrete generation-store class moves to `libpkgstate-posix`; publication evidence schema 2 and generation-v3 bytes remain unchanged.
 
-The source, build, planner, and application adapters are no longer built by `libpkgstate`. Install the independently released `libpkgstate-source`, `libpkgstate-build`, `libpkgstate-plan`, and `libpkgstate-apply` repositories at matching 3.0 generation, then relink consumers against the exact adapter product they use. Remove the former `source_adapter`, `build_adapter`, `planner_adapter`, and `application_adapter` Meson options from packaging and integration scripts.
+The source, build, planner, and application adapters and the concrete generation provider are no longer built by `libpkgstate`. Install the independently released `libpkgstate-source`, `libpkgstate-build`, `libpkgstate-plan`, and `libpkgstate-apply` repositories at matching 3.0 generation and `libpkgstate-posix` for generation-v3 storage, then relink consumers against the exact adapter product they use. Remove the former `source_adapter`, `build_adapter`, `planner_adapter`, and `application_adapter` Meson options from packaging and integration scripts.
 
 The extraction does not add a compatibility library, umbrella adapter package, migration mode, or transitive core dependency.

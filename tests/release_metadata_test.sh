@@ -7,7 +7,7 @@ fail(){ echo "release-metadata-test: $*" >&2; exit 1; }
 grep -F "version: '3.0.0'" "$root/meson.build" >/dev/null || fail 'Meson version is not 3.0.0'
 grep -F 'PROJECT_NUMBER         = 3.0.0' "$root/Doxyfile" >/dev/null || fail 'Doxygen version is not 3.0.0'
 grep -F 'INPUT                  = include/libpkgstate' "$root/Doxyfile" >/dev/null || fail 'Doxygen input is not core-only'
-grep -F "soversion: '3'" "$root/src/meson.build" >/dev/null || fail 'core soversion is not 3'
+grep -F "soversion: '4'" "$root/src/meson.build" >/dev/null || fail 'core soversion is not 4'
 grep -F 'requires_private: [libcrypto_dep]' "$root/src/meson.build" >/dev/null || fail 'private crypto closure is missing'
 grep -F '3.0.0' "$root/HISTORY.md" >/dev/null || fail 'history omits 3.0.0'
 grep -F 'libpkgstate-posix' "$root/HISTORY.md" >/dev/null || fail 'history omits provider extraction'

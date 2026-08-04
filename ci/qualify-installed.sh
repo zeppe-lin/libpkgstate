@@ -29,7 +29,7 @@ ${CXX:-c++} -std=c++17 -Wall -Wextra -Wpedantic -Werror "$(dirname "$0")/install
 for header in "$install_prefix"/include/libpkgstate/*.h; do printf '#include <libpkgstate/%s>
 ' "$(basename "$header")" >"$tmp/header.cpp"; ${CXX:-c++} -std=c++17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only $(pkg-config --cflags libpkgstate) "$tmp/header.cpp"; done
 case $link_mode in
-  shared) "$(dirname "$0")/audit-shared-boundary.sh" "$install_prefix/lib/libpkgstate.so.3.0.0" ;;
+  shared) "$(dirname "$0")/audit-shared-boundary.sh" "$install_prefix/lib/libpkgstate.so.4.0.0" ;;
   static) test -f "$install_prefix/lib/libpkgstate.a" ;;
 esac
 if [ -d "$build_dir/man" ]; then

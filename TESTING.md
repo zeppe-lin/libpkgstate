@@ -6,7 +6,7 @@ The core repository qualifies only state-owned behavior:
 - package, profile, architecture, source-record, build-provenance, installed-control, ownership, receipt, snapshot, and target-binding invariants;
 - publication request and receipt validation and durable evidence codecs;
 - stale-safe backend-neutral compare-and-publish behavior;
-- public-header independence, reviewed ELF exports, SONAME 3, and pkg-config closure;
+- public-header independence, reviewed ELF exports, SONAME 4, and pkg-config closure;
 - manual, Doxygen, documentation, repository, architecture, and release contracts; and
 - installed shared and static consumers.
 

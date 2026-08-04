@@ -6,6 +6,7 @@
 - Extracted the concrete generation-v3 filesystem backend and `pkgstate-check` into `libpkgstate-posix`.
 - Removed every foreign package-management dependency, adapter option, storage syscall, concrete backend, and diagnostic tool from the durable state owner.
 - Retained state values, publication codecs, and the backend-neutral non-virtual compare-and-publish sequence.
+- Advanced the core SONAME from 3 to 4 because the exported concrete generation-store class moved to its provider.
 - Added explicit architecture, integration, repository, documentation, and release contracts for the pure owner boundary.
 
 ## 2.5.1
