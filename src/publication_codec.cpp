@@ -580,6 +580,8 @@ state_publication_codec_error::state_publication_codec_error(
 {
 }
 
+state_publication_codec_error::~state_publication_codec_error() = default;
+
 state_publication_codec_error_code
 state_publication_codec_error::code() const noexcept
 {

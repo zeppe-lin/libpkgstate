@@ -15,6 +15,7 @@ if get_option('tests').allowed()
     )
   endif
   core_tests = [
+    ['error', 'anchor public failure domains'],
     ['digest', 'validate native identity domains'],
     ['canonical_record', 'hash canonical state records'],
     ['model', 'validate native installed-state values'],

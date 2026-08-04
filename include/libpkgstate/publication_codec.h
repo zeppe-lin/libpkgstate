@@ -56,6 +56,7 @@ class PKGSTATE_API state_publication_codec_error final : public std::invalid_arg
 public:
   state_publication_codec_error(state_publication_codec_error_code code,
                                 std::string message);
+  ~state_publication_codec_error() override;
 
   [[nodiscard]] state_publication_codec_error_code code() const noexcept;
 

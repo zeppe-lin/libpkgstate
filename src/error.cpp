@@ -3,11 +3,19 @@
 
 #include <libpkgstate/error.h>
 
+#include <utility>
+
 namespace pkgstate {
 
-error::error(const std::string& message)
-    : std::runtime_error(message)
+error::error(std::string message)
+    : std::runtime_error(std::move(message))
 {
 }
+
+error::~error() = default;
+identity_error::~identity_error() = default;
+path_error::~path_error() = default;
+state_error::~state_error() = default;
+store_error::~store_error() = default;
 
 } // namespace pkgstate

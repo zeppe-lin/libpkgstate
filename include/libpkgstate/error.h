@@ -23,7 +23,10 @@ public:
   /*!
    * \brief Construct an error with a human-readable diagnostic.
    */
-  explicit error(const std::string& message);
+  explicit error(std::string message);
+
+  /*! \brief Destroy the polymorphic state failure. */
+  ~error() override;
 };
 
 /*!
@@ -32,6 +35,9 @@ public:
 class PKGSTATE_API identity_error : public error {
 public:
   using error::error;
+
+  /*! \brief Destroy the polymorphic identity failure. */
+  ~identity_error() override;
 };
 
 /*!
@@ -40,6 +46,9 @@ public:
 class PKGSTATE_API path_error : public error {
 public:
   using error::error;
+
+  /*! \brief Destroy the polymorphic path failure. */
+  ~path_error() override;
 };
 
 /*!
@@ -48,6 +57,9 @@ public:
 class PKGSTATE_API state_error : public error {
 public:
   using error::error;
+
+  /*! \brief Destroy the polymorphic state-model failure. */
+  ~state_error() override;
 };
 
 /*!
@@ -56,6 +68,9 @@ public:
 class PKGSTATE_API store_error : public error {
 public:
   using error::error;
+
+  /*! \brief Destroy the polymorphic store failure. */
+  ~store_error() override;
 };
 
 

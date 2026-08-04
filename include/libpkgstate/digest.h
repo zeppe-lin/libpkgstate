@@ -37,6 +37,7 @@ enum class digest_error_code {
 class PKGSTATE_API digest_error final : public identity_error {
 public:
   digest_error(digest_error_code code, std::string message);
+  ~digest_error() override;
   [[nodiscard]] digest_error_code code() const noexcept;
 private:
   digest_error_code code_;
