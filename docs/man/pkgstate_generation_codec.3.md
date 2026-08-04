@@ -5,7 +5,7 @@
 
 # NAME
 
-pkgstate_generation_codec - canonical generation-v3 state records
+pkgstate_generation_codec - canonical generation-v4 state records
 
 # SYNOPSIS
 
@@ -26,9 +26,9 @@ Malformed, unsupported, non-canonical, or identity-inconsistent records raise
 
 # VERSION
 
-The record version is **canonical_generation_storage_version**, currently 3. Its
+The record version is **canonical_generation_storage_version**, currently 4. Its
 receipt-visible identifier is **canonical_generation_storage_format**, currently
-**libpkgstate-generation-v3**.
+**libpkgstate-generation-v4**.
 
 Repository release, C++ SONAME, publication-evidence schema, and generation
 record version are independent version axes.

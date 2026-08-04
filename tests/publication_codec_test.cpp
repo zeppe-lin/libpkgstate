@@ -274,7 +274,7 @@ int main()
 
   const state_publication_receipt published =
       state_publication_receipt::published(
-          install, empty, result, "libpkgstate-generation-v3",
+          install, empty, result, "libpkgstate-generation-v4",
           state_storage_atomicity_boundary::immutable_generation_selection,
           evidence);
   check_receipt_round_trip(published, install, empty);
@@ -328,43 +328,43 @@ int main()
       "other", 220, binding);
   check_receipt_round_trip(
       state_publication_receipt::stale_expected_state(
-          install, stale_prior, "libpkgstate-generation-v3", evidence),
+          install, stale_prior, "libpkgstate-generation-v4", evidence),
       install, stale_prior);
 
   check_receipt_round_trip(
       state_publication_receipt::request_rejected(
-          install, empty, "libpkgstate-generation-v3", evidence),
+          install, empty, "libpkgstate-generation-v4", evidence),
       install, empty);
 
   check_receipt_round_trip(
       state_publication_receipt::failed_before_publication(
-          install, empty, "libpkgstate-generation-v3", evidence),
+          install, empty, "libpkgstate-generation-v4", evidence),
       install, empty);
 
   check_receipt_round_trip(
       state_publication_receipt::published_but_durability_unconfirmed(
-          install, empty, result, "libpkgstate-generation-v3",
+          install, empty, result, "libpkgstate-generation-v4",
           state_storage_atomicity_boundary::immutable_generation_selection,
           evidence),
       install, empty);
 
   check_receipt_round_trip(
       state_publication_receipt::indeterminate(
-          install, empty, result.identity(), "libpkgstate-generation-v3",
+          install, empty, result.identity(), "libpkgstate-generation-v4",
           state_storage_atomicity_boundary::immutable_generation_selection,
           evidence),
       install, empty);
 
   check_receipt_round_trip(
       state_publication_receipt::indeterminate(
-          install, empty, std::nullopt, "libpkgstate-generation-v3",
+          install, empty, std::nullopt, "libpkgstate-generation-v4",
           state_storage_atomicity_boundary::immutable_generation_selection,
           evidence),
       install, empty);
 
   auto corrupt_receipt = encode_state_publication_receipt(
       state_publication_receipt::published(
-          install, empty, result, "libpkgstate-generation-v3",
+          install, empty, result, "libpkgstate-generation-v4",
           state_storage_atomicity_boundary::immutable_generation_selection));
   TEST(corrupt_receipt.size() > 100);
   corrupt_receipt[90] ^= 0x01U;
@@ -377,7 +377,7 @@ int main()
 
   auto truncated_receipt = encode_state_publication_receipt(
       state_publication_receipt::request_rejected(
-          install, empty, "libpkgstate-generation-v3"));
+          install, empty, "libpkgstate-generation-v4"));
   truncated_receipt.pop_back();
   TEST(rejects_with(
       state_publication_codec_error_code::checksum_mismatch,
@@ -394,7 +394,7 @@ int main()
         static_cast<void>(decode_state_publication_receipt(
             encode_state_publication_receipt(
                 state_publication_receipt::request_rejected(
-                    install, empty, "libpkgstate-generation-v3")),
+                    install, empty, "libpkgstate-generation-v4")),
             foreign_request, empty));
       }));
 
@@ -404,7 +404,7 @@ int main()
         static_cast<void>(decode_state_publication_receipt(
             encode_state_publication_receipt(
                 state_publication_receipt::request_rejected(
-                    install, empty, "libpkgstate-generation-v3")),
+                    install, empty, "libpkgstate-generation-v4")),
             install, stale_prior));
       }));
 

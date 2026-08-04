@@ -11,7 +11,7 @@ libpkgstate - native installed-package state authority
 # DESCRIPTION
 
 *libpkgstate* defines complete immutable installed-package state. Its values
-retain source-authoritative package release and recipe identities, installed
+retain source-authoritative package release, selected-profile, and source-snapshot identities, installed
 runtime and lifecycle control, build provenance, installation reason, target
 binding, ownership, reconciliation results, and publication evidence.
 
@@ -36,7 +36,7 @@ retained as typed external references and are never recomputed by libpkgstate.
 
 *canonical_store* owns backend-neutral compare-and-publish semantics. Concrete
 storage implementations are selected independently by the composition root.
-Canonical generation-v3 target-binding and complete-snapshot record bytes are
+Canonical generation-v4 target-binding and complete-snapshot record bytes are
 owned by *pkgstate_generation_codec*(3). The reference filesystem mechanism that
 persists those records is provided by *libpkgstate-posix*.
 

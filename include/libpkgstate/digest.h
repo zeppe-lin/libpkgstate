@@ -380,7 +380,7 @@ private:
 struct package_source_record_identity_domain final {
   /*! \brief Canonical package-source-record identity protocol separator. */
   static constexpr std::string_view canonical_domain =
-      "pkgstate/package-source-record/1";
+      "pkgstate/package-source-record/2";
 };
 
 /*! \brief Domain tag for installed_control_identity. */
@@ -478,8 +478,6 @@ struct state_publication_receipt_identity_domain final {
 struct package_release_reference_domain final {};
 /*! \brief Domain tag for source_profile_identity. */
 struct source_profile_reference_domain final {};
-/*! \brief Domain tag for source_recipe_identity. */
-struct source_recipe_reference_domain final {};
 /*! \brief Domain tag for source_snapshot_identity. */
 struct source_snapshot_reference_domain final {};
 /*! \brief Domain tag for build_request_identity. */
@@ -572,9 +570,6 @@ using package_release_identity =
 /*! \brief Foreign identity of one source-owned selected profile. */
 using source_profile_identity =
     detail::referenced_digest<detail::source_profile_reference_domain>;
-/*! \brief Foreign identity of one sealed source recipe. */
-using source_recipe_identity =
-    detail::referenced_digest<detail::source_recipe_reference_domain>;
 /*! \brief Foreign identity of one complete source snapshot. */
 using source_snapshot_identity =
     detail::referenced_digest<detail::source_snapshot_reference_domain>;

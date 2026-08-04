@@ -3,10 +3,11 @@
 ## 3.0.0 (2026-08-04)
 
 - Extracted source, build, plan, and apply translations into independent role-qualified repositories.
-- Extracted the concrete generation-v3 filesystem backend and `pkgstate-check` into `libpkgstate-posix`.
+- Extracted the concrete generation filesystem backend and `pkgstate-check` into `libpkgstate-posix`.
 - Removed every foreign package-management dependency, adapter option, storage syscall, concrete backend, and diagnostic tool from the durable state owner.
-- Retained state values, publication codecs, canonical generation-v3 binding and snapshot records, and the backend-neutral non-virtual compare-and-publish sequence.
-- Made the generation-v3 codec one state-owned protocol consumed by storage providers instead of a duplicated provider-private implementation.
+- Removed the retired source-recipe identity from durable source records to follow the `libpkgsource` 3.0 authority reset.
+- Advanced the package-source-record identity protocol to version 2 and canonical generation storage to version 4.
+- Kept one state-owned generation codec consumed by storage providers instead of a duplicated provider-private implementation.
 - Advanced the core SONAME from 3 to 4 because the exported concrete generation-store class moved to its provider, stabilized backend vtables with out-of-line destructors, and removed accidental libstdc++ exports.
 - Added explicit architecture, integration, repository, documentation, and release contracts for the pure owner boundary.
 - Anchored every public failure hierarchy with out-of-line destruction so exception RTTI and vtables remain core-owned.

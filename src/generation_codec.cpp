@@ -333,7 +333,6 @@ void encode_source(writer& output, const package_source_record& source)
     for (const declaration_provenance& declaration : value.declarations())
       encode_provenance(output, declaration);
   }
-  output.digest(source.recipe());
   output.digest(source.snapshot());
 }
 
@@ -420,15 +419,13 @@ package_source_record decode_source(reader& input)
     profiles.emplace_back(std::move(profile), std::move(identity), std::move(declarations));
   }
 
-  source_recipe_identity recipe =
-      read_digest<source_recipe_identity>(input, "source recipe identity");
   source_snapshot_identity snapshot =
       read_digest<source_snapshot_identity>(input, "source snapshot identity");
   return package_source_record::make(
       std::move(release), std::move(metadata), std::move(runtime),
       std::move(programs), std::move(lifecycle_requirements),
       std::move(architectures), std::move(profiles),
-      std::move(recipe), std::move(snapshot));
+      std::move(snapshot));
 }
 
 void encode_control(writer& output, const installed_control& control)

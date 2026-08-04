@@ -16,7 +16,7 @@ The library owns immutable state-domain values and their identities:
 - package releases, source records, build provenance, installed control, installation receipts, installed packages, and complete ownership;
 - state-publication requests and receipts with stale-safe compare-and-publish semantics;
 - canonical publication evidence encoding;
-- canonical generation-v3 target-binding and complete-snapshot records; and
+- canonical generation-v4 target-binding and complete-snapshot records; and
 - the backend-neutral stale-safe `canonical_store` contract.
 
 There is no incomplete native installed package. Construction requires complete source, build, application, target, ownership, plan, and receipt evidence as represented by the state model. Missing historical facts are migration input, not optional fields silently filled from current ambient state.
@@ -39,11 +39,19 @@ libpkgapply -------> libpkgstate-apply -----+--> publication request
 
 Those repositories depend inward on `libpkgstate`; the owner depends on none of them. The core build, installed headers, pkg-config metadata, and dynamic linkage have one external implementation dependency: OpenSSL `libcrypto`, used privately for qualified SHA-256 operations. They contain no concrete storage provider.
 
-Canonical generation-v3 record bytes are a state-owned durable protocol exposed by `generation_codec.h`. Concrete persistence mechanisms are independent providers. The reference filesystem layout, locking, selector replacement, durability, recovery refusal, and read-only diagnostics live in `libpkgstate-posix`; the state owner does not select, open, or depend on that provider.
+Canonical generation-v4 record bytes are a state-owned durable protocol
+exposed by `generation_codec.h`. Concrete persistence mechanisms are
+independent providers. The reference filesystem layout, locking, selector
+replacement, durability, recovery refusal, and read-only diagnostics live in
+`libpkgstate-posix`; the state owner does not select, open, or depend on that
+provider.
 
 ## Native model
 
-A `package_source_record` retains exact source-owned release, recipe, profile, architecture, and source-snapshot identities together with state-relevant metadata, runtime requirements, and lifecycle authority.
+A `package_source_record` retains the source-owned release, selected-profile,
+and complete source-snapshot identities together with state-relevant metadata,
+runtime requirements, lifecycle authority, and selected architecture binding.
+The 3.0 source owner no longer issues a separate recipe identity.
 
 `build_provenance` retains request, verified materials, materialized inputs, environment and build policies, successful result, payload, artifact, exact artifact bytes, binding, execution, normalized image, and independent inspection identities. `installed_control` binds that provenance to its exact source record and typed installation reason.
 

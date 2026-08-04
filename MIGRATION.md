@@ -117,10 +117,27 @@ entered production storage. Controllers may simply retain any existing 2.5.0
 bytes and allow a later semantic rewrite to encode version 2.
 
 
-## 2.5.1 to 3.0.0 repository extraction
+## 2.5.1 to 3.0.0 authority and repository reset
 
-No installed-state migration is required. Core SONAME advances from 3 to 4 because the concrete generation-store class moves to `libpkgstate-posix`; publication evidence schema 2 and generation-v3 bytes remain unchanged.
+Core SONAME advances from 3 to 4 because the concrete generation-store class
+moves to `libpkgstate-posix`. Publication evidence schema 2 remains unchanged.
+Canonical installed-state storage advances from generation v3 to generation v4
+because `libpkgsource` 3.0 removed recipe identity from semantic source
+authority and downstream source records. Package-source-record identity
+advances from protocol version 1 to version 2 for the same reason.
 
-The source, build, planner, and application adapters and the concrete generation provider are no longer built by `libpkgstate`. Install the independently released `libpkgstate-source`, `libpkgstate-build`, `libpkgstate-plan`, and `libpkgstate-apply` repositories at matching 3.0 generation and `libpkgstate-posix` for generation-v3 storage, then relink consumers against the exact adapter product they use. Remove the former `source_adapter`, `build_adapter`, `planner_adapter`, and `application_adapter` Meson options from packaging and integration scripts.
+Generation-v3 stores cannot be reinterpreted as generation v4. This release
+does not embed a legacy source model or silently discard the retired field.
+Existing generation-v3 state requires a separate explicit migration/import
+step before publication through the 3.0 stack.
 
-The extraction does not add a compatibility library, umbrella adapter package, migration mode, or transitive core dependency.
+The source, build, planner, and application adapters and the concrete
+generation provider are no longer built by `libpkgstate`. Install the
+independently released `libpkgstate-source`, `libpkgstate-build`,
+`libpkgstate-plan`, and `libpkgstate-apply` repositories at matching 3.0
+generation and `libpkgstate-posix` for generation-v4 storage, then relink
+consumers against the exact adapter product they use. Remove the former
+`source_adapter`, `build_adapter`, `planner_adapter`, and
+`application_adapter` Meson options from packaging and integration scripts.
+
+The reset does not add a compatibility library, umbrella adapter package, implicit migration mode, or transitive core dependency.

@@ -18,7 +18,6 @@ pkgstate_model - native installed-state value model
 - all lifecycle programs and action-bound lifecycle requirements;
 - declared and selected build and target architectures;
 - selected build profiles with source-owned identities and declarations;
-- source recipe identity; and
 - source snapshot identity.
 
 The record is normalized and immutable. Its identity is owned by libpkgstate and

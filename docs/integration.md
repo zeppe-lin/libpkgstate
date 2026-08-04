@@ -15,7 +15,7 @@ libpkgapply + source/build admission -> libpkgstate-apply
                                       -> selected provider
 
 libpkgstate generation codec -> canonical binding and snapshot bytes
-libpkgstate-posix             -> generation-v3 filesystem storage
+libpkgstate-posix             -> generation-v4 filesystem storage
 ```
 
 A consumer links only the bridges and storage provider it uses. Linking `libpkgstate` alone exposes the pure generation record protocol but never pulls a source, build, image, plan, apply, or filesystem mechanism authority into the process.

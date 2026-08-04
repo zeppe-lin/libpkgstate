@@ -10,9 +10,9 @@
 int main()
 {
   using namespace pkgstate;
-  static_assert(canonical_generation_storage_version == 3);
+  static_assert(canonical_generation_storage_version == 4);
   TEST_EQ(canonical_generation_storage_format,
-          std::string_view("libpkgstate-generation-v3"));
+          std::string_view("libpkgstate-generation-v4"));
 
   const state_target_binding binding = native_fixture::target();
   const std::vector<std::uint8_t> binding_bytes =
@@ -34,6 +34,14 @@ int main()
   TEST_EQ(decoded.identity(), state.identity());
   TEST_EQ(decoded.target_binding(), state.target_binding());
   TEST_EQ(decoded.packages(), state.packages());
+
+  std::string legacy_version(
+      reinterpret_cast<const char*>(snapshot_bytes.data()),
+      snapshot_bytes.size());
+  constexpr std::size_t snapshot_version_offset = 18;
+  legacy_version[snapshot_version_offset] = '\0';
+  legacy_version[snapshot_version_offset + 1] = '\x03';
+  TEST_THROWS(store_error, decode_generation_snapshot(legacy_version));
 
   std::string damaged(
       reinterpret_cast<const char*>(snapshot_bytes.data()),

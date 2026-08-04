@@ -37,7 +37,6 @@ public:
    * \param lifecycle_requirements Action-bound package requirements.
    * \param architectures Declared and selected architecture authority.
    * \param selected_profiles Exact selected profile evidence.
-   * \param recipe Source-owned sealed recipe identity.
    * \param snapshot Source-owned sealed snapshot identity.
    * \return Canonically ordered immutable source record.
    * \throws state_error for duplicate runtime packages, lifecycle actions,
@@ -51,7 +50,6 @@ public:
       std::vector<lifecycle_requirement> lifecycle_requirements,
       architecture_binding architectures,
       std::vector<selected_profile> selected_profiles,
-      source_recipe_identity recipe,
       source_snapshot_identity snapshot);
 
   /*!
@@ -118,11 +116,6 @@ public:
   [[nodiscard]] const std::vector<selected_profile>&
   selected_profiles() const noexcept;
   /*!
-   * \brief Return the foreign sealed-recipe identity.
-   * \return The foreign sealed-recipe identity.
-   */
-  [[nodiscard]] const source_recipe_identity& recipe() const noexcept;
-  /*!
    * \brief Return the foreign sealed-source-snapshot identity.
    * \return The foreign sealed-source-snapshot identity.
    */
@@ -162,7 +155,6 @@ private:
                         std::vector<lifecycle_requirement> lifecycle_requirements,
                         architecture_binding architectures,
                         std::vector<selected_profile> selected_profiles,
-                        source_recipe_identity recipe,
                         source_snapshot_identity snapshot);
 
   package_source_record_identity identity_;
@@ -173,7 +165,6 @@ private:
   std::vector<lifecycle_requirement> lifecycle_requirements_;
   architecture_binding architectures_;
   std::vector<selected_profile> selected_profiles_;
-  source_recipe_identity recipe_;
   source_snapshot_identity snapshot_;
 };
 

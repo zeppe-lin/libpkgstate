@@ -50,7 +50,6 @@ package_source_record_identity identify(
     const std::vector<lifecycle_requirement>& lifecycle_requirements,
     const architecture_binding& architectures,
     const std::vector<selected_profile>& selected_profiles,
-    const source_recipe_identity& recipe,
     const source_snapshot_identity& snapshot)
 {
   detail::canonical_record record(package_source_record_identity::canonical_domain());
@@ -108,7 +107,6 @@ package_source_record_identity identify(
       append_provenance(record, provenance);
   }
 
-  record.append_digest(recipe);
   record.append_digest(snapshot);
   return package_source_record_identity::from_sha256(record.sha256());
 }
@@ -131,7 +129,6 @@ package_source_record package_source_record::make(
     std::vector<lifecycle_requirement> lifecycle_requirements,
     architecture_binding architectures,
     std::vector<selected_profile> selected_profiles,
-    source_recipe_identity recipe,
     source_snapshot_identity snapshot)
 {
   std::sort(runtime_requirements.begin(), runtime_requirements.end(),
@@ -171,12 +168,12 @@ package_source_record package_source_record::make(
 
   package_source_record_identity identity = identify(
       release, metadata, runtime_requirements, lifecycle_programs,
-      lifecycle_requirements, architectures, selected_profiles, recipe, snapshot);
+      lifecycle_requirements, architectures, selected_profiles, snapshot);
   return package_source_record(
       std::move(identity), std::move(release), std::move(metadata),
       std::move(runtime_requirements), std::move(lifecycle_programs),
       std::move(lifecycle_requirements), std::move(architectures),
-      std::move(selected_profiles), std::move(recipe), std::move(snapshot));
+      std::move(selected_profiles), std::move(snapshot));
 }
 
 package_source_record::package_source_record(
@@ -188,7 +185,6 @@ package_source_record::package_source_record(
     std::vector<lifecycle_requirement> lifecycle_requirements,
     architecture_binding architectures,
     std::vector<selected_profile> selected_profiles,
-    source_recipe_identity recipe,
     source_snapshot_identity snapshot)
     : identity_(std::move(identity)), release_(std::move(release)),
       metadata_(std::move(metadata)),
@@ -197,7 +193,7 @@ package_source_record::package_source_record(
       lifecycle_requirements_(std::move(lifecycle_requirements)),
       architectures_(std::move(architectures)),
       selected_profiles_(std::move(selected_profiles)),
-      recipe_(std::move(recipe)), snapshot_(std::move(snapshot))
+      snapshot_(std::move(snapshot))
 {
 }
 
@@ -223,9 +219,8 @@ std::vector<package_requirement> package_source_record::lifecycle_requirements(l
 }
 const architecture_binding& package_source_record::architectures() const noexcept { return architectures_; }
 const std::vector<selected_profile>& package_source_record::selected_profiles() const noexcept { return selected_profiles_; }
-const source_recipe_identity& package_source_record::recipe() const noexcept { return recipe_; }
 const source_snapshot_identity& package_source_record::snapshot() const noexcept { return snapshot_; }
-bool operator==(const package_source_record& lhs, const package_source_record& rhs) noexcept { return lhs.identity_ == rhs.identity_ && std::tie(lhs.release_, lhs.metadata_, lhs.runtime_requirements_, lhs.lifecycle_programs_, lhs.lifecycle_requirements_, lhs.architectures_, lhs.selected_profiles_, lhs.recipe_, lhs.snapshot_) == std::tie(rhs.release_, rhs.metadata_, rhs.runtime_requirements_, rhs.lifecycle_programs_, rhs.lifecycle_requirements_, rhs.architectures_, rhs.selected_profiles_, rhs.recipe_, rhs.snapshot_); }
+bool operator==(const package_source_record& lhs, const package_source_record& rhs) noexcept { return lhs.identity_ == rhs.identity_ && std::tie(lhs.release_, lhs.metadata_, lhs.runtime_requirements_, lhs.lifecycle_programs_, lhs.lifecycle_requirements_, lhs.architectures_, lhs.selected_profiles_, lhs.snapshot_) == std::tie(rhs.release_, rhs.metadata_, rhs.runtime_requirements_, rhs.lifecycle_programs_, rhs.lifecycle_requirements_, rhs.architectures_, rhs.selected_profiles_, rhs.snapshot_); }
 bool operator!=(const package_source_record& lhs, const package_source_record& rhs) noexcept { return !(lhs == rhs); }
 bool operator<(const package_source_record& lhs, const package_source_record& rhs) noexcept { return lhs.identity_ < rhs.identity_; }
 

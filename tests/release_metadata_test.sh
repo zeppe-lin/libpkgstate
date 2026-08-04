@@ -20,4 +20,8 @@ grep -F "'-DPKGSTATE_BUILDING_LIBRARY'" "$root/src/meson.build" >/dev/null || fa
 
 grep -F "'generation_codec.cpp'" "$root/src/meson.build" >/dev/null || fail 'core source omits generation codec'
 grep -F "'../include/libpkgstate/generation_codec.h'" "$root/src/meson.build" >/dev/null || fail 'core install omits generation codec'
+grep -F 'canonical_generation_storage_version = 4' "$root/include/libpkgstate/generation_codec.h" >/dev/null || fail 'generation codec version is not 4'
+grep -F 'libpkgstate-generation-v4' "$root/include/libpkgstate/generation_codec.h" >/dev/null || fail 'generation codec format is not v4'
+grep -F 'pkgstate/package-source-record/2' "$root/include/libpkgstate/digest.h" >/dev/null || fail 'source-record identity protocol is not version 2'
+if grep -R -F 'source_recipe_identity' "$root/include" "$root/src" >/dev/null; then fail 'retired source recipe identity remains in core'; fi
 ! grep -v '8pkgstate' "$root/abi/libpkgstate.exports" >/dev/null || fail 'core ABI manifest contains foreign implementation exports'

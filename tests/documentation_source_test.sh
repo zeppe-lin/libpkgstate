@@ -10,7 +10,7 @@ done
 
 for stale in STORAGE.md include/libpkgstate/canonical_generation_store.h man/pkgstate-generation.5.scdoc man/pkgstate-check.1.scdoc; do test ! -e "$root/$stale" || { echo "provider documentation retained: $stale" >&2; exit 1; }; done
 
-grep -F 'canonical generation-v3' "$root/docs/architecture.md" >/dev/null || { echo "state-owned generation protocol undocumented" >&2; exit 1; }
+grep -F 'canonical generation-v4' "$root/docs/architecture.md" >/dev/null || { echo "state-owned generation protocol undocumented" >&2; exit 1; }
 python3 "$root/tools/check-public-documentation.py" \
   "$root" libpkgstate libpkgstate.h
 

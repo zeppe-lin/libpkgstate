@@ -10,8 +10,10 @@ or apply a package, or how an obsolete database should be interpreted.
 
 ## Authority boundaries
 
-Source authority supplies a sealed source snapshot. The independently released `libpkgstate-source` adapter retains exact source-owned release, profile, recipe, and snapshot identities.
-The state core never recreates those identities from coordinates.
+Source authority supplies a sealed source snapshot. The independently released
+`libpkgstate-source` adapter retains exact source-owned release, selected-profile,
+and complete snapshot identities. The state core never recreates those identities
+from coordinates.
 
 Build authority supplies one sealed request, one successful result, exact
 artifact bytes, execution evidence, and an ordered payload manifest. Image
@@ -66,7 +68,7 @@ different transactions.
 
 ## Canonical generation protocol
 
-`libpkgstate` owns the canonical generation-v3 binding and complete-snapshot
+`libpkgstate` owns the canonical generation-v4 binding and complete-snapshot
 record codec because those bytes encode state authority, not filesystem policy.
 Decode verifies framing, version, normalized structure, every state-owned
 identity, target binding, and canonical re-encoding. The codec performs no I/O
@@ -150,7 +152,7 @@ and the non-virtual stale-safe compare-and-publish sequence. It does not select
 a filesystem layout, open a lock, encode a provider generation, replace a
 selector, synchronize directories, or inspect a concrete store.
 
-`libpkgstate-posix` supplies the reference immutable-generation-v3 provider.
+`libpkgstate-posix` supplies the reference immutable-generation-v4 provider.
 Other providers must preserve the same semantic store contract without becoming
 second owners of publication policy. Storage migration remains an explicit
 provider-side admission problem.

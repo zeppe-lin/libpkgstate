@@ -2,7 +2,7 @@
 
 ## Authority
 
-`libpkgstate` owns complete immutable installed-package state for one exact target binding. It owns state-domain identities, publication requests and receipts, publication evidence codecs, canonical generation-v3 binding and snapshot records, and compare-and-publish semantics.
+`libpkgstate` owns complete immutable installed-package state for one exact target binding. It owns state-domain identities, publication requests and receipts, publication evidence codecs, canonical generation-v4 binding and snapshot records, and compare-and-publish semantics.
 
 The library accepts already admitted facts. It does not parse source syntax, execute builds, inspect package images, plan operations, execute application, inspect a target filesystem, or acquire mutation leases.
 
@@ -19,7 +19,7 @@ Those repositories depend inward on `libpkgstate`. The state owner depends on no
 
 ## Persistence placement
 
-The core owns publication evidence codecs, canonical generation-v3 record bytes, and the non-virtual compare-and-publish sequence. Concrete paths, directories, locks, selectors, durability, recovery, and diagnostic mechanisms are provider authority. `libpkgstate-posix` persists the state-owned records in the reference immutable-generation layout and depends inward on this core; the core does not depend outward on it.
+The core owns publication evidence codecs, canonical generation-v4 record bytes, and the non-virtual compare-and-publish sequence. Concrete paths, directories, locks, selectors, durability, recovery, and diagnostic mechanisms are provider authority. `libpkgstate-posix` persists the state-owned records in the reference immutable-generation layout and depends inward on this core; the core does not depend outward on it.
 
 ## Forbidden dependencies
 
