@@ -60,12 +60,15 @@ public:
   [[nodiscard]] const publication_domain_identity&
   publication_domain() const noexcept;
 
+  /*! \brief Compare complete target-state bindings for equality. */
   friend PKGSTATE_API bool operator==(const state_target_binding& lhs,
-                         const state_target_binding& rhs) noexcept;
+                                      const state_target_binding& rhs) noexcept;
+  /*! \brief Compare complete target-state bindings for inequality. */
   friend PKGSTATE_API bool operator!=(const state_target_binding& lhs,
-                         const state_target_binding& rhs) noexcept;
+                                      const state_target_binding& rhs) noexcept;
+  /*! \brief Order target-state bindings by canonical identity. */
   friend PKGSTATE_API bool operator<(const state_target_binding& lhs,
-                        const state_target_binding& rhs) noexcept;
+                                     const state_target_binding& rhs) noexcept;
 
 private:
   state_target_binding(state_target_binding_identity identity,

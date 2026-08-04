@@ -86,12 +86,15 @@ public:
   [[nodiscard]] const application_evidence_identity&
   application_evidence() const noexcept;
 
+  /*! \brief Compare complete package-state deltas for equality. */
   friend PKGSTATE_API bool operator==(const package_state_delta& lhs,
-                         const package_state_delta& rhs) noexcept;
+                                      const package_state_delta& rhs) noexcept;
+  /*! \brief Compare complete package-state deltas for inequality. */
   friend PKGSTATE_API bool operator!=(const package_state_delta& lhs,
-                         const package_state_delta& rhs) noexcept;
+                                      const package_state_delta& rhs) noexcept;
+  /*! \brief Order package-state deltas canonically. */
   friend PKGSTATE_API bool operator<(const package_state_delta& lhs,
-                        const package_state_delta& rhs) noexcept;
+                                     const package_state_delta& rhs) noexcept;
 
 private:
   package_state_delta(package_state_delta_kind kind,

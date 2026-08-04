@@ -9,6 +9,8 @@
 - Made the generation-v3 codec one state-owned protocol consumed by storage providers instead of a duplicated provider-private implementation.
 - Advanced the core SONAME from 3 to 4 because the exported concrete generation-store class moved to its provider, stabilized backend vtables with out-of-line destructors, and removed accidental libstdc++ exports.
 - Added explicit architecture, integration, repository, documentation, and release contracts for the pure owner boundary.
+- Anchored every public failure hierarchy with out-of-line destruction so exception RTTI and vtables remain core-owned.
+- Completed public API contracts for native identities, source records, installed control, object ownership, receipts, packages, and snapshots.
 
 ## 2.5.1
 

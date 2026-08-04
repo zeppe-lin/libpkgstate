@@ -169,12 +169,15 @@ public:
   [[nodiscard]] const std::vector<state_publication_evidence_identity>&
   subordinate_evidence() const noexcept;
 
+  /*! \brief Compare complete publication receipts for equality. */
   friend PKGSTATE_API bool operator==(const state_publication_receipt& lhs,
-                         const state_publication_receipt& rhs) noexcept;
+                                      const state_publication_receipt& rhs) noexcept;
+  /*! \brief Compare complete publication receipts for inequality. */
   friend PKGSTATE_API bool operator!=(const state_publication_receipt& lhs,
-                         const state_publication_receipt& rhs) noexcept;
+                                      const state_publication_receipt& rhs) noexcept;
+  /*! \brief Order publication receipts by canonical identity. */
   friend PKGSTATE_API bool operator<(const state_publication_receipt& lhs,
-                        const state_publication_receipt& rhs) noexcept;
+                                     const state_publication_receipt& rhs) noexcept;
 
 private:
   [[nodiscard]] static state_publication_receipt

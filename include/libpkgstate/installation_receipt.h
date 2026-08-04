@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Alexandr Savca
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-/*! \file installation_receipt.h
- *  \brief Complete native evidence admitted for installed-state publication.
+/*!
+ * \file installation_receipt.h
+ * \brief Complete admitted evidence for one installed package publication.
  */
 #pragma once
 
@@ -19,34 +20,71 @@
 
 namespace pkgstate {
 
+/*! \brief Canonical semantic schema of installation_receipt identity input. */
 inline constexpr std::uint16_t installation_receipt_schema_version = 2;
 
+/*!
+ * \brief Immutable package installation authority admitted into state.
+ *
+ * A receipt binds complete source and build control, the exact managed target,
+ * the normalized installed object manifest, the operation plan, completed
+ * application evidence, and optional transaction evidence. It is not an
+ * execution log and cannot be assembled from partial filesystem observation.
+ */
 class PKGSTATE_API installation_receipt final {
 public:
+  /*!
+   * \brief Validate, normalize, and identify one installation receipt.
+   * \param control Complete installed source and build control.
+   * \param target_binding Exact durable target-state authority.
+   * \param manifest Non-empty installed object manifest, normalized by class.
+   * \param operation_plan Planner-owned identity of the exact applied plan.
+   * \param application_evidence Application-owned completion identity.
+   * \param transaction_evidence Optional orchestration-owned transaction proof.
+   * \return Immutable identified installation receipt.
+   * \throws state_error for duplicate paths, invalid hard-link topology,
+   * mismatched package authority, or otherwise inconsistent evidence.
+   */
   [[nodiscard]] static installation_receipt make(
       installed_control control,
       state_target_binding target_binding,
       std::vector<owned_entry> manifest,
       operation_plan_identity operation_plan,
       application_evidence_identity application_evidence,
-      std::optional<transaction_evidence_identity> transaction_evidence = std::nullopt);
+      std::optional<transaction_evidence_identity> transaction_evidence =
+          std::nullopt);
 
+  /*! \brief Return installation_receipt_schema_version. */
   [[nodiscard]] std::uint16_t schema_version() const noexcept;
+  /*! \brief Return the canonical receipt identity. */
   [[nodiscard]] const installation_receipt_identity& identity() const noexcept;
+  /*! \brief Return complete installed source and build control. */
   [[nodiscard]] const installed_control& control() const noexcept;
+  /*! \brief Return the source-authoritative package release. */
   [[nodiscard]] const package_release& release() const noexcept;
+  /*! \brief Return the exact durable target-state binding. */
   [[nodiscard]] const state_target_binding& target_binding() const noexcept;
+  /*! \brief Return the canonical installed object manifest. */
   [[nodiscard]] const std::vector<owned_entry>& manifest() const noexcept;
+  /*! \brief Return the exact planner-owned operation-plan identity. */
   [[nodiscard]] const operation_plan_identity& operation_plan() const noexcept;
-  [[nodiscard]] const application_evidence_identity& application_evidence() const noexcept;
-  [[nodiscard]] const std::optional<transaction_evidence_identity>& transaction_evidence() const noexcept;
+  /*! \brief Return the exact completed-application evidence identity. */
+  [[nodiscard]] const application_evidence_identity&
+  application_evidence() const noexcept;
+  /*! \brief Return optional orchestration-owned transaction evidence. */
+  [[nodiscard]] const std::optional<transaction_evidence_identity>&
+  transaction_evidence() const noexcept;
 
+  /*! \brief Compare complete installation receipts for equality. */
   friend PKGSTATE_API bool operator==(const installation_receipt& lhs,
-                         const installation_receipt& rhs) noexcept;
+                                      const installation_receipt& rhs) noexcept;
+  /*! \brief Compare complete installation receipts for inequality. */
   friend PKGSTATE_API bool operator!=(const installation_receipt& lhs,
-                         const installation_receipt& rhs) noexcept;
+                                      const installation_receipt& rhs) noexcept;
+  /*! \brief Order installation receipts canonically. */
   friend PKGSTATE_API bool operator<(const installation_receipt& lhs,
-                        const installation_receipt& rhs) noexcept;
+                                     const installation_receipt& rhs) noexcept;
+
 private:
   installation_receipt(
       installation_receipt_identity identity,
