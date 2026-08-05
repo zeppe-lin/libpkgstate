@@ -2,7 +2,7 @@
 
 ## Authority
 
-`libpkgstate` owns complete immutable installed-package state for one exact target binding. It owns state-domain identities, publication requests and receipts, publication evidence codecs, canonical generation-v4 binding and snapshot records, and compare-and-publish semantics.
+`libpkgstate` owns complete immutable installed-package state for one exact target binding. It owns state-domain identities, publication requests and receipts, publication evidence codecs, canonical generation-v1 binding and snapshot records, and compare-and-publish semantics.
 
 The library accepts already admitted facts. It does not parse source syntax, execute builds, inspect package images, plan operations, execute application, inspect a target filesystem, or acquire mutation leases.
 
@@ -11,7 +11,7 @@ The library accepts already admitted facts. It does not parse source syntax, exe
 The 3.0 generation removes all foreign-authority adapters from the state owner:
 
 - `libpkgstate-source` translates sealed source authority into `package_source_record`;
-- `libpkgstate-build` admits successful build and image authority;
+- `libpkgstate-build` projects admitted `libpkgbuild-image` authority into durable provenance;
 - `libpkgstate-plan` projects installed state into planner facts;
 - `libpkgstate-apply` reads lease-bound state projections and admits completed application evidence.
 
@@ -19,7 +19,7 @@ Those repositories depend inward on `libpkgstate`. The state owner depends on no
 
 ## Persistence placement
 
-The core owns publication evidence codecs, canonical generation-v4 record bytes, and the non-virtual compare-and-publish sequence. Concrete paths, directories, locks, selectors, durability, recovery, and diagnostic mechanisms are provider authority. `libpkgstate-posix` persists the state-owned records in the reference immutable-generation layout and depends inward on this core; the core does not depend outward on it.
+The core owns publication evidence codecs, canonical generation-v1 record bytes, and the non-virtual compare-and-publish sequence. Concrete paths, directories, locks, selectors, durability, recovery, and diagnostic mechanisms are provider authority. `libpkgstate-posix` persists the state-owned records in the reference immutable-generation layout and depends inward on this core; the core does not depend outward on it.
 
 ## Forbidden dependencies
 

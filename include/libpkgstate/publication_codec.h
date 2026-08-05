@@ -23,10 +23,10 @@
 namespace pkgstate {
 
 /*! \brief Current state-publication request encoding version. */
-inline constexpr std::uint16_t state_publication_request_encoding_version = 2;
+inline constexpr std::uint16_t state_publication_request_encoding_version = 1;
 
 /*! \brief Current state-publication receipt encoding version. */
-inline constexpr std::uint16_t state_publication_receipt_encoding_version = 2;
+inline constexpr std::uint16_t state_publication_receipt_encoding_version = 1;
 
 /*! \brief Maximum admitted request record size. */
 inline constexpr std::size_t maximum_state_publication_request_encoding_size =

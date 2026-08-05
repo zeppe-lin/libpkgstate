@@ -447,7 +447,6 @@ void encode_control(writer& output, const installed_control& control)
   const build_provenance& build = control.build();
   output.digest(build.source_record());
   output.digest(build.request());
-  output.digest(build.source_materials());
   output.digest(build.build_inputs());
   output.digest(build.environment_policy());
   output.digest(build.build_policy());
@@ -457,6 +456,7 @@ void encode_control(writer& output, const installed_control& control)
   output.digest(build.artifact_content());
   output.digest(build.artifact_binding());
   output.digest(build.execution_evidence());
+  output.digest(build.build_image());
   output.digest(build.artifact_image());
   output.digest(build.artifact_inspection());
 }
@@ -504,8 +504,6 @@ installed_control decode_control(reader& input)
       read_digest<package_source_record_identity>(input, "build source record identity");
   build_request_identity request =
       read_digest<build_request_identity>(input, "build request identity");
-  source_material_set_identity source_materials =
-      read_digest<source_material_set_identity>(input, "source material set identity");
   build_input_set_identity build_inputs =
       read_digest<build_input_set_identity>(input, "build input set identity");
   environment_policy_identity environment_policy =
@@ -524,17 +522,19 @@ installed_control decode_control(reader& input)
       read_digest<artifact_binding_identity>(input, "artifact binding identity");
   execution_evidence_identity execution_evidence =
       read_digest<execution_evidence_identity>(input, "execution evidence identity");
+  build_image_identity build_image =
+      read_digest<build_image_identity>(input, "build image identity");
   artifact_image_identity artifact_image =
       read_digest<artifact_image_identity>(input, "artifact image identity");
   artifact_inspection_identity artifact_inspection =
       read_digest<artifact_inspection_identity>(input, "artifact inspection identity");
   build_provenance build(
-      std::move(source_record), std::move(request), std::move(source_materials),
+      std::move(source_record), std::move(request),
       std::move(build_inputs), std::move(environment_policy),
       std::move(build_policy), std::move(build_result),
       std::move(payload_manifest), std::move(artifact),
       std::move(artifact_content), std::move(artifact_binding), std::move(execution_evidence),
-      std::move(artifact_image), std::move(artifact_inspection));
+      std::move(build_image), std::move(artifact_image), std::move(artifact_inspection));
   return installed_control::make(std::move(source), std::move(reason), std::move(build));
 }
 

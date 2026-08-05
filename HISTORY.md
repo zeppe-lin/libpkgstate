@@ -6,8 +6,11 @@
 - Extracted the concrete generation filesystem backend and `pkgstate-check` into `libpkgstate-posix`.
 - Removed every foreign package-management dependency, adapter option, storage syscall, concrete backend, and diagnostic tool from the durable state owner.
 - Removed the retired source-recipe identity from durable source records to follow the `libpkgsource` 3.0 authority reset.
-- Advanced the package-source-record identity protocol to version 2 and canonical generation storage to version 4.
+- Reset all undeployed state identities and durable records to their first actual protocol generation.
 - Kept one state-owned generation codec consumed by storage providers instead of a duplicated provider-private implementation.
+- Removed the false source-material-set provenance reference and retained the exact build-to-inspected-image admission identity instead.
+- Reinterpreted build-input provenance as the logical resolver-backed input set rather than a materialized filesystem-tree claim.
+- Removed undeployed publication-framing compatibility branches; one canonical house framing is authoritative.
 - Advanced the core SONAME from 3 to 4 because the exported concrete generation-store class moved to its provider, stabilized backend vtables with out-of-line destructors, and removed accidental libstdc++ exports.
 - Added explicit architecture, integration, repository, documentation, and release contracts for the pure owner boundary.
 - Anchored every public failure hierarchy with out-of-line destruction so exception RTTI and vtables remain core-owned.

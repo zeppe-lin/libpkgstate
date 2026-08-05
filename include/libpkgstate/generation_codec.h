@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /*! \file generation_codec.h
- *  \brief Canonical generation-v4 binding and snapshot records.
+ *  \brief Canonical generation-v1 binding and snapshot records.
  */
 #pragma once
 
@@ -18,16 +18,16 @@
 namespace pkgstate {
 
 /*! \brief Current canonical generation record version. */
-inline constexpr std::uint16_t canonical_generation_storage_version = 4;
+inline constexpr std::uint16_t canonical_generation_storage_version = 1;
 
 /*! \brief Receipt-visible canonical generation protocol identifier. */
 inline constexpr std::string_view canonical_generation_storage_format =
-    "libpkgstate-generation-v4";
+    "libpkgstate-generation-v1";
 
 /*!
- * \brief Encode one target binding as a canonical generation-v4 record.
+ * \brief Encode one target binding as a canonical generation-v1 record.
  * \param binding Target and state-store binding to encode.
- * \return Canonical generation-v4 target-binding bytes.
+ * \return Canonical generation-v1 target-binding bytes.
  */
 [[nodiscard]] PKGSTATE_API std::vector<std::uint8_t>
 encode_generation_binding(const state_target_binding& binding);
@@ -44,7 +44,7 @@ decode_generation_binding(std::string_view bytes);
 /*!
  * \brief Encode one complete installed-state snapshot canonically.
  * \param value Complete installed-state snapshot to encode.
- * \return Canonical generation-v4 snapshot bytes.
+ * \return Canonical generation-v1 snapshot bytes.
  */
 [[nodiscard]] PKGSTATE_API std::vector<std::uint8_t>
 encode_generation_snapshot(const snapshot& value);

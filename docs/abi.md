@@ -3,7 +3,7 @@
 `libpkgstate` 3.0.0 advances the core SONAME from 3 to 4 because the exported
 `canonical_generation_store` mechanism moves to `libpkgstate-posix`. The core
 also gives `canonical_store` and `canonical_publication_transaction` stable
-out-of-line virtual destructors and publishes the generation-v4 record codec as
+out-of-line virtual destructors and publishes the first canonical generation record codec as
 state-owned protocol authority.
 
 The exact reviewed ELF surface is stored in `abi/libpkgstate.exports`. Shared
@@ -24,11 +24,5 @@ Four version axes are independent:
 3. durable publication-evidence protocols; and
 4. canonical generation records and independently released storage mechanisms.
 
-Release 3.0 extracts adapters and the concrete generation provider. It advances
-the core C++ SONAME, preserves publication-evidence schema 2, and advances
-canonical generation records to version 4 under one state-owned encoder and
-decoder. `libpkgstate-posix` consumes those bytes without owning a competing
-codec. Generation-v3 stores require explicit migration because source recipe
-identity was retired by `libpkgsource` 3.0 and is no longer part of the durable
-source record.
+Release 3.0 extracts adapters and the concrete generation provider. Because no native package state has yet been deployed, publication evidence, state identities, installation receipts, and generation records remain at their first actual protocol generation. Experimental intermediate numbers are not compatibility contracts.
 Future work must not infer one version decision from another.

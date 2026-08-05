@@ -2,7 +2,7 @@ PKGSTATE_GENERATION_CODEC(3)
 
 # NAME
 
-pkgstate_generation_codec - canonical generation-v4 state records
+pkgstate_generation_codec - canonical generation-v1 state records
 
 # SYNOPSIS
 
@@ -15,7 +15,7 @@ The generation codec is the *libpkgstate*-owned binary protocol for one exact
 and owns no storage path, lock, selector, recovery, or durability policy.
 
 *encode_generation_binding()* and *encode_generation_snapshot()* emit canonical
-version-3 records. *decode_generation_binding()* and
+version-1 records. *decode_generation_binding()* and
 *decode_generation_snapshot()* validate framing, version, normalized value
 shape, target binding, state-owned identities, and canonical re-encoding.
 Malformed, unsupported, non-canonical, or identity-inconsistent records raise
@@ -23,9 +23,9 @@ Malformed, unsupported, non-canonical, or identity-inconsistent records raise
 
 # VERSION
 
-The record version is *canonical_generation_storage_version*, currently 4. Its
+The record version is *canonical_generation_storage_version*, currently 1. Its
 receipt-visible identifier is *canonical_generation_storage_format*, currently
-*libpkgstate-generation-v4*.
+*libpkgstate-generation-v1*.
 
 Repository release, C++ SONAME, publication-evidence schema, and generation
 record version are independent version axes.

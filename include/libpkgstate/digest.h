@@ -380,35 +380,35 @@ private:
 struct package_source_record_identity_domain final {
   /*! \brief Canonical package-source-record identity protocol separator. */
   static constexpr std::string_view canonical_domain =
-      "pkgstate/package-source-record/2";
+      "pkgstate/package-source-record/1";
 };
 
 /*! \brief Domain tag for installed_control_identity. */
 struct installed_control_identity_domain final {
   /*! \brief Canonical installed-control identity protocol separator. */
   static constexpr std::string_view canonical_domain =
-      "pkgstate/installed-control/3";
+      "pkgstate/installed-control/1";
 };
 
 /*! \brief Domain tag for installation_receipt_identity. */
 struct installation_receipt_identity_domain final {
   /*! \brief Canonical installation-receipt identity protocol separator. */
   static constexpr std::string_view canonical_domain =
-      "pkgstate/installation-receipt/2";
+      "pkgstate/installation-receipt/1";
 };
 
 /*! \brief Domain tag for installed_package_identity. */
 struct installed_package_identity_domain final {
   /*! \brief Canonical installed-package identity protocol separator. */
   static constexpr std::string_view canonical_domain =
-      "pkgstate/installed-package/3";
+      "pkgstate/installed-package/1";
 };
 
 /*! \brief Domain tag for ownership_inventory_identity. */
 struct ownership_inventory_identity_domain final {
   /*! \brief Canonical ownership-inventory identity protocol separator. */
   static constexpr std::string_view canonical_domain =
-      "pkgstate/ownership-inventory/3";
+      "pkgstate/ownership-inventory/1";
 };
 
 /*! \brief Domain tag for managed_target_identity. */
@@ -457,21 +457,21 @@ struct state_target_binding_identity_domain final {
 struct installed_state_snapshot_identity_domain final {
   /*! \brief Canonical installed-snapshot identity protocol separator. */
   static constexpr std::string_view canonical_domain =
-      "pkgstate/installed-snapshot/3";
+      "pkgstate/installed-snapshot/1";
 };
 
 /*! \brief Domain tag for state_publication_request_identity. */
 struct state_publication_request_identity_domain final {
   /*! \brief Canonical publication-request identity protocol separator. */
   static constexpr std::string_view canonical_domain =
-      "pkgstate/publication-request/3";
+      "pkgstate/publication-request/1";
 };
 
 /*! \brief Domain tag for state_publication_receipt_identity. */
 struct state_publication_receipt_identity_domain final {
   /*! \brief Canonical publication-receipt identity protocol separator. */
   static constexpr std::string_view canonical_domain =
-      "pkgstate/publication-receipt/3";
+      "pkgstate/publication-receipt/1";
 };
 
 /*! \brief Domain tag for package_release_identity. */
@@ -482,8 +482,6 @@ struct source_profile_reference_domain final {};
 struct source_snapshot_reference_domain final {};
 /*! \brief Domain tag for build_request_identity. */
 struct build_request_reference_domain final {};
-/*! \brief Domain tag for source_material_set_identity. */
-struct source_material_set_reference_domain final {};
 /*! \brief Domain tag for build_input_set_identity. */
 struct build_input_set_reference_domain final {};
 /*! \brief Domain tag for environment_policy_identity. */
@@ -502,6 +500,8 @@ struct artifact_content_reference_domain final {};
 struct artifact_binding_reference_domain final {};
 /*! \brief Domain tag for execution_evidence_identity. */
 struct execution_evidence_reference_domain final {};
+/*! \brief Domain tag for build_image_identity. */
+struct build_image_reference_domain final {};
 /*! \brief Domain tag for artifact_image_identity. */
 struct artifact_image_reference_domain final {};
 /*! \brief Domain tag for artifact_inspection_identity. */
@@ -576,9 +576,6 @@ using source_snapshot_identity =
 /*! \brief Foreign identity of one immutable build request. */
 using build_request_identity =
     detail::referenced_digest<detail::build_request_reference_domain>;
-/*! \brief Foreign identity of one admitted source-material set. */
-using source_material_set_identity =
-    detail::referenced_digest<detail::source_material_set_reference_domain>;
 /*! \brief Foreign identity of one exact build-input set. */
 using build_input_set_identity =
     detail::referenced_digest<detail::build_input_set_reference_domain>;
@@ -606,6 +603,9 @@ using artifact_binding_identity =
 /*! \brief Foreign identity of build-execution evidence. */
 using execution_evidence_identity =
     detail::referenced_digest<detail::execution_evidence_reference_domain>;
+/*! \brief Foreign identity binding a successful build to its inspected image. */
+using build_image_identity =
+    detail::referenced_digest<detail::build_image_reference_domain>;
 /*! \brief Foreign identity of a normalized package image. */
 using artifact_image_identity =
     detail::referenced_digest<detail::artifact_image_reference_domain>;

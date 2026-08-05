@@ -16,12 +16,12 @@ filename, installed path, or current source tree.
 
 # BUILD AUTHORITY
 
-**libpkgbuild** owns the sealed build request, verified source materials,
-materialized package inputs, policies, result, payload manifest, exact artifact
-bytes, artifact binding, and execution evidence. **libpkgimage** independently
-owns normalized archive inspection. **libpkgstate-build** admits build authority
-only when source projection, exact artifact digest, inspection receipt, and every
-ordered payload field agree.
+**libpkgbuild** owns the sealed build request, resolver-backed logical inputs,
+policies, result, payload manifest, exact artifact bytes, artifact binding, and
+execution evidence. **libpkgimage** independently
+owns normalized archive inspection. **libpkgbuild-image** admits the successful
+build and inspected image as one exact authority. **libpkgstate-build** projects
+that admitted authority into durable provenance.
 
 State retains those identities through **build_provenance**. It does not inspect a
 build directory or accept planner candidate facts as substitutes.

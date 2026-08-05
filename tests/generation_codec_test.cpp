@@ -10,9 +10,9 @@
 int main()
 {
   using namespace pkgstate;
-  static_assert(canonical_generation_storage_version == 4);
+  static_assert(canonical_generation_storage_version == 1);
   TEST_EQ(canonical_generation_storage_format,
-          std::string_view("libpkgstate-generation-v4"));
+          std::string_view("libpkgstate-generation-v1"));
 
   const state_target_binding binding = native_fixture::target();
   const std::vector<std::uint8_t> binding_bytes =
@@ -40,7 +40,7 @@ int main()
       snapshot_bytes.size());
   constexpr std::size_t snapshot_version_offset = 18;
   legacy_version[snapshot_version_offset] = '\0';
-  legacy_version[snapshot_version_offset + 1] = '\x03';
+  legacy_version[snapshot_version_offset + 1] = '\x02';
   TEST_THROWS(store_error, decode_generation_snapshot(legacy_version));
 
   std::string damaged(

@@ -68,7 +68,7 @@ different transactions.
 
 ## Canonical generation protocol
 
-`libpkgstate` owns the canonical generation-v4 binding and complete-snapshot
+`libpkgstate` owns the canonical generation-v1 binding and complete-snapshot
 record codec because those bytes encode state authority, not filesystem policy.
 Decode verifies framing, version, normalized structure, every state-owned
 identity, target binding, and canonical re-encoding. The codec performs no I/O
@@ -96,10 +96,10 @@ facts are a migration problem and cannot be represented as native authority.
 ## Build provenance
 
 Build provenance retains typed identities for the source record, build request,
-verified source-material set, materialized build-input set, environment policy,
-build policy, build result, payload manifest, sealed artifact, exact artifact
-content, artifact binding, execution evidence, normalized artifact image, and
-inspection receipt.
+logical resolver-backed build-input set, environment policy, build policy, build
+result, payload manifest, sealed artifact, exact artifact content, artifact
+binding, execution evidence, admitted build/image authority, normalized artifact
+image, and inspection receipt.
 
 Planner candidate and artifact-manifest identities are not build authority and
 are not stored as substitutes. Package archive filenames and mutable build
@@ -140,10 +140,9 @@ State-publication requests use `ZLSPRQST`; receipts use `ZLSPRCPT`. A big-endian
 16-bit schema version follows the magic. Human-readable format names belong in
 diagnostics and documentation rather than variable-length magic strings.
 
-Current encoders emit only schema version 2. Decode retains narrow compatibility
-with the published 2.5.0 textual version-1 framing and checks canonical bytes
-against that original version. This compatibility does not introduce a store
-migrator, dual-write policy, or another semantic authority.
+Current encoders and decoders recognize only schema version 1. No unpublished
+intermediate framing is retained as compatibility surface. Storage migration,
+dual-write policy, and historical import remain outside this evidence codec.
 
 ## Storage-provider boundary
 
@@ -152,7 +151,7 @@ and the non-virtual stale-safe compare-and-publish sequence. It does not select
 a filesystem layout, open a lock, encode a provider generation, replace a
 selector, synchronize directories, or inspect a concrete store.
 
-`libpkgstate-posix` supplies the reference immutable-generation-v4 provider.
+`libpkgstate-posix` supplies the reference immutable-generation-v1 provider.
 Other providers must preserve the same semantic store contract without becoming
 second owners of publication policy. Storage migration remains an explicit
 provider-side admission problem.

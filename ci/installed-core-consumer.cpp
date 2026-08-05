@@ -39,8 +39,8 @@ main()
   static_cast<void>(request_decoder);
   static_cast<void>(receipt_encoder);
   static_cast<void>(receipt_decoder);
-  if (pkgstate::state_publication_request_encoding_version != 2 ||
-      pkgstate::state_publication_receipt_encoding_version != 2)
+  if (pkgstate::state_publication_request_encoding_version != 1 ||
+      pkgstate::state_publication_receipt_encoding_version != 1)
     return 1;
 
   const pkgstate::state_target_binding target = target_binding();

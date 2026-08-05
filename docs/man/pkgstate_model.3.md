@@ -43,7 +43,7 @@ A named source profile and its source-owned identity caused installation.
 A named system policy caused installation.
 
 Build provenance retains typed identities for the exact source record, build
-request, verified source-material set, materialized build-input set, environment
+request, logical resolver input set, build-to-inspected-image binding, environment
 policy, build policy, successful build result, payload manifest, sealed artifact,
 exact artifact content, artifact binding, execution evidence, normalized artifact
 image, and image-inspection receipt.

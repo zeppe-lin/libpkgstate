@@ -28,14 +28,7 @@ constexpr std::array<std::uint8_t, 8> request_magic = {
 constexpr std::array<std::uint8_t, 8> receipt_magic = {
     'Z', 'L', 'S', 'P', 'R', 'C', 'P', 'T',
 };
-constexpr std::array<std::uint8_t, 29> legacy_request_magic = {
-    'p','k','g','s','t','a','t','e','-','p','u','b','l','i','c','a','t','i','o','n','-','r','e','q','u','e','s','t',0,
-};
-constexpr std::array<std::uint8_t, 29> legacy_receipt_magic = {
-    'p','k','g','s','t','a','t','e','-','p','u','b','l','i','c','a','t','i','o','n','-','r','e','c','e','i','p','t',0,
-};
 constexpr std::size_t checksum_size = 32U;
-constexpr std::size_t current_prefix_size = request_magic.size() + 2U;
 
 std::array<std::uint8_t, checksum_size> checksum(
     const std::vector<std::uint8_t>& bytes)
@@ -61,24 +54,6 @@ void replace_checksum(std::vector<std::uint8_t>& encoding)
   encoding.resize(encoding.size() - checksum_size);
   const auto digest = checksum(encoding);
   encoding.insert(encoding.end(), digest.begin(), digest.end());
-}
-
-template<std::size_t LegacyMagicSize>
-std::vector<std::uint8_t> make_legacy_encoding(
-    const std::vector<std::uint8_t>& current,
-    const std::array<std::uint8_t, LegacyMagicSize>& legacy_magic)
-{
-  TEST(current.size() >= current_prefix_size + checksum_size);
-  std::vector<std::uint8_t> result;
-  result.insert(result.end(), legacy_magic.begin(), legacy_magic.end());
-  result.push_back(0U);
-  result.push_back(1U);
-  result.insert(result.end(),
-                current.begin() + static_cast<std::ptrdiff_t>(current_prefix_size),
-                current.end() - static_cast<std::ptrdiff_t>(checksum_size));
-  const auto digest = checksum(result);
-  result.insert(result.end(), digest.begin(), digest.end());
-  return result;
 }
 
 template<std::size_t Size>
@@ -172,35 +147,7 @@ int main()
       encode_state_publication_request(install);
   TEST(starts_with(current_request, request_magic));
   TEST_EQ(current_request[request_magic.size()], 0U);
-  TEST_EQ(current_request[request_magic.size() + 1U], 2U);
-
-  const state_publication_request_encoding legacy_request =
-      make_legacy_encoding(current_request, legacy_request_magic);
-  const state_publication_request legacy_decoded_request =
-      decode_state_publication_request(legacy_request, empty);
-  TEST_EQ(legacy_decoded_request.identity(), install.identity());
-  TEST_EQ(encode_state_publication_request(legacy_decoded_request),
-          current_request);
-
-  auto current_request_with_legacy_version = current_request;
-  current_request_with_legacy_version[request_magic.size() + 1U] = 1U;
-  replace_checksum(current_request_with_legacy_version);
-  TEST(rejects_with(
-      state_publication_codec_error_code::unsupported_version,
-      [&] {
-        static_cast<void>(decode_state_publication_request(
-            current_request_with_legacy_version, empty));
-      }));
-
-  auto legacy_request_with_current_version = legacy_request;
-  legacy_request_with_current_version[legacy_request_magic.size() + 1U] = 2U;
-  replace_checksum(legacy_request_with_current_version);
-  TEST(rejects_with(
-      state_publication_codec_error_code::unsupported_version,
-      [&] {
-        static_cast<void>(decode_state_publication_request(
-            legacy_request_with_current_version, empty));
-      }));
+  TEST_EQ(current_request[request_magic.size() + 1U], 1U);
 
   auto request_with_receipt_magic = current_request;
   std::copy(receipt_magic.begin(), receipt_magic.end(),
@@ -274,7 +221,7 @@ int main()
 
   const state_publication_receipt published =
       state_publication_receipt::published(
-          install, empty, result, "libpkgstate-generation-v4",
+          install, empty, result, "libpkgstate-generation-v1",
           state_storage_atomicity_boundary::immutable_generation_selection,
           evidence);
   check_receipt_round_trip(published, install, empty);
@@ -283,35 +230,7 @@ int main()
       encode_state_publication_receipt(published);
   TEST(starts_with(current_receipt, receipt_magic));
   TEST_EQ(current_receipt[receipt_magic.size()], 0U);
-  TEST_EQ(current_receipt[receipt_magic.size() + 1U], 2U);
-
-  const state_publication_receipt_encoding legacy_receipt =
-      make_legacy_encoding(current_receipt, legacy_receipt_magic);
-  const state_publication_receipt legacy_decoded_receipt =
-      decode_state_publication_receipt(legacy_receipt, install, empty);
-  TEST_EQ(legacy_decoded_receipt, published);
-  TEST_EQ(encode_state_publication_receipt(legacy_decoded_receipt),
-          current_receipt);
-
-  auto current_receipt_with_legacy_version = current_receipt;
-  current_receipt_with_legacy_version[receipt_magic.size() + 1U] = 1U;
-  replace_checksum(current_receipt_with_legacy_version);
-  TEST(rejects_with(
-      state_publication_codec_error_code::unsupported_version,
-      [&] {
-        static_cast<void>(decode_state_publication_receipt(
-            current_receipt_with_legacy_version, install, empty));
-      }));
-
-  auto legacy_receipt_with_current_version = legacy_receipt;
-  legacy_receipt_with_current_version[legacy_receipt_magic.size() + 1U] = 2U;
-  replace_checksum(legacy_receipt_with_current_version);
-  TEST(rejects_with(
-      state_publication_codec_error_code::unsupported_version,
-      [&] {
-        static_cast<void>(decode_state_publication_receipt(
-            legacy_receipt_with_current_version, install, empty));
-      }));
+  TEST_EQ(current_receipt[receipt_magic.size() + 1U], 1U);
 
   auto receipt_with_request_magic = current_receipt;
   std::copy(request_magic.begin(), request_magic.end(),
@@ -328,43 +247,43 @@ int main()
       "other", 220, binding);
   check_receipt_round_trip(
       state_publication_receipt::stale_expected_state(
-          install, stale_prior, "libpkgstate-generation-v4", evidence),
+          install, stale_prior, "libpkgstate-generation-v1", evidence),
       install, stale_prior);
 
   check_receipt_round_trip(
       state_publication_receipt::request_rejected(
-          install, empty, "libpkgstate-generation-v4", evidence),
+          install, empty, "libpkgstate-generation-v1", evidence),
       install, empty);
 
   check_receipt_round_trip(
       state_publication_receipt::failed_before_publication(
-          install, empty, "libpkgstate-generation-v4", evidence),
+          install, empty, "libpkgstate-generation-v1", evidence),
       install, empty);
 
   check_receipt_round_trip(
       state_publication_receipt::published_but_durability_unconfirmed(
-          install, empty, result, "libpkgstate-generation-v4",
+          install, empty, result, "libpkgstate-generation-v1",
           state_storage_atomicity_boundary::immutable_generation_selection,
           evidence),
       install, empty);
 
   check_receipt_round_trip(
       state_publication_receipt::indeterminate(
-          install, empty, result.identity(), "libpkgstate-generation-v4",
+          install, empty, result.identity(), "libpkgstate-generation-v1",
           state_storage_atomicity_boundary::immutable_generation_selection,
           evidence),
       install, empty);
 
   check_receipt_round_trip(
       state_publication_receipt::indeterminate(
-          install, empty, std::nullopt, "libpkgstate-generation-v4",
+          install, empty, std::nullopt, "libpkgstate-generation-v1",
           state_storage_atomicity_boundary::immutable_generation_selection,
           evidence),
       install, empty);
 
   auto corrupt_receipt = encode_state_publication_receipt(
       state_publication_receipt::published(
-          install, empty, result, "libpkgstate-generation-v4",
+          install, empty, result, "libpkgstate-generation-v1",
           state_storage_atomicity_boundary::immutable_generation_selection));
   TEST(corrupt_receipt.size() > 100);
   corrupt_receipt[90] ^= 0x01U;
@@ -377,7 +296,7 @@ int main()
 
   auto truncated_receipt = encode_state_publication_receipt(
       state_publication_receipt::request_rejected(
-          install, empty, "libpkgstate-generation-v4"));
+          install, empty, "libpkgstate-generation-v1"));
   truncated_receipt.pop_back();
   TEST(rejects_with(
       state_publication_codec_error_code::checksum_mismatch,
@@ -394,7 +313,7 @@ int main()
         static_cast<void>(decode_state_publication_receipt(
             encode_state_publication_receipt(
                 state_publication_receipt::request_rejected(
-                    install, empty, "libpkgstate-generation-v4")),
+                    install, empty, "libpkgstate-generation-v1")),
             foreign_request, empty));
       }));
 
@@ -404,7 +323,7 @@ int main()
         static_cast<void>(decode_state_publication_receipt(
             encode_state_publication_receipt(
                 state_publication_receipt::request_rejected(
-                    install, empty, "libpkgstate-generation-v4")),
+                    install, empty, "libpkgstate-generation-v1")),
             install, stale_prior));
       }));
 

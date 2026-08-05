@@ -37,7 +37,7 @@ int main()
 
   const pkgstate::state_publication_receipt published =
       pkgstate::state_publication_receipt::published(
-          request, prior, result, "pkgstate-generation/2",
+          request, prior, result, "pkgstate-generation/1",
           pkgstate::state_storage_atomicity_boundary::
               immutable_generation_selection);
   TEST_EQ(published.outcome(), pkgstate::state_publication_outcome::published);
@@ -49,14 +49,14 @@ int main()
       "other", 40, target);
   const pkgstate::state_publication_receipt stale =
       pkgstate::state_publication_receipt::stale_expected_state(
-          request, changed, "pkgstate-generation/2");
+          request, changed, "pkgstate-generation/1");
   TEST_EQ(stale.outcome(),
           pkgstate::state_publication_outcome::stale_expected_state);
   TEST(!stale.resulting_snapshot());
 
   TEST_THROWS(pkgstate::state_error,
               pkgstate::state_publication_receipt::published(
-                  request, changed, result, "pkgstate-generation/2",
+                  request, changed, result, "pkgstate-generation/1",
                   pkgstate::state_storage_atomicity_boundary::
                       immutable_generation_selection));
 }

@@ -48,8 +48,6 @@ int main()
           explicit_control.source().identity());
   TEST_EQ(explicit_control.build().request(),
           native_fixture::identity<pkgstate::build_request_identity>(24));
-  TEST_EQ(explicit_control.build().source_materials(),
-          native_fixture::identity<pkgstate::source_material_set_identity>(25));
   TEST_EQ(explicit_control.build().build_inputs(),
           native_fixture::identity<pkgstate::build_input_set_identity>(26));
   TEST_EQ(explicit_control.build().environment_policy(),
@@ -68,10 +66,12 @@ int main()
           native_fixture::identity<pkgstate::artifact_binding_identity>(33));
   TEST_EQ(explicit_control.build().execution_evidence(),
           native_fixture::identity<pkgstate::execution_evidence_identity>(34));
+  TEST_EQ(explicit_control.build().build_image(),
+          native_fixture::identity<pkgstate::build_image_identity>(35));
   TEST_EQ(explicit_control.build().artifact_image(),
-          native_fixture::identity<pkgstate::artifact_image_identity>(35));
+          native_fixture::identity<pkgstate::artifact_image_identity>(36));
   TEST_EQ(explicit_control.build().artifact_inspection(),
-          native_fixture::identity<pkgstate::artifact_inspection_identity>(36));
+          native_fixture::identity<pkgstate::artifact_inspection_identity>(37));
 
   pkgstate::package_source_record mismatched_source =
       native_fixture::source("other", 70);

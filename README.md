@@ -16,7 +16,7 @@ The library owns immutable state-domain values and their identities:
 - package releases, source records, build provenance, installed control, installation receipts, installed packages, and complete ownership;
 - state-publication requests and receipts with stale-safe compare-and-publish semantics;
 - canonical publication evidence encoding;
-- canonical generation-v4 target-binding and complete-snapshot records; and
+- canonical generation-v1 target-binding and complete-snapshot records; and
 - the backend-neutral stale-safe `canonical_store` contract.
 
 There is no incomplete native installed package. Construction requires complete source, build, application, target, ownership, plan, and receipt evidence as represented by the state model. Missing historical facts are migration input, not optional fields silently filled from current ambient state.
@@ -39,7 +39,7 @@ libpkgapply -------> libpkgstate-apply -----+--> publication request
 
 Those repositories depend inward on `libpkgstate`; the owner depends on none of them. The core build, installed headers, pkg-config metadata, and dynamic linkage have one external implementation dependency: OpenSSL `libcrypto`, used privately for qualified SHA-256 operations. They contain no concrete storage provider.
 
-Canonical generation-v4 record bytes are a state-owned durable protocol
+Canonical generation-v1 record bytes are a state-owned durable protocol
 exposed by `generation_codec.h`. Concrete persistence mechanisms are
 independent providers. The reference filesystem layout, locking, selector
 replacement, durability, recovery refusal, and read-only diagnostics live in
@@ -53,7 +53,7 @@ and complete source-snapshot identities together with state-relevant metadata,
 runtime requirements, lifecycle authority, and selected architecture binding.
 The 3.0 source owner no longer issues a separate recipe identity.
 
-`build_provenance` retains request, verified materials, materialized inputs, environment and build policies, successful result, payload, artifact, exact artifact bytes, binding, execution, normalized image, and independent inspection identities. `installed_control` binds that provenance to its exact source record and typed installation reason.
+`build_provenance` retains the logical request and resolver-backed input set, environment and build policies, successful result, payload, artifact, exact artifact bytes, execution evidence, one admitted build-to-image binding, the normalized image, and independent inspection identities. `installed_control` binds that provenance to its exact source record and typed installation reason.
 
 An `installation_receipt` binds installed control to one target, complete object ownership, one accepted operation plan, completed application evidence, and optional exact transaction evidence. `installed_package` exists only from a complete receipt.
 
@@ -65,14 +65,13 @@ Callers submit deltas against one expected snapshot. `canonical_store::compare_a
 
 Publication request decode requires the exact expected snapshot. Receipt decode requires the exact request and actual prior snapshot. Durable records may retain identities and complete delta bodies, but they never promote a digest string into missing semantic authority.
 
-Current request and receipt encoders emit schema version 2 with fixed eight-byte house framing:
+Request and receipt encoders emit the first canonical schema with fixed eight-byte house framing:
 
 ```text
 ZLSPRQST  state-publication request
 ZLSPRCPT  state-publication receipt
 ```
 
-Decode retains narrow compatibility with canonical version-1 evidence emitted by 2.5.0. This is evidence compatibility, not a store migrator or dual-write policy.
 
 ## Storage providers
 

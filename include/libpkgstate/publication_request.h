@@ -24,7 +24,7 @@
 
 namespace pkgstate {
 /*! \brief Current canonical state-publication request schema. */
-inline constexpr std::uint16_t state_publication_request_schema_version = 3;
+inline constexpr std::uint16_t state_publication_request_schema_version = 1;
 
 /*! \brief Semantic installed-state transition of one package name. */
 enum class package_state_delta_kind : std::uint8_t {

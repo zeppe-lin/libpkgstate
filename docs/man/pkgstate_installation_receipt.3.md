@@ -23,7 +23,7 @@ An **installation_receipt** binds:
 - optional composed-transaction evidence.
 
 The receipt identity is computed from every field using the
-**pkgstate/installation-receipt/2** domain. The constructor sorts and validates the
+**pkgstate/installation-receipt/1** domain. The constructor sorts and validates the
 manifest and rejects duplicate paths. An empty manifest is valid for a package
 that installs no filesystem objects.
 

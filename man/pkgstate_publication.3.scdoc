@@ -37,9 +37,8 @@ Proposed installed packages are retained as complete native state bodies. Decode
 rebuilds each install, replacement, or removal delta through the public
 invariant-enforcing factories and requires canonical byte-for-byte re-encoding.
 
-Current request records use fixed eight-byte magic *ZLSPRQST* followed by
-big-endian schema version 2. The decoder also admits canonical version-1 records
-emitted by libpkgstate 2.5.0; the public encoder emits only version 2.
+Request records use fixed eight-byte magic *ZLSPRQST* followed by
+big-endian schema version 1. The decoder accepts only this canonical framing.
 
 # RECEIPT
 
@@ -64,9 +63,8 @@ receipt may cite that derived identity or no result. The codec never accepts a
 caller-authored replacement snapshot, opens storage, invokes a backend, retries,
 repairs, or publishes state.
 
-Current receipt records use fixed eight-byte magic *ZLSPRCPT* followed by
-big-endian schema version 2. Canonical 2.5.0 version-1 records remain decodeable;
-new encodings never use the legacy textual magic.
+Receipt records use fixed eight-byte magic *ZLSPRCPT* followed by
+big-endian schema version 1. The decoder accepts only this canonical framing.
 
 # OUTCOMES
 

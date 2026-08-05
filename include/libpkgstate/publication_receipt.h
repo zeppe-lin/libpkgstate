@@ -22,7 +22,7 @@
 
 namespace pkgstate {
 /*! \brief Current canonical state-publication receipt schema. */
-inline constexpr std::uint16_t state_publication_receipt_schema_version = 3;
+inline constexpr std::uint16_t state_publication_receipt_schema_version = 1;
 
 /*! \brief Semantic outcome of one installed-state publication attempt. */
 enum class state_publication_outcome : std::uint8_t {

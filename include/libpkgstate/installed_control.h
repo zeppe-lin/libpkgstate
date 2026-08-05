@@ -150,7 +150,6 @@ public:
    * \brief Construct complete build provenance.
    * \param source_record Native identity of the admitted source record.
    * \param request Build-owned request identity.
-   * \param source_materials Build-owned admitted source-material identity.
    * \param build_inputs Build-owned exact input-set identity.
    * \param environment_policy Build-environment policy identity.
    * \param build_policy Build-policy identity.
@@ -160,13 +159,13 @@ public:
    * \param artifact_content Exact artifact-byte identity.
    * \param artifact_binding Artifact authority-to-content binding identity.
    * \param execution_evidence Build-execution evidence identity.
+   * \param build_image Build-to-inspected-image admission identity.
    * \param artifact_image Normalized package-image identity.
    * \param artifact_inspection Image-inspection receipt identity.
    */
   build_provenance(
       package_source_record_identity source_record,
       build_request_identity request,
-      source_material_set_identity source_materials,
       build_input_set_identity build_inputs,
       environment_policy_identity environment_policy,
       build_policy_identity build_policy,
@@ -176,6 +175,7 @@ public:
       artifact_content_identity artifact_content,
       artifact_binding_identity artifact_binding,
       execution_evidence_identity execution_evidence,
+      build_image_identity build_image,
       artifact_image_identity artifact_image,
       artifact_inspection_identity artifact_inspection);
 
@@ -190,12 +190,6 @@ public:
    * \return The exact build-request identity.
    */
   [[nodiscard]] const build_request_identity& request() const noexcept;
-  /*!
-   * \brief Return the admitted source-material-set identity.
-   * \return The admitted source-material-set identity.
-   */
-  [[nodiscard]] const source_material_set_identity&
-  source_materials() const noexcept;
   /*!
    * \brief Return the exact build-input-set identity.
    * \return The exact build-input-set identity.
@@ -247,6 +241,11 @@ public:
   [[nodiscard]] const execution_evidence_identity&
   execution_evidence() const noexcept;
   /*!
+   * \brief Return build-to-inspected-image admission identity.
+   * \return Build-to-inspected-image admission identity.
+   */
+  [[nodiscard]] const build_image_identity& build_image() const noexcept;
+  /*!
    * \brief Return normalized package-image identity.
    * \return Normalized package-image identity.
    */
@@ -286,7 +285,6 @@ public:
 private:
   package_source_record_identity source_record_;
   build_request_identity request_;
-  source_material_set_identity source_materials_;
   build_input_set_identity build_inputs_;
   environment_policy_identity environment_policy_;
   build_policy_identity build_policy_;
@@ -296,6 +294,7 @@ private:
   artifact_content_identity artifact_content_;
   artifact_binding_identity artifact_binding_;
   execution_evidence_identity execution_evidence_;
+  build_image_identity build_image_;
   artifact_image_identity artifact_image_;
   artifact_inspection_identity artifact_inspection_;
 };

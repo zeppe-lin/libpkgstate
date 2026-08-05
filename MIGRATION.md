@@ -120,22 +120,20 @@ bytes and allow a later semantic rewrite to encode version 2.
 ## 2.5.1 to 3.0.0 authority and repository reset
 
 Core SONAME advances from 3 to 4 because the concrete generation-store class
-moves to `libpkgstate-posix`. Publication evidence schema 2 remains unchanged.
-Canonical installed-state storage advances from generation v3 to generation v4
-because `libpkgsource` 3.0 removed recipe identity from semantic source
-authority and downstream source records. Package-source-record identity
-advances from protocol version 1 to version 2 for the same reason.
+moves to `libpkgstate-posix`. Publication evidence, package-source records, and
+canonical generation storage use their first actual protocol generation. No
+unpublished intermediate record layout is retained as compatibility surface.
 
-Generation-v3 stores cannot be reinterpreted as generation v4. This release
-does not embed a legacy source model or silently discard the retired field.
-Existing generation-v3 state requires a separate explicit migration/import
-step before publication through the 3.0 stack.
+Existing records from the earlier experimental model are not native authority
+for this release. Import, when required, remains a separate explicit operation;
+the core does not embed a legacy source model or silently discard retired
+fields.
 
 The source, build, planner, and application adapters and the concrete
 generation provider are no longer built by `libpkgstate`. Install the
 independently released `libpkgstate-source`, `libpkgstate-build`,
 `libpkgstate-plan`, and `libpkgstate-apply` repositories at matching 3.0
-generation and `libpkgstate-posix` for generation-v4 storage, then relink
+generation and `libpkgstate-posix` for generation-v1 storage, then relink
 consumers against the exact adapter product they use. Remove the former
 `source_adapter`, `build_adapter`, `planner_adapter`, and
 `application_adapter` Meson options from packaging and integration scripts.

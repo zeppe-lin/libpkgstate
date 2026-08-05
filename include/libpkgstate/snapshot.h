@@ -24,7 +24,7 @@
 namespace pkgstate {
 
 /*! \brief Current canonical installed-state snapshot schema. */
-inline constexpr std::uint16_t installed_state_schema_version = 3;
+inline constexpr std::uint16_t installed_state_schema_version = 1;
 
 /*!
  * \brief Complete immutable installed truth for one target-state binding.

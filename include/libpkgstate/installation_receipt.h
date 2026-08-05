@@ -21,7 +21,7 @@
 namespace pkgstate {
 
 /*! \brief Canonical semantic schema of installation_receipt identity input. */
-inline constexpr std::uint16_t installation_receipt_schema_version = 2;
+inline constexpr std::uint16_t installation_receipt_schema_version = 1;
 
 /*!
  * \brief Immutable package installation authority admitted into state.
