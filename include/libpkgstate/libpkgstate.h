@@ -20,8 +20,9 @@
 #include <libpkgstate/package_path.h>
 #include <libpkgstate/package_release.h>
 #include <libpkgstate/package_source_record.h>
+#include <libpkgstate/publication_request.h>
+#include <libpkgstate/publication_projection.h>
 #include <libpkgstate/publication_receipt.h>
 #include <libpkgstate/publication_codec.h>
-#include <libpkgstate/publication_request.h>
 #include <libpkgstate/snapshot.h>
 #include <libpkgstate/state_target_binding.h>

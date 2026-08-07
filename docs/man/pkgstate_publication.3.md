@@ -17,6 +17,14 @@ also carry transaction evidence.
 The request validates target consistency, package expectations, duplicate names,
 and operation shape. It is immutable and performs no storage I/O.
 
+# PURE PROJECTION
+
+**project_publication_request()** applies one exact request to its complete
+actual-prior **snapshot**. It rejects a foreign target, stale prior epoch, or
+contradictory package delta and returns the only valid resulting immutable
+snapshot. It performs no store access, target observation, publication, retry,
+repair, or mutation.
+
 # COMPARE AND PUBLISH
 
 **canonical_store::compare_and_publish()** owns the stale-state check. Under the

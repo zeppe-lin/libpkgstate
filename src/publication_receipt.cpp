@@ -4,7 +4,7 @@
 #include <libpkgstate/publication_receipt.h>
 
 #include "canonical_record.h"
-#include "publication_projection.h"
+#include <libpkgstate/publication_projection.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -108,7 +108,7 @@ validate_result(const state_publication_request& request,
   }
 
   const snapshot expected_result =
-      detail::project_publication_request(request, actual_prior);
+      project_publication_request(request, actual_prior);
   if (resulting_snapshot.identity() != expected_result.identity())
   {
     throw state_error(
@@ -337,7 +337,7 @@ state_publication_receipt::indeterminate(
   if (resulting_snapshot.has_value())
   {
     const snapshot expected_result =
-      detail::project_publication_request(request, actual_prior);
+      project_publication_request(request, actual_prior);
     if (*resulting_snapshot != expected_result.identity())
     {
       throw state_error(

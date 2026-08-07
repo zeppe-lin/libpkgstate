@@ -83,6 +83,7 @@ install_headers(
   '../include/libpkgstate/installed_package.h',
   '../include/libpkgstate/snapshot.h',
   '../include/libpkgstate/publication_request.h',
+  '../include/libpkgstate/publication_projection.h',
   '../include/libpkgstate/publication_receipt.h',
   '../include/libpkgstate/publication_codec.h',
   '../include/libpkgstate/generation_codec.h',

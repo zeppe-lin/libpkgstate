@@ -15,6 +15,7 @@ The library owns immutable state-domain values and their identities:
 - exact target binding and canonical snapshot epochs;
 - package releases, source records, build provenance, installed control, installation receipts, installed packages, and complete ownership;
 - state-publication requests and receipts with stale-safe compare-and-publish semantics;
+- pure projection of one exact publication request over its complete prior snapshot;
 - canonical publication evidence encoding;
 - canonical generation-v1 target-binding and complete-snapshot records; and
 - the backend-neutral stale-safe `canonical_store` contract.

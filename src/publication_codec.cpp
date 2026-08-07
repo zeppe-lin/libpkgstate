@@ -4,7 +4,7 @@
 #include <libpkgstate/publication_codec.h>
 
 #include <libpkgstate/generation_codec.h>
-#include "publication_projection.h"
+#include <libpkgstate/publication_projection.h>
 
 #include <algorithm>
 #include <array>
@@ -753,7 +753,7 @@ decode_state_publication_receipt(
     std::optional<snapshot> projected;
     auto require_projected = [&]() -> const snapshot& {
       if (!projected)
-        projected = detail::project_publication_request(request, actual_prior);
+        projected = project_publication_request(request, actual_prior);
       if (!resulting || *resulting != projected->identity())
       {
         fail(state_publication_codec_error_code::invalid_value,

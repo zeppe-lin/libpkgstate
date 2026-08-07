@@ -3,7 +3,7 @@
 
 #include <libpkgstate/canonical_store.h>
 
-#include "publication_projection.h"
+#include <libpkgstate/publication_projection.h>
 
 #include <algorithm>
 #include <memory>
@@ -173,7 +173,7 @@ canonical_store::compare_and_publish(
   }
 
   const snapshot resulting_snapshot =
-      detail::project_publication_request(request, actual_prior);
+      project_publication_request(request, actual_prior);
   const state_publication_backend_result result =
       transaction->publish(resulting_snapshot);
 

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Alexandr Savca
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "publication_projection.h"
+#include <libpkgstate/publication_projection.h>
 
 #include <algorithm>
 #include <string_view>
@@ -11,7 +11,7 @@
 #include <libpkgstate/error.h>
 #include <libpkgstate/installed_package.h>
 
-namespace pkgstate::detail {
+namespace pkgstate {
 
 snapshot
 project_publication_request(const state_publication_request& request,
@@ -67,4 +67,4 @@ project_publication_request(const state_publication_request& request,
   return snapshot::make(request.target_binding(), std::move(packages));
 }
 
-} // namespace pkgstate::detail
+} // namespace pkgstate
