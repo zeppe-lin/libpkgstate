@@ -1,4 +1,4 @@
-% LIBPKGSTATE(3) libpkgstate | Version 3.0.0
+% LIBPKGSTATE(3) libpkgstate | Version 3.1.0
 
 <!-- Generated from libpkgstate.3.scdoc; do not edit. -->
 

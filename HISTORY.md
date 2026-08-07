@@ -1,5 +1,12 @@
 # History
 
+## 3.1.0 (2026-08-07)
+
+- Exposes the state-owned pure `project_publication_request()` projection used by canonical publication, receipt validation, durable decoding, and controller recovery.
+- Requires one exact request and complete actual-prior snapshot; foreign targets, stale priors, and contradictory deltas fail closed.
+- Performs no store access, target observation, publication, retry, repair, or mutation.
+- Adds one reviewed public symbol while retaining core SONAME 4 and generation-v1 durable state records unchanged. No migration is required.
+
 ## 3.0.0 (2026-08-04)
 
 - Extracted source, build, plan, and apply translations into independent role-qualified repositories.

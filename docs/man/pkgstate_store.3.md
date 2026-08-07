@@ -1,4 +1,4 @@
-% PKGSTATE_STORE(3) libpkgstate | Version 3.0.0
+% PKGSTATE_STORE(3) libpkgstate | Version 3.1.0
 
 <!-- Generated from pkgstate_store.3.scdoc; do not edit. -->
 

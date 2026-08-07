@@ -1,4 +1,4 @@
-% PKGSTATE_AUTHORITY(7) libpkgstate | Version 3.0.0
+% PKGSTATE_AUTHORITY(7) libpkgstate | Version 3.1.0
 
 <!-- Generated from pkgstate_authority.7.scdoc; do not edit. -->
 

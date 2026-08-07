@@ -4,13 +4,15 @@
 set -eu
 root=$1
 fail(){ echo "release-metadata-test: $*" >&2; exit 1; }
-grep -F "version: '3.0.0'" "$root/meson.build" >/dev/null || fail 'Meson version is not 3.0.0'
-grep -F 'PROJECT_NUMBER         = 3.0.0' "$root/Doxyfile" >/dev/null || fail 'Doxygen version is not 3.0.0'
+grep -F "version: '3.1.0'" "$root/meson.build" >/dev/null || fail 'Meson version is not 3.1.0'
+grep -F 'PROJECT_NUMBER         = 3.1.0' "$root/Doxyfile" >/dev/null || fail 'Doxygen version is not 3.1.0'
 grep -F 'INPUT                  = include/libpkgstate' "$root/Doxyfile" >/dev/null || fail 'Doxygen input is not core-only'
 grep -F "soversion: '4'" "$root/src/meson.build" >/dev/null || fail 'core soversion is not 4'
 grep -F 'requires_private: [libcrypto_dep]' "$root/src/meson.build" >/dev/null || fail 'private crypto closure is missing'
-grep -F '3.0.0' "$root/HISTORY.md" >/dev/null || fail 'history omits 3.0.0'
+grep -F '3.1.0' "$root/HISTORY.md" >/dev/null || fail 'history omits 3.1.0'
 grep -F 'libpkgstate-posix' "$root/HISTORY.md" >/dev/null || fail 'history omits provider extraction'
+grep -F "'../include/libpkgstate/publication_projection.h'" "$root/src/meson.build" >/dev/null || fail 'core install omits publication projection'
+grep -F 'project_publication_request' "$root/include/libpkgstate/publication_projection.h" >/dev/null || fail 'public projection API is absent'
 grep -F "'publication_codec.cpp'" "$root/src/meson.build" >/dev/null || fail 'core source omits publication codec'
 ! grep -F "'canonical_generation_store.cpp'" "$root/src/meson.build" >/dev/null || fail 'core retains generation backend'
 grep -F 'state_publication_request_encoding_version = 1' "$root/include/libpkgstate/publication_codec.h" >/dev/null || fail 'request codec version is not 1'
