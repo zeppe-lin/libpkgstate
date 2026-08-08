@@ -6,7 +6,7 @@ root=$1
 fail() { echo "publication-codec-source-test: $*" >&2; exit 1; }
 header=$root/include/libpkgstate/publication_codec.h
 source=$root/src/publication_codec.cpp
-for file in "$header" "$source" "$root/tests/publication_codec_test.cpp"; do
+for file in "$header" "$source" "$root/tests/protocol/publication_request_codec_test.cpp" "$root/tests/protocol/publication_receipt_codec_test.cpp"; do
   test -s "$file" || fail "missing ${file#"$root"/}"
 done
 for contract in \
@@ -55,9 +55,12 @@ grep -F "'publication_codec.cpp'" "$root/src/meson.build" >/dev/null ||
   fail 'core Meson omits publication_codec.cpp'
 grep -F "'../include/libpkgstate/publication_codec.h'" "$root/src/meson.build" >/dev/null ||
   fail 'core install omits publication_codec.h'
-grep -F "['publication_codec', 'reopen durable publication evidence']" \
+grep -F "['publication-request-codec', 'reopen publication requests']" \
   "$root/tests/meson.build" >/dev/null ||
-  fail 'Meson omits publication codec runtime test'
+  fail 'Meson omits publication request codec runtime test'
+grep -F "['publication-receipt-codec', 'reopen publication receipts']" \
+  "$root/tests/meson.build" >/dev/null ||
+  fail 'Meson omits publication receipt codec runtime test'
 grep -F "['publication-codec', 'libpkgstate/publication_codec.h']" \
   "$root/tests/meson.build" >/dev/null ||
   fail 'Meson omits publication codec public-header test'

@@ -340,7 +340,7 @@ class PKGSTATE_API owned_entry final {
 public:
   /*!
    * \brief Validate and construct one owned manifest entry.
-   * \param path Canonical absolute package path.
+   * \param path Canonical target-relative package path.
    * \param object Complete active object metadata.
    * \param origin Authority for the active object.
    * \param rejected Optional side-qualified rejected-object evidence.

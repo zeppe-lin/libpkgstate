@@ -2,63 +2,83 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 if get_option('tests').allowed()
   sh = find_program('sh')
+
   if library_kind == 'shared'
     nm = find_program('nm')
     test(
       'verify reviewed core ABI surface',
-      find_program(meson.current_source_dir() / 'check_abi_surface.sh'),
+      find_program(meson.current_source_dir() / 'contracts/check_abi_surface.sh'),
       args: [
         libpkgstate.full_path(),
         meson.project_source_root() / 'abi/libpkgstate.exports',
         nm.full_path(),
       ],
+      suite: 'contract',
     )
   endif
-  core_tests = [
+
+  unit_tests = [
     ['error', 'anchor public failure domains'],
     ['digest', 'validate native identity domains'],
-    ['canonical_record', 'hash canonical state records'],
-    ['model', 'validate native installed-state values'],
-    ['package_release', 'retain source-authoritative package releases'],
-    ['package_source_record', 'seal durable package-source records'],
-    ['installed_control', 'retain complete installed control'],
-    ['state_target_binding', 'identify durable target-state bindings'],
-    ['package_path', 'normalize installed package paths'],
-    ['installation_receipt', 'seal native installation receipts'],
-    ['snapshot_identity', 'identify ownership and installed snapshots'],
-    ['publication_request', 'validate immutable publication requests'],
-    ['publication_projection', 'project exact publication state without I/O'],
-    ['publication_receipt', 'classify typed publication receipts'],
-    ['publication_codec', 'reopen durable publication evidence'],
-    ['generation_codec', 'reopen canonical generation records'],
-    ['canonical_store', 'enforce canonical compare and publish'],
-    ['umbrella_header', 'compile the native umbrella header'],
+    ['reference-provenance', 'validate references and declaration provenance'],
+    ['source-control-model', 'validate source control model values'],
+    ['installation-reason', 'validate installation reason shapes'],
+    ['package-release', 'retain source-authoritative package releases'],
+    ['state-target-binding', 'identify durable target-state bindings'],
+    ['package-path', 'normalize installed package paths'],
+    ['owned-entry', 'validate installed object and ownership values'],
   ]
-  direct_libcrypto_tests = [
-    'canonical_record',
-    'publication_codec',
-  ]
-  foreach item : core_tests
-    test_dependencies = [libpkgstate_dep]
-    test_sources = [item[0] + '_test.cpp']
+  foreach item : unit_tests
+    target = executable(
+      item[0] + '-test',
+      'unit/' + item[0].replace('-', '_') + '_test.cpp',
+      dependencies: libpkgstate_dep,
+    )
+    test(item[1], target, suite: 'unit')
+  endforeach
 
-    # publication_codec-test computes an independent OpenSSL fixture digest.
-    # canonical_record-test recompiles the hidden implementation so it can
-    # exercise the private record protocol without exporting that helper.
-    # Both targets therefore own a direct libcrypto dependency.
-    if item[0] in direct_libcrypto_tests
-      test_dependencies += libcrypto_dep
-    endif
-    if item[0] == 'canonical_record'
-      test_sources += '../src/canonical_record.cpp'
+  integration_tests = [
+    ['package-source-record', 'seal durable package-source records'],
+    ['installed-control', 'retain complete installed control'],
+    ['installation-receipt', 'seal native installation receipts'],
+    ['installed-package', 'identify complete installed packages'],
+    ['snapshot', 'identify ownership and installed snapshots'],
+    ['publication-request', 'validate immutable publication requests'],
+    ['publication-projection', 'project exact publication state without I/O'],
+    ['publication-receipt', 'classify typed publication receipts'],
+    ['canonical-store', 'enforce canonical compare and publish'],
+  ]
+  foreach item : integration_tests
+    target = executable(
+      item[0] + '-test',
+      'integration/' + item[0].replace('-', '_') + '_test.cpp',
+      dependencies: libpkgstate_dep,
+    )
+    test(item[1], target, suite: 'integration')
+  endforeach
+
+  protocol_tests = [
+    ['canonical-record', 'hash canonical state records'],
+    ['generation-codec', 'reopen canonical generation records'],
+    ['publication-request-codec', 'reopen publication requests'],
+    ['publication-receipt-codec', 'reopen publication receipts'],
+  ]
+  foreach item : protocol_tests
+    sources = ['protocol/' + item[0].replace('-', '_') + '_test.cpp']
+    dependencies = [libpkgstate_dep]
+    if item[0] == 'canonical-record'
+      sources += '../src/canonical_record.cpp'
+      dependencies += libcrypto_dep
+    elif item[0] in ['publication-request-codec', 'publication-receipt-codec']
+      dependencies += libcrypto_dep
     endif
     target = executable(
       item[0] + '-test',
-      test_sources,
+      sources,
       include_directories: include_directories('../src'),
-      dependencies: test_dependencies,
+      dependencies: dependencies,
     )
-    test(item[1], target)
+    test(item[1], target, suite: 'protocol')
   endforeach
 
   public_headers = [
@@ -86,12 +106,19 @@ if get_option('tests').allowed()
   foreach header : public_headers
     target = executable(
       header[0] + '-public-header-test',
-      'public_header_test.cpp',
+      'header/public_header_test.cpp',
       cpp_args: ['-DLIBPKGSTATE_TEST_HEADER="' + header[1] + '"'],
       dependencies: libpkgstate_dep,
     )
-    test('compile public header ' + header[1], target)
+    test('compile public header ' + header[1], target, suite: 'header')
   endforeach
+
+  target = executable(
+    'umbrella-header-test',
+    'header/umbrella_header_test.cpp',
+    dependencies: libpkgstate_dep,
+  )
+  test('compile the native umbrella header', target, suite: 'header')
 
   foreach contract : [
     'abi_manifest_contract_test.sh',
@@ -100,30 +127,35 @@ if get_option('tests').allowed()
     'ci_qualification_source_test.sh',
     'architecture_contract_test.sh',
     'repository_contract_test.sh',
+    'check_test_layout.sh',
   ]
     test(
-      contract.replace('_test.sh', '').replace('_', '-'),
+      contract.replace('_test.sh', '').replace('.sh', '').replace('_', '-'),
       sh,
-      args: [join_paths(meson.current_source_dir(), contract), meson.project_source_root()],
+      args: [join_paths(meson.current_source_dir(), 'contracts', contract), meson.project_source_root()],
+      suite: 'contract',
     )
   endforeach
   test(
     'verify source style contract',
     sh,
     args: [
-      join_paths(meson.current_source_dir(), 'style_contract_test.sh'),
+      join_paths(meson.current_source_dir(), 'contracts/style_contract_test.sh'),
       meson.project_source_root(),
       meson.project_build_root(),
     ],
+    suite: 'contract',
   )
   test(
     'verify pkg-config dependency metadata',
     sh,
-    args: [join_paths(meson.current_source_dir(), 'pkgconfig_metadata_test.sh'), join_paths(meson.project_build_root(), 'meson-private', 'libpkgstate.pc')],
+    args: [join_paths(meson.current_source_dir(), 'contracts/pkgconfig_metadata_test.sh'), join_paths(meson.project_build_root(), 'meson-private', 'libpkgstate.pc')],
+    suite: 'contract',
   )
   test(
     'verify release metadata',
     sh,
-    args: [join_paths(meson.current_source_dir(), 'release_metadata_test.sh'), meson.project_source_root()],
+    args: [join_paths(meson.current_source_dir(), 'contracts/release_metadata_test.sh'), meson.project_source_root()],
+    suite: 'contract',
   )
 endif

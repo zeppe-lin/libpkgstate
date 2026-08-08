@@ -70,7 +70,7 @@ public:
 
   /*!
    * \brief Find one exact owned path.
-   * \param path Canonical absolute package path.
+   * \param path Canonical target-relative package path.
    * \return Pointer valid for this package's lifetime, or `nullptr` when the
    * path is not owned.
    */
@@ -78,7 +78,7 @@ public:
 
   /*!
    * \brief Test whether this package owns one exact path.
-   * \param path Canonical absolute package path.
+   * \param path Canonical target-relative package path.
    * \return `true` exactly when find() returns an entry.
    */
   [[nodiscard]] bool owns(const package_path& path) const noexcept;

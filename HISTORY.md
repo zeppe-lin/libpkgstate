@@ -2,6 +2,8 @@
 
 ## 3.1.0 (2026-08-07)
 
+- Reorganizes core qualification into unit, integration, protocol, header, and contract roles; expands publication/store and generation-v1 adversarial coverage without changing ABI or durable encodings.
+- Clarifies that a complete installed manifest may be empty and that regular hard-link anchors are retained object facts rather than a state-owned global topology constraint.
 - Exposes the state-owned pure `project_publication_request()` projection used by canonical publication, receipt validation, durable decoding, and controller recovery.
 - Requires one exact request and complete actual-prior snapshot; foreign targets, stale priors, and contradictory deltas fail closed.
 - Performs no store access, target observation, publication, retry, repair, or mutation.

@@ -3,7 +3,7 @@
 
 #include <libpkgstate/error.h>
 
-#include "test.h"
+#include "../support/test.h"
 
 #include <stdexcept>
 #include <string>

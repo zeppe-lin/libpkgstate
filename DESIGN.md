@@ -90,8 +90,10 @@ There is no incomplete native installed package. A package must have:
 6. accepted operation-plan evidence; and
 7. completed application evidence.
 
-Known empty collections remain explicit empty collections. Missing historical
-facts are a migration problem and cannot be represented as native authority.
+Known empty collections remain explicit empty collections. A package that owns
+no filesystem paths therefore has a valid complete empty manifest. Missing
+historical facts are a migration problem and cannot be represented as native
+authority.
 
 ## Build provenance
 
@@ -111,7 +113,10 @@ Ownership identity is derived from path-ordered ownership groups. Each package
 manifest retains complete recorded active-object metadata admitted from completed
 application evidence: object kind, mode, owner, timestamp, kind-specific
 content, optional hard-link topology, active origin, and rejected-object
-provenance. State does not rediscover these facts from the target filesystem.
+provenance. A regular-object hard-link anchor is one retained object fact; core
+state does not require that anchor path to be owned by the same package or build
+a global inode graph from package manifests. State does not rediscover these
+facts from the target filesystem.
 
 ## Publication
 

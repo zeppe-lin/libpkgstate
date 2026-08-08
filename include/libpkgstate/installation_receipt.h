@@ -37,13 +37,14 @@ public:
    * \brief Validate, normalize, and identify one installation receipt.
    * \param control Complete installed source and build control.
    * \param target_binding Exact durable target-state authority.
-   * \param manifest Non-empty installed object manifest, normalized by class.
+   * \param manifest Complete installed object manifest; may be empty and is
+   *                 normalized by canonical package path.
    * \param operation_plan Planner-owned identity of the exact applied plan.
    * \param application_evidence Application-owned completion identity.
    * \param transaction_evidence Optional orchestration-owned transaction proof.
    * \return Immutable identified installation receipt.
-   * \throws state_error for duplicate paths, invalid hard-link topology,
-   * mismatched package authority, or otherwise inconsistent evidence.
+   * \throws state_error when the manifest contains duplicate package paths
+   *         or canonical identity construction fails.
    */
   [[nodiscard]] static installation_receipt make(
       installed_control control,

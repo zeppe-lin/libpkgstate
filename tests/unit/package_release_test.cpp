@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Alexandr Savca
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "native_fixture.h"
-#include "test.h"
+#include "../fixtures/state.h"
+#include "../support/test.h"
 
 #include <cstdint>
 
@@ -11,7 +11,7 @@
 int main()
 {
   const auto identity =
-      native_fixture::identity<pkgstate::package_release_identity>(1);
+      state_fixture::identity<pkgstate::package_release_identity>(1);
   const pkgstate::package_release release(
       identity, pkgstate::package_reference("base"), "1.0", 2);
   TEST_EQ(release.identity(), identity);

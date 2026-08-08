@@ -24,3 +24,20 @@ meson test -C build --print-errorlogs
 ```
 
 Sanitizer qualification uses address and undefined-behavior sanitizers. Shared and static closures are built separately. Installed-consumer qualification must confirm that no source, build, image, planning, application, concrete storage provider, or extracted-state-adapter dependency appears in the core pkg-config surface.
+
+## Test roles
+
+The source tree separates evidence by authority rather than collecting all tests
+under one flat directory:
+
+- `unit` validates atomic state-owned values and identity inputs;
+- `integration` composes installed packages, snapshots, publication requests,
+  projections, receipts, and the backend-neutral canonical store;
+- `protocol` qualifies canonical generation and publication byte protocols,
+  including rich-state round trips and malformed input;
+- `header` compiles every installed public header independently; and
+- `contract` qualifies ABI, repository, documentation, release, style, CI, and
+  test-layout invariants.
+
+Run a focused role with `meson test -C build --suite <role>`. A release still
+requires the complete suite in clean shared/static and sanitizer builds.

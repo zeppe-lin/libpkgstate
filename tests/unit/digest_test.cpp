@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Alexandr Savca
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "test.h"
+#include "../support/test.h"
 
 #include <array>
 #include <string>

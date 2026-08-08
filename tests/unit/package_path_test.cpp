@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string>
 
-#include "test.h"
+#include "../support/test.h"
 
 int
 main()

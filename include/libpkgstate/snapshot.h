@@ -45,8 +45,8 @@ public:
    * \brief Validate, identify, and construct complete installed state.
    * \param target_binding Durable state target represented by the snapshot.
    * \param packages Complete installed package records in arbitrary order.
-   * \throws state_error on duplicate names, target-binding mismatch, duplicate
-   *         ownership claims, or canonical identity failure.
+   * \throws state_error on duplicate package names, target-binding mismatch,
+   *         or canonical identity failure.
    * \return Validated immutable value.
    */
   [[nodiscard]] static snapshot

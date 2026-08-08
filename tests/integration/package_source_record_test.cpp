@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Alexandr Savca
 // SPDX-License-Identifier: GPL-3.0-or-later
-#include "native_fixture.h"
-#include "test.h"
+#include "../fixtures/state.h"
+#include "../support/test.h"
 
 #include <libpkgstate/error.h>
 
 int main()
 {
   using namespace pkgstate;
-  const package_source_record first = native_fixture::source();
-  const package_source_record same = native_fixture::source();
-  const package_source_record changed = native_fixture::source("example", 21);
+  const package_source_record first = state_fixture::source();
+  const package_source_record same = state_fixture::source();
+  const package_source_record changed = state_fixture::source("example", 21);
 
   TEST_EQ(first, same);
   TEST_NE(first.identity(), changed.identity());

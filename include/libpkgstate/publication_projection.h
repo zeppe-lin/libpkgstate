@@ -17,6 +17,9 @@ namespace pkgstate {
  * The function performs no storage access or target mutation. It rejects a
  * foreign target, a stale prior snapshot, and any delta that contradicts the
  * supplied prior state. On success it returns the exact resulting snapshot.
+ * \param request Exact validated publication request.
+ * \param actual_prior Complete actual prior snapshot.
+ * \return Exact resulting snapshot implied by \p request.
  */
 [[nodiscard]] PKGSTATE_API snapshot project_publication_request(
     const state_publication_request& request,
